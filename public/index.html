@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PCG Screening Services — Candidate Portal</title>
+<link rel="icon" type="image/png" href="Copy_of_PCG_Logo_with_Soft_Typography.png">
+<meta property="og:title" content="PCG Screening Services — Candidate Portal">
+<meta property="og:description" content="Complete your background screening authorization securely online. FCRA certified, BBB A+ rated. Trusted since 2003.">
+<meta property="og:image" content="Copy_of_PCG_Logo_with_Soft_Typography.png">
+<meta property="og:type" content="website">
+<meta name="description" content="Complete your background screening authorization securely online. FCRA certified, BBB A+ rated. Trusted since 2003.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
@@ -336,7 +342,7 @@
 
   .form-group label {
     display: block;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--navy);
     margin-bottom: 6px;
@@ -348,9 +354,16 @@
     margin-left: 2px;
   }
 
+  .form-hint {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
   .form-input {
     width: 100%;
-    padding: 12px 14px;
+    padding: 14px 16px;
     border: 1.5px solid var(--gray-200);
     border-radius: var(--radius-sm);
     font-family: inherit;
@@ -616,9 +629,9 @@
 
   .sig-actions button {
     font-family: inherit;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
-    padding: 6px 14px;
+    padding: 10px 20px;
     border-radius: 6px;
     border: 1px solid var(--gray-200);
     background: var(--white);
@@ -910,6 +923,18 @@
   .toast.show {
     transform: translateX(-50%) translateY(0);
   }
+
+  /* ============ MOBILE RESPONSIVE ============ */
+  @media (max-width: 420px) {
+    .card { padding: 22px 18px; }
+    .welcome-heading h2 { font-size: 23px; }
+    .card-header h2 { font-size: 20px; }
+    .form-row { grid-template-columns: 1fr; gap: 0; }
+    .package-name { font-size: 14px; }
+    .package-price { font-size: 20px; }
+    .btn { padding: 16px 20px; font-size: 16px; }
+    .consent-box { max-height: 150px; }
+  }
 </style>
 </head>
 <body>
@@ -1006,7 +1031,7 @@
     <div class="card">
       <div class="card-header">
         <h2>Personal Information</h2>
-        <p>Enter your legal name and contact details.</p>
+        <p>Enter your legal name and contact details. All data is encrypted and secure.</p>
       </div>
 
       <div class="form-row">
@@ -1043,6 +1068,7 @@
         <div class="form-group">
           <label>Last 4 of SSN <span class="required">*</span></label>
           <input type="text" class="form-input" id="ssn4" placeholder="••••" maxlength="4" inputmode="numeric" pattern="[0-9]{4}">
+          <div class="form-hint">For identity verification only</div>
           <div class="error-msg">4 digits required</div>
         </div>
       </div>
@@ -1079,7 +1105,7 @@
             </div>
             <span class="package-price">$29</span>
           </div>
-          <div class="package-desc">National criminal database search, sex offender registry, and SSN trace.</div>
+          <div class="package-desc">National criminal database search, sex offender registry, and SSN trace.<br><strong style="color:var(--navy);font-size:11px;">Best for:</strong> <span style="font-size:11px;">Entry-level & hourly positions</span></div>
           <div class="package-features">
             <span class="feature-tag">SSN Trace</span>
             <span class="feature-tag">Criminal DB</span>
@@ -1096,7 +1122,7 @@
             </div>
             <span class="package-price">$49</span>
           </div>
-          <div class="package-desc">Everything in Basic plus county criminal search, employment verification, and education verification.</div>
+          <div class="package-desc">Everything in Basic plus county criminal search, employment verification, and education verification.<br><strong style="color:var(--navy);font-size:11px;">Best for:</strong> <span style="font-size:11px;">Salaried & professional roles</span></div>
           <div class="package-features">
             <span class="feature-tag">Everything in Basic</span>
             <span class="feature-tag">County Search</span>
@@ -1113,7 +1139,7 @@
             </div>
             <span class="package-price">$79</span>
           </div>
-          <div class="package-desc">Comprehensive screening with credit check, professional references, federal criminal search, and driving record.</div>
+          <div class="package-desc">Comprehensive screening with credit check, professional references, federal criminal search, and driving record.<br><strong style="color:var(--navy);font-size:11px;">Best for:</strong> <span style="font-size:11px;">Management, finance & executive roles</span></div>
           <div class="package-features">
             <span class="feature-tag">Everything in Standard</span>
             <span class="feature-tag">Credit Check</span>
@@ -1130,7 +1156,7 @@
             </div>
             <span class="package-price">$45</span>
           </div>
-          <div class="package-desc">Standard 9-panel urine drug screening at a certified collection site near you.</div>
+          <div class="package-desc">Standard 9-panel urine drug screening at a certified collection site near you.<br><strong style="color:var(--navy);font-size:11px;">Best for:</strong> <span style="font-size:11px;">DOT, warehouse & safety-sensitive roles</span></div>
           <div class="package-features">
             <span class="feature-tag">9-Panel Urine</span>
             <span class="feature-tag">Certified Lab</span>
@@ -1154,7 +1180,7 @@
     <div class="card">
       <div class="card-header">
         <h2>Authorization & Consent</h2>
-        <p>Please review and sign to authorize the screening.</p>
+        <p>Please review and sign to authorize the screening. Questions? Visit <a href="https://pcgscreening.com" target="_blank" style="color:var(--gold);font-weight:600;">pcgscreening.com</a></p>
       </div>
 
       <div class="consent-box">
@@ -1235,8 +1261,8 @@
       <div class="success-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
       </div>
-      <h2>Screening Submitted</h2>
-      <p>Your authorization and payment have been received. You'll receive a confirmation email shortly.</p>
+      <h2 id="successHeading">Screening Submitted</h2>
+      <p id="successMessage">Your authorization and payment have been received. You'll receive a confirmation email shortly.</p>
       <div class="confirmation-id">
         Confirmation: <code id="confirmationCode">PCG-000000</code>
       </div>
@@ -1270,6 +1296,7 @@
   <div class="footer-location">Metro Atlanta &middot; Serving Nationwide</div>
   <div class="footer-tagline">"The advantage of knowledge is that wisdom preserves the lives of its possessors."</div>
   <div class="footer-links">&copy; 2026 PCG Screening Services &middot; <a href="https://pcgscreening.com">pcgscreening.com</a> &middot; <a href="#">Privacy Policy</a> &middot; <a href="#">Terms</a></div>
+  <div style="margin-top:8px;"><a href="https://pcgscreening.com/content/contact-us" target="_blank" style="color:var(--gold);font-weight:500;">Need help? Contact us</a></div>
 </footer>
 
 <div class="toast" id="toast"></div>
@@ -1444,13 +1471,27 @@
     btn.disabled = true;
     spinner.style.display = 'block';
 
-    // Simulate Stripe payment processing
+    // Simulate payment processing
     setTimeout(() => {
       spinner.style.display = 'none';
+
+      // Check for redirect param
+      const redirectUrl = new URLSearchParams(window.location.search).get('redirect');
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      }
 
       // Generate confirmation code
       const code = 'PCG-' + Math.random().toString(36).substr(2, 6).toUpperCase();
       document.getElementById('confirmationCode').textContent = code;
+
+      // Personalize success message
+      const firstName = document.getElementById('firstName').value;
+      if (firstName) {
+        document.getElementById('successHeading').textContent = 'Thanks, ' + firstName + '!';
+        document.getElementById('successMessage').textContent = 'Your screening authorization and payment have been received. You\'ll get a confirmation email shortly.';
+      }
 
       // Show success
       document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
@@ -1484,13 +1525,24 @@
     e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
   });
 
-  // ====== CLIENT PARAM ======
-  // Usage: ?client=Acme+Corp to customize the badge per client
+  // ====== CLIENT PARAMS ======
+  // Usage: ?client=Acme+Corp&packages=basic,standard&redirect=https://...
   (function() {
     const params = new URLSearchParams(window.location.search);
     const client = params.get('client');
     if (client) {
       document.getElementById('clientBadge').textContent = client;
+    }
+
+    // Filter visible packages
+    const pkgFilter = params.get('packages');
+    if (pkgFilter) {
+      const allowed = pkgFilter.split(',').map(p => p.trim().toLowerCase());
+      document.querySelectorAll('.package-card').forEach(card => {
+        if (!allowed.includes(card.dataset.package)) {
+          card.style.display = 'none';
+        }
+      });
     }
   })();
 
