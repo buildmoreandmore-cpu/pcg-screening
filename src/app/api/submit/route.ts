@@ -7,7 +7,12 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { firstName, lastName, email, phone, dob, ssn4, address, packageName, packagePrice, confirmationCode, signatureType, signatureValue, clientName } = body;
+    const {
+      firstName, lastName, email, phone, dob, ssn4, address,
+      packageName, packagePrice, confirmationCode,
+      stripeSessionId, signatureRequestId,
+      clientName,
+    } = body;
 
     // Store in Supabase
     const supabase = getSupabase();
@@ -23,8 +28,10 @@ export async function POST(req: NextRequest) {
         address,
         package_name: packageName,
         package_price: packagePrice,
-        signature_type: signatureType || null,
-        signature_value: signatureValue || null,
+        stripe_session_id: stripeSessionId || null,
+        signature_request_id: signatureRequestId || null,
+        payment_status: stripeSessionId ? 'paid' : 'unpaid',
+        consent_status: signatureRequestId ? 'signed' : 'pending',
         client_name: clientName || null,
       });
       if (dbError) console.error('Supabase insert error:', dbError);
@@ -52,15 +59,15 @@ export async function POST(req: NextRequest) {
           from: `PCG Screening Portal <${fromEmail}>`,
           to: adminEmail,
           subject: `New Screening Submission — ${firstName} ${lastName} (${packageName})`,
-          html: buildAdminEmail({ firstName, lastName, email, phone, dob, address, packageName, packagePrice, confirmationCode }),
+          html: buildAdminEmail({ firstName, lastName, email, phone, dob, address, packageName, packagePrice, confirmationCode, stripeSessionId, signatureRequestId }),
         });
       }
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Email send error:', error);
-    return NextResponse.json({ success: false, error: 'Failed to send email' }, { status: 500 });
+    console.error('Submit error:', error);
+    return NextResponse.json({ success: false, error: 'Failed to process submission' }, { status: 500 });
   }
 }
 
@@ -111,7 +118,7 @@ function buildCandidateEmail({ firstName, packageName, packagePrice, confirmatio
           <h3 style="margin:0 0 12px;font-size:15px;color:#1f2f4a;font-weight:600;">What Happens Next</h3>
           <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
             <tr><td style="padding:4px 0;font-size:14px;color:#4a4743;line-height:1.6;">1. Our team will begin processing your screening immediately.</td></tr>
-            <tr><td style="padding:4px 0;font-size:14px;color:#4a4743;line-height:1.6;">2. Most screenings are completed within <strong>1–3 business days</strong>.</td></tr>
+            <tr><td style="padding:4px 0;font-size:14px;color:#4a4743;line-height:1.6;">2. Most screenings are completed within <strong>1\u20133 business days</strong>.</td></tr>
             <tr><td style="padding:4px 0;font-size:14px;color:#4a4743;line-height:1.6;">3. Results will be shared with the requesting employer per your authorization.</td></tr>
           </table>
 
@@ -140,8 +147,8 @@ function buildCandidateEmail({ firstName, packageName, packagePrice, confirmatio
 </html>`;
 }
 
-function buildAdminEmail({ firstName, lastName, email, phone, dob, address, packageName, packagePrice, confirmationCode }: {
-  firstName: string; lastName: string; email: string; phone: string; dob: string; address: string; packageName: string; packagePrice: number; confirmationCode: string;
+function buildAdminEmail({ firstName, lastName, email, phone, dob, address, packageName, packagePrice, confirmationCode, stripeSessionId, signatureRequestId }: {
+  firstName: string; lastName: string; email: string; phone: string; dob: string; address: string; packageName: string; packagePrice: number; confirmationCode: string; stripeSessionId?: string; signatureRequestId?: string;
 }) {
   const timestamp = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
   return `
@@ -165,7 +172,9 @@ function buildAdminEmail({ firstName, lastName, email, phone, dob, address, pack
             <tr><td style="font-size:13px;color:#8a8680;padding:8px 0;border-bottom:1px solid #f0efec;">Address</td><td style="font-size:14px;color:#1f2f4a;font-weight:600;text-align:right;padding:8px 0;border-bottom:1px solid #f0efec;">${address}</td></tr>
             <tr><td style="font-size:13px;color:#8a8680;padding:8px 0;border-bottom:1px solid #f0efec;">Package</td><td style="font-size:14px;color:#1f2f4a;font-weight:600;text-align:right;padding:8px 0;border-bottom:1px solid #f0efec;">${packageName}</td></tr>
             <tr><td style="font-size:13px;color:#8a8680;padding:8px 0;border-bottom:1px solid #f0efec;">Amount</td><td style="font-size:14px;color:#1f2f4a;font-weight:600;text-align:right;padding:8px 0;border-bottom:1px solid #f0efec;">$${packagePrice}</td></tr>
-            <tr><td style="font-size:13px;color:#8a8680;padding:8px 0;">Confirmation</td><td style="font-size:14px;color:#1f2f4a;font-weight:700;text-align:right;padding:8px 0;">${confirmationCode}</td></tr>
+            <tr><td style="font-size:13px;color:#8a8680;padding:8px 0;border-bottom:1px solid #f0efec;">Confirmation</td><td style="font-size:14px;color:#1f2f4a;font-weight:700;text-align:right;padding:8px 0;border-bottom:1px solid #f0efec;">${confirmationCode}</td></tr>
+            <tr><td style="font-size:13px;color:#8a8680;padding:8px 0;border-bottom:1px solid #f0efec;">Payment</td><td style="font-size:14px;color:${stripeSessionId ? '#2e7d32' : '#c62828'};font-weight:600;text-align:right;padding:8px 0;border-bottom:1px solid #f0efec;">${stripeSessionId ? 'Paid via Stripe' : 'Pending'}</td></tr>
+            <tr><td style="font-size:13px;color:#8a8680;padding:8px 0;">Consent</td><td style="font-size:14px;color:${signatureRequestId ? '#2e7d32' : '#c62828'};font-weight:600;text-align:right;padding:8px 0;">${signatureRequestId ? 'Signed via Dropbox Sign' : 'Pending'}</td></tr>
           </table>
         </td></tr>
       </table>
