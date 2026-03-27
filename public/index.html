@@ -1401,6 +1401,16 @@
     e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
   });
 
+  // ====== CLIENT PARAM ======
+  // Usage: ?client=Acme+Corp to customize the badge per client
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const client = params.get('client');
+    if (client) {
+      document.getElementById('clientBadge').textContent = client;
+    }
+  })();
+
   // ====== INIT ======
   window.addEventListener('load', initCanvas);
   window.addEventListener('resize', () => { clearSignature(); initCanvas(); });
