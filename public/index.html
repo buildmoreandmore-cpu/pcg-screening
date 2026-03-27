@@ -1190,12 +1190,12 @@
         I acknowledge that a telephonic facsimile (fax) or photographic copy of this authorization shall be as valid as the original. This authorization is valid for the duration of my employment or application process.
       </div>
 
-      <div class="checkbox-group" onclick="toggleCheck('consent1')">
+      <div class="checkbox-group">
         <input type="checkbox" id="consent1">
         <label for="consent1">I have read and understand the above disclosure and authorization statement.</label>
       </div>
 
-      <div class="checkbox-group" onclick="toggleCheck('consent2')">
+      <div class="checkbox-group">
         <input type="checkbox" id="consent2">
         <label for="consent2">I authorize PCG Screening Services to conduct the background screening described above.</label>
       </div>
@@ -1323,6 +1323,15 @@
     // Update review if going to step 4
     if (step === 4) populateReview();
 
+    // Reset consent box scroll and re-init signature canvas on step 3
+    if (step === 3) {
+      setTimeout(() => {
+        const consentBox = document.querySelector('.consent-box');
+        if (consentBox) consentBox.scrollTop = 0;
+        initCanvas();
+      }, 50);
+    }
+
     currentStep = step;
 
     // Hide all, show target
@@ -1391,12 +1400,6 @@
     selectedPackage = name;
     selectedPrice = price;
     document.getElementById('step2Next').disabled = false;
-  }
-
-  // ====== CHECKBOX TOGGLE ======
-  function toggleCheck(id) {
-    const cb = document.getElementById(id);
-    cb.checked = !cb.checked;
   }
 
   // ====== SIGNATURE PAD ======
