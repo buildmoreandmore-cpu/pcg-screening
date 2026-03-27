@@ -4,7 +4,30 @@
   "private": true,
   "description": "PCG Screening Services — Candidate Portal",
   "scripts": {
-    "dev": "npx serve public",
-    "build": "echo 'Static site — no build needed'"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/buildmoreandmore-cpu/pcg-screening.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/buildmoreandmore-cpu/pcg-screening/issues"
+  },
+  "homepage": "https://github.com/buildmoreandmore-cpu/pcg-screening#readme",
+  "dependencies": {
+    "next": "^16.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "resend": "^6.9.4"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.0",
+    "@types/react": "19.2.14",
+    "typescript": "6.0.2"
   }
 }
