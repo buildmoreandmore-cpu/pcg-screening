@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCG Screening Services — Candidate Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1f2f4a;
+    --navy-light: #2a3f5f;
+    --teal: #043b3e;
+    --teal-light: #065a5e;
+    --gold: #c9a44c;
+    --gold-light: #e5c97a;
+    --gold-pale: #f5ecd4;
+    --white: #ffffff;
+    --off-white: #f8f7f4;
+    --gray-50: #fafaf9;
+    --gray-100: #f0efec;
+    --gray-200: #e2e0db;
+    --gray-300: #c8c5be;
+    --gray-500: #8a8680;
+    --gray-700: #4a4743;
+    --gray-900: #1c1b19;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --shadow-sm: 0 1px 3px rgba(31,47,74,0.06), 0 1px 2px rgba(31,47,74,0.04);
+    --shadow-md: 0 4px 16px rgba(31,47,74,0.08), 0 2px 4px rgba(31,47,74,0.04);
+    --shadow-lg: 0 12px 40px rgba(31,47,74,0.12), 0 4px 12px rgba(31,47,74,0.06);
+    --shadow-gold: 0 4px 20px rgba(201,164,76,0.2);
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--off-white);
+    color: var(--gray-900);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============ HEADER ============ */
+  .header {
+    background: var(--navy);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(31,47,74,0.3);
+  }
+
+  .header-inner {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    object-fit: contain;
+  }
+
+  .header-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--white);
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+
+  .header-text span {
+    font-size: 11px;
+    color: var(--gold-light);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .header-secure {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--gold-light);
+    font-weight: 500;
+    opacity: 0.8;
+  }
+
+  .header-secure svg { width: 14px; height: 14px; }
+
+  /* ============ PROGRESS ============ */
+  .progress-bar {
+    background: var(--navy-light);
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .progress-track {
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    width: 0%;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 12px rgba(201,164,76,0.4);
+  }
+
+  .progress-steps {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .progress-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    font-weight: 500;
+    transition: var(--transition);
+    white-space: nowrap;
+  }
+
+  .progress-step.active { color: var(--gold-light); }
+  .progress-step.completed { color: rgba(255,255,255,0.6); }
+
+  .step-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+
+  .progress-step.active .step-dot {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(201,164,76,0.2);
+  }
+
+  .progress-step.completed .step-dot {
+    border-color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.15);
+    color: var(--white);
+  }
+
+  .step-label { display: none; }
+  @media (min-width: 420px) { .step-label { display: inline; } }
+
+  /* ============ MAIN ============ */
+  .main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px 16px 100px;
+  }
+
+  /* ============ SECTIONS / STEPS ============ */
+  .step-section {
+    display: none;
+    animation: fadeUp 0.4s ease;
+  }
+
+  .step-section.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ CARDS ============ */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 28px 24px;
+    margin-bottom: 16px;
+    border: 1px solid var(--gray-100);
+  }
+
+  .card-header {
+    margin-bottom: 20px;
+  }
+
+  .card-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--navy);
+    font-weight: 400;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .card-header p {
+    font-size: 14px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+
+  /* ============ WELCOME ============ */
+  .welcome-shield {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+
+  .welcome-shield img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .welcome-heading {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .welcome-heading h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .welcome-heading p {
+    font-size: 14px;
+    color: var(--gray-500);
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .client-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold-pale);
+    border: 1px solid var(--gold-light);
+    border-radius: 100px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 20px;
+  }
+
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-100);
+  }
+
+  .info-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .info-icon svg {
+    width: 18px;
+    height: 18px;
+    color: var(--gold-light);
+  }
+
+  .info-content h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 2px;
+  }
+
+  .info-content p {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.4;
+  }
+
+  /* ============ FORM ELEMENTS ============ */
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+  }
+
+  .form-group label .required {
+    color: #c0392b;
+    margin-left: 2px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--gray-900);
+    background: var(--white);
+    transition: var(--transition);
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .form-input::placeholder {
+    color: var(--gray-300);
+  }
+
+  .form-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,164,76,0.12);
+  }
+
+  .form-input.error {
+    border-color: #c0392b;
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+  }
+
+  .error-msg {
+    font-size: 12px;
+    color: #c0392b;
+    margin-top: 4px;
+    display: none;
+  }
+
+  .form-input.error + .error-msg { display: block; }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  select.form-input {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%238a8680' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  /* ============ PACKAGE CARDS ============ */
+  .packages-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .package-card {
+    padding: 18px 20px;
+    border: 2px solid var(--gray-100);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    background: var(--white);
+  }
+
+  .package-card:hover {
+    border-color: var(--gray-200);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .package-card.selected {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, rgba(201,164,76,0.03), rgba(229,201,122,0.06));
+    box-shadow: var(--shadow-gold);
+  }
+
+  .package-card.popular {
+    border-color: var(--navy);
+  }
+
+  .package-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .package-name {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--navy);
+  }
+
+  .package-price {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--navy);
+  }
+
+  .package-desc {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+
+  .package-badge {
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    background: var(--navy);
+    color: var(--gold-light);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  .package-radio {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gray-200);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: var(--transition);
+  }
+
+  .package-card.selected .package-radio {
+    border-color: var(--gold);
+    background: var(--gold);
+  }
+
+  .package-card.selected .package-radio::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--white);
+    border-radius: 50%;
+  }
+
+  .package-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .feature-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--gray-50);
+    color: var(--gray-700);
+    border: 1px solid var(--gray-100);
+  }
+
+  /* ============ CONSENT ============ */
+  .consent-box {
+    padding: 16px;
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-100);
+    margin-bottom: 16px;
+    max-height: 180px;
+    overflow-y: auto;
+    font-size: 12px;
+    color: var(--gray-700);
+    line-height: 1.7;
+  }
+
+  .checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+    cursor: pointer;
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 2px solid var(--gray-200);
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: var(--transition);
+    position: relative;
+    background: var(--white);
+  }
+
+  .checkbox-group input[type="checkbox"]:checked {
+    background: var(--navy);
+    border-color: var(--navy);
+  }
+
+  .checkbox-group input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid var(--white);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .checkbox-group label {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    cursor: pointer;
+  }
+
+  /* ============ SIGNATURE ============ */
+  .signature-pad-wrapper {
+    border: 2px dashed var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    background: var(--white);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .signature-pad-wrapper.signed {
+    border-color: var(--gold);
+    border-style: solid;
+  }
+
+  .signature-pad {
+    width: 100%;
+    height: 120px;
+    cursor: crosshair;
+    display: block;
+    border-radius: 8px;
+  }
+
+  .signature-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 13px;
+    color: var(--gray-300);
+    pointer-events: none;
+    transition: var(--transition);
+  }
+
+  .signature-pad-wrapper.signed .signature-placeholder { opacity: 0; }
+
+  .sig-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .sig-actions button {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .sig-actions button:hover { background: var(--gray-50); }
+
+  /* ============ REVIEW ============ */
+  .review-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 14px;
+  }
+
+  .review-row:last-child { border-bottom: none; }
+  .review-label { color: var(--gray-500); }
+  .review-value { font-weight: 600; color: var(--navy); text-align: right; }
+
+  .review-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--navy);
+    border-radius: var(--radius-md);
+    margin-top: 16px;
+  }
+
+  .review-total .label {
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .review-total .amount {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--gold-light);
+  }
+
+  /* ============ BUTTONS ============ */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--navy);
+    color: var(--white);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-primary:hover {
+    background: var(--navy-light);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: var(--white);
+    color: var(--navy);
+    border: 1.5px solid var(--gray-200);
+  }
+
+  .btn-secondary:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+  }
+
+  .btn-pay {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy);
+    box-shadow: var(--shadow-gold);
+  }
+
+  .btn-pay:hover {
+    box-shadow: 0 6px 28px rgba(201,164,76,0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* ============ SUCCESS ============ */
+  .success-section { text-align: center; }
+
+  .success-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    box-shadow: 0 8px 30px rgba(4,59,62,0.25);
+    animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes scaleIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .success-icon svg { width: 36px; height: 36px; color: var(--white); }
+
+  .success-section h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .success-section p {
+    font-size: 14px;
+    color: var(--gray-500);
+    max-width: 340px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .confirmation-id {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 10px 18px;
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--gray-700);
+    font-weight: 500;
+    border: 1px solid var(--gray-100);
+  }
+
+  .confirmation-id code {
+    font-family: 'DM Sans', monospace;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 11px;
+    color: var(--gray-300);
+  }
+
+  .footer a { color: var(--gray-500); text-decoration: none; }
+
+  /* ============ UTILS ============ */
+  .divider {
+    height: 1px;
+    background: var(--gray-100);
+    margin: 20px 0;
+  }
+
+  .text-center { text-align: center; }
+
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mb-4 { margin-bottom: 4px; }
+
+  /* Stripe-inspired loading animation */
+  .spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--navy);
+    color: var(--white);
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    z-index: 999;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== HEADER ====== -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <img src="Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG" class="header-logo" onerror="this.style.display='none'">
+      <div class="header-text">
+        <h1>PCG Screening Services</h1>
+        <span>Candidate Portal</span>
+      </div>
+    </div>
+    <div class="header-secure">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Secure
+    </div>
+  </div>
+</header>
+
+<!-- ====== PROGRESS ====== -->
+<div class="progress-bar">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-steps">
+    <div class="progress-step active" data-step="1">
+      <div class="step-dot">1</div>
+      <span class="step-label">Info</span>
+    </div>
+    <div class="progress-step" data-step="2">
+      <div class="step-dot">2</div>
+      <span class="step-label">Package</span>
+    </div>
+    <div class="progress-step" data-step="3">
+      <div class="step-dot">3</div>
+      <span class="step-label">Consent</span>
+    </div>
+    <div class="progress-step" data-step="4">
+      <div class="step-dot">4</div>
+      <span class="step-label">Review</span>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+
+  <!-- ====== STEP 1: WELCOME + INFO ====== -->
+  <section class="step-section active" id="step1">
+    <div class="card text-center">
+      <div class="welcome-shield">
+        <img src="Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG Screening Services" onerror="this.parentElement.innerHTML='<div style=&quot;width:100%;height:100%;background:var(--navy);display:flex;align-items:center;justify-content:center;color:var(--gold-light);font-family:DM Serif Display,serif;font-size:28px;&quot;>PCG</div>'">
+      </div>
+      <div class="welcome-heading">
+        <div class="client-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5"><path d="M20 7L9.5 17.5 4 12"/></svg>
+          <!-- CLIENT NAME — change per engagement -->
+          <span id="clientBadge">Client Screening Request</span>
+        </div>
+        <h2>Background Screening</h2>
+        <p>Complete the steps below to authorize and submit your screening. Takes about 3 minutes.</p>
+      </div>
+
+      <div class="info-list">
+        <div class="info-item">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="info-content">
+            <h4>Secure & Confidential</h4>
+            <p>Your data is encrypted and only shared with authorized parties.</p>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="info-content">
+            <h4>Quick Process</h4>
+            <p>Most screenings are completed within 1–3 business days.</p>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="info-content">
+            <h4>FCRA Compliant</h4>
+            <p>All screenings follow federal Fair Credit Reporting Act guidelines.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Personal Information</h2>
+        <p>Enter your legal name and contact details.</p>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name <span class="required">*</span></label>
+          <input type="text" class="form-input" id="firstName" placeholder="John" autocomplete="given-name" required>
+          <div class="error-msg">Required</div>
+        </div>
+        <div class="form-group">
+          <label>Last Name <span class="required">*</span></label>
+          <input type="text" class="form-input" id="lastName" placeholder="Doe" autocomplete="family-name" required>
+          <div class="error-msg">Required</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email Address <span class="required">*</span></label>
+        <input type="email" class="form-input" id="email" placeholder="john@company.com" autocomplete="email" required>
+        <div class="error-msg">Valid email required</div>
+      </div>
+
+      <div class="form-group">
+        <label>Phone Number <span class="required">*</span></label>
+        <input type="tel" class="form-input" id="phone" placeholder="(555) 123-4567" autocomplete="tel">
+        <div class="error-msg">Required</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date of Birth <span class="required">*</span></label>
+          <input type="date" class="form-input" id="dob" required>
+          <div class="error-msg">Required</div>
+        </div>
+        <div class="form-group">
+          <label>Last 4 of SSN <span class="required">*</span></label>
+          <input type="text" class="form-input" id="ssn4" placeholder="••••" maxlength="4" inputmode="numeric" pattern="[0-9]{4}">
+          <div class="error-msg">4 digits required</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Current Address <span class="required">*</span></label>
+        <input type="text" class="form-input" id="address" placeholder="123 Main St, City, State ZIP" autocomplete="street-address">
+        <div class="error-msg">Required</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goToStep(2)">
+        Continue
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ====== STEP 2: PACKAGE SELECTION ====== -->
+  <section class="step-section" id="step2">
+    <div class="card">
+      <div class="card-header">
+        <h2>Select Your Package</h2>
+        <p>Choose the screening package required for your position.</p>
+      </div>
+
+      <div class="packages-grid">
+        <div class="package-card" onclick="selectPackage(this, 'Basic Background Check', 29)" data-package="basic">
+          <div class="package-top">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="package-radio"></div>
+              <span class="package-name">Basic Background Check</span>
+            </div>
+            <span class="package-price">$29</span>
+          </div>
+          <div class="package-desc">National criminal database search, sex offender registry, and SSN trace.</div>
+          <div class="package-features">
+            <span class="feature-tag">SSN Trace</span>
+            <span class="feature-tag">Criminal DB</span>
+            <span class="feature-tag">Sex Offender</span>
+          </div>
+        </div>
+
+        <div class="package-card" onclick="selectPackage(this, 'Standard Background Check', 49)" data-package="standard">
+          <div class="package-badge">Most Popular</div>
+          <div class="package-top">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="package-radio"></div>
+              <span class="package-name">Standard Background Check</span>
+            </div>
+            <span class="package-price">$49</span>
+          </div>
+          <div class="package-desc">Everything in Basic plus county criminal search, employment verification, and education verification.</div>
+          <div class="package-features">
+            <span class="feature-tag">Everything in Basic</span>
+            <span class="feature-tag">County Search</span>
+            <span class="feature-tag">Employment</span>
+            <span class="feature-tag">Education</span>
+          </div>
+        </div>
+
+        <div class="package-card" onclick="selectPackage(this, 'Premium Background Check', 79)" data-package="premium">
+          <div class="package-top">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="package-radio"></div>
+              <span class="package-name">Premium Background Check</span>
+            </div>
+            <span class="package-price">$79</span>
+          </div>
+          <div class="package-desc">Comprehensive screening with credit check, professional references, federal criminal search, and driving record.</div>
+          <div class="package-features">
+            <span class="feature-tag">Everything in Standard</span>
+            <span class="feature-tag">Credit Check</span>
+            <span class="feature-tag">Federal Criminal</span>
+            <span class="feature-tag">MVR</span>
+          </div>
+        </div>
+
+        <div class="package-card" onclick="selectPackage(this, '9-Panel Drug Test', 45)" data-package="drug">
+          <div class="package-top">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="package-radio"></div>
+              <span class="package-name">9-Panel Drug Test</span>
+            </div>
+            <span class="package-price">$45</span>
+          </div>
+          <div class="package-desc">Standard 9-panel urine drug screening at a certified collection site near you.</div>
+          <div class="package-features">
+            <span class="feature-tag">9-Panel Urine</span>
+            <span class="feature-tag">Certified Lab</span>
+            <span class="feature-tag">24-48hr Results</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goToStep(1)">Back</button>
+      <button class="btn btn-primary" onclick="goToStep(3)" id="step2Next" disabled>
+        Continue
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ====== STEP 3: CONSENT & SIGNATURE ====== -->
+  <section class="step-section" id="step3">
+    <div class="card">
+      <div class="card-header">
+        <h2>Authorization & Consent</h2>
+        <p>Please review and sign to authorize the screening.</p>
+      </div>
+
+      <div class="consent-box">
+        <strong>Disclosure & Authorization</strong><br><br>
+        In connection with my application for employment or continued employment, I understand that a consumer report and/or investigative consumer report may be requested by the prospective employer or current employer listed above. These reports may include, but are not limited to: criminal history records, court records, driving records, education verification, employment verification, professional references, credit reports, and drug testing results.<br><br>
+        I hereby authorize PCG Screening Services and its designated agents to conduct such investigations and to request any and all information deemed necessary. I understand that I have the right to request a complete and accurate disclosure of the nature and scope of the investigation and that I may request a summary of my rights under the Fair Credit Reporting Act (FCRA).<br><br>
+        I acknowledge that a telephonic facsimile (fax) or photographic copy of this authorization shall be as valid as the original. This authorization is valid for the duration of my employment or application process.
+      </div>
+
+      <div class="checkbox-group" onclick="toggleCheck('consent1')">
+        <input type="checkbox" id="consent1">
+        <label for="consent1">I have read and understand the above disclosure and authorization statement.</label>
+      </div>
+
+      <div class="checkbox-group" onclick="toggleCheck('consent2')">
+        <input type="checkbox" id="consent2">
+        <label for="consent2">I authorize PCG Screening Services to conduct the background screening described above.</label>
+      </div>
+
+      <div class="divider"></div>
+
+      <label style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;display:block;">Electronic Signature <span class="required">*</span></label>
+
+      <div class="signature-pad-wrapper" id="sigWrapper">
+        <canvas class="signature-pad" id="signaturePad"></canvas>
+        <div class="signature-placeholder">Sign here with your finger or mouse</div>
+      </div>
+      <div class="sig-actions">
+        <button onclick="clearSignature()">Clear</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goToStep(2)">Back</button>
+      <button class="btn btn-primary" onclick="goToStep(4)" id="step3Next">
+        Continue to Review
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ====== STEP 4: REVIEW & PAY ====== -->
+  <section class="step-section" id="step4">
+    <div class="card">
+      <div class="card-header">
+        <h2>Review & Submit</h2>
+        <p>Confirm your details are correct before payment.</p>
+      </div>
+
+      <div id="reviewDetails">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="review-total">
+        <span class="label">Total Due</span>
+        <span class="amount" id="reviewTotal">$0</span>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center;padding:20px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="2" style="margin-bottom:4px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <p style="font-size:12px;color:var(--gray-500);margin:0;">Payment securely processed by <strong>Stripe</strong></p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goToStep(3)">Back</button>
+      <button class="btn btn-pay" onclick="submitForm()" id="payBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Pay & Submit
+        <div class="spinner" id="paySpinner"></div>
+      </button>
+    </div>
+  </section>
+
+  <!-- ====== SUCCESS ====== -->
+  <section class="step-section" id="stepSuccess">
+    <div class="card success-section" style="padding:40px 24px;">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h2>Screening Submitted</h2>
+      <p>Your authorization and payment have been received. You'll receive a confirmation email shortly.</p>
+      <div class="confirmation-id">
+        Confirmation: <code id="confirmationCode">PCG-000000</code>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  &copy; 2026 PCG Screening Services &middot; <a href="#">Privacy Policy</a> &middot; <a href="#">Terms</a>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ====== STATE ======
+  let currentStep = 1;
+  let selectedPackage = null;
+  let selectedPrice = 0;
+  let signatureData = null;
+
+  // ====== STEP NAVIGATION ======
+  function goToStep(step) {
+    // Validate current step before advancing
+    if (step > currentStep) {
+      if (currentStep === 1 && !validateStep1()) return;
+      if (currentStep === 2 && !selectedPackage) {
+        showToast('Please select a screening package');
+        return;
+      }
+      if (currentStep === 3 && !validateStep3()) return;
+    }
+
+    // Update review if going to step 4
+    if (step === 4) populateReview();
+
+    currentStep = step;
+
+    // Hide all, show target
+    document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + step).classList.add('active');
+
+    // Update progress
+    const pct = ((step - 1) / 3) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    document.querySelectorAll('.progress-step').forEach(s => {
+      const sStep = parseInt(s.dataset.step);
+      s.classList.remove('active', 'completed');
+      if (sStep === step) s.classList.add('active');
+      else if (sStep < step) s.classList.add('completed');
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ====== VALIDATION ======
+  function validateStep1() {
+    const fields = [
+      { id: 'firstName', test: v => v.trim().length > 0 },
+      { id: 'lastName', test: v => v.trim().length > 0 },
+      { id: 'email', test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+      { id: 'phone', test: v => v.replace(/\D/g,'').length >= 7 },
+      { id: 'dob', test: v => v.length > 0 },
+      { id: 'ssn4', test: v => /^\d{4}$/.test(v) },
+      { id: 'address', test: v => v.trim().length > 5 },
+    ];
+
+    let valid = true;
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      if (!f.test(el.value)) {
+        el.classList.add('error');
+        valid = false;
+      } else {
+        el.classList.remove('error');
+      }
+    });
+
+    if (!valid) showToast('Please complete all required fields');
+    return valid;
+  }
+
+  function validateStep3() {
+    const c1 = document.getElementById('consent1').checked;
+    const c2 = document.getElementById('consent2').checked;
+    if (!c1 || !c2) {
+      showToast('Please check both consent boxes');
+      return false;
+    }
+    if (!signatureData) {
+      showToast('Please provide your signature');
+      return false;
+    }
+    return true;
+  }
+
+  // ====== PACKAGE SELECTION ======
+  function selectPackage(el, name, price) {
+    document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedPackage = name;
+    selectedPrice = price;
+    document.getElementById('step2Next').disabled = false;
+  }
+
+  // ====== CHECKBOX TOGGLE ======
+  function toggleCheck(id) {
+    const cb = document.getElementById(id);
+    cb.checked = !cb.checked;
+  }
+
+  // ====== SIGNATURE PAD ======
+  const canvas = document.getElementById('signaturePad');
+  const ctx = canvas.getContext('2d');
+  let drawing = false;
+
+  function initCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.strokeStyle = '#1f2f4a';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  }
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  }
+
+  canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove', e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); markSigned(); });
+  canvas.addEventListener('mouseup', () => { drawing = false; saveSignature(); });
+  canvas.addEventListener('mouseleave', () => { drawing = false; });
+
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }, { passive: false });
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); markSigned(); }, { passive: false });
+  canvas.addEventListener('touchend', e => { e.preventDefault(); drawing = false; saveSignature(); });
+
+  function markSigned() {
+    document.getElementById('sigWrapper').classList.add('signed');
+  }
+
+  function saveSignature() {
+    signatureData = canvas.toDataURL();
+  }
+
+  function clearSignature() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    signatureData = null;
+    document.getElementById('sigWrapper').classList.remove('signed');
+  }
+
+  // ====== REVIEW ======
+  function populateReview() {
+    const data = [
+      ['Name', document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value],
+      ['Email', document.getElementById('email').value],
+      ['Phone', document.getElementById('phone').value],
+      ['Date of Birth', document.getElementById('dob').value],
+      ['SSN (last 4)', '••••' + document.getElementById('ssn4').value.slice(-4)],
+      ['Address', document.getElementById('address').value],
+      ['Package', selectedPackage],
+    ];
+
+    document.getElementById('reviewDetails').innerHTML = data.map(([l,v]) =>
+      `<div class="review-row"><span class="review-label">${l}</span><span class="review-value">${v}</span></div>`
+    ).join('');
+
+    document.getElementById('reviewTotal').textContent = '$' + selectedPrice;
+  }
+
+  // ====== SUBMIT ======
+  function submitForm() {
+    const btn = document.getElementById('payBtn');
+    const spinner = document.getElementById('paySpinner');
+    btn.disabled = true;
+    spinner.style.display = 'block';
+
+    // Simulate Stripe payment processing
+    setTimeout(() => {
+      spinner.style.display = 'none';
+
+      // Generate confirmation code
+      const code = 'PCG-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+      document.getElementById('confirmationCode').textContent = code;
+
+      // Show success
+      document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('stepSuccess').classList.add('active');
+      document.getElementById('progressFill').style.width = '100%';
+
+      document.querySelectorAll('.progress-step').forEach(s => s.classList.add('completed'));
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 2200);
+  }
+
+  // ====== TOAST ======
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ====== PHONE FORMATTING ======
+  document.getElementById('phone').addEventListener('input', function(e) {
+    let v = e.target.value.replace(/\D/g, '');
+    if (v.length >= 6) v = '(' + v.slice(0,3) + ') ' + v.slice(3,6) + '-' + v.slice(6,10);
+    else if (v.length >= 3) v = '(' + v.slice(0,3) + ') ' + v.slice(3);
+    e.target.value = v;
+  });
+
+  // ====== SSN MASK ======
+  document.getElementById('ssn4').addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+  });
+
+  // ====== INIT ======
+  window.addEventListener('load', initCanvas);
+  window.addEventListener('resize', () => { clearSignature(); initCanvas(); });
+
+  // Remove error state on input
+  document.querySelectorAll('.form-input').forEach(input => {
+    input.addEventListener('input', () => input.classList.remove('error'));
+  });
+</script>
+
+</body>
+</html>
