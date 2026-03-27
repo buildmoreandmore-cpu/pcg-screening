@@ -11,7 +11,7 @@
 <meta property="og:type" content="website">
 <meta name="description" content="Complete your background screening authorization securely online. FCRA certified, BBB A+ rated. Trusted since 2003.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Serif+Display&family=Dancing+Script:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --navy: #1f2f4a;
@@ -586,6 +586,89 @@
   }
 
   /* ============ SIGNATURE ============ */
+  .sig-toggle {
+    display: flex;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-100);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    margin-bottom: 14px;
+    gap: 3px;
+  }
+
+  .sig-toggle button {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    background: transparent;
+    color: var(--gray-500);
+  }
+
+  .sig-toggle button.active {
+    background: var(--white);
+    color: var(--navy);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .sig-mode { display: none; }
+  .sig-mode.active { display: block; }
+
+  .sig-type-input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--gray-900);
+    background: var(--white);
+    outline: none;
+    transition: var(--transition);
+    margin-bottom: 8px;
+  }
+
+  .sig-type-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,164,76,0.12);
+  }
+
+  .sig-type-preview {
+    padding: 16px 20px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    background: var(--gray-50);
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    transition: var(--transition);
+  }
+
+  .sig-type-preview.has-value {
+    border-color: var(--gold);
+    border-style: solid;
+  }
+
+  .sig-type-preview span {
+    font-family: 'Dancing Script', 'Brush Script MT', 'Segoe Script', cursive;
+    font-size: 28px;
+    color: var(--navy);
+    letter-spacing: 0.02em;
+  }
+
+  .sig-type-preview .empty {
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--gray-300);
+  }
+
   .signature-pad-wrapper {
     border: 2px dashed var(--gray-200);
     border-radius: var(--radius-md);
@@ -1202,14 +1285,30 @@
 
       <div class="divider"></div>
 
-      <label style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;display:block;">Electronic Signature <span class="required">*</span></label>
+      <label style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:10px;display:block;">Electronic Signature <span class="required">*</span></label>
 
-      <div class="signature-pad-wrapper" id="sigWrapper">
-        <canvas class="signature-pad" id="signaturePad"></canvas>
-        <div class="signature-placeholder">Sign here with your finger or mouse</div>
+      <div class="sig-toggle">
+        <button class="active" onclick="switchSigMode('type')" id="sigToggleType">Type Name</button>
+        <button onclick="switchSigMode('draw')" id="sigToggleDraw">Draw Signature</button>
       </div>
-      <div class="sig-actions">
-        <button onclick="clearSignature()">Clear</button>
+
+      <!-- Type signature -->
+      <div class="sig-mode active" id="sigModeType">
+        <input type="text" class="sig-type-input" id="sigTypeInput" placeholder="Type your full legal name" autocomplete="name">
+        <div class="sig-type-preview" id="sigTypePreview">
+          <span class="empty">Your signature will appear here</span>
+        </div>
+      </div>
+
+      <!-- Draw signature -->
+      <div class="sig-mode" id="sigModeDraw">
+        <div class="signature-pad-wrapper" id="sigWrapper">
+          <canvas class="signature-pad" id="signaturePad"></canvas>
+          <div class="signature-placeholder">Sign here with your finger or mouse</div>
+        </div>
+        <div class="sig-actions">
+          <button onclick="clearSignature()">Clear</button>
+        </div>
       </div>
     </div>
 
@@ -1402,7 +1501,36 @@
     document.getElementById('step2Next').disabled = false;
   }
 
-  // ====== SIGNATURE PAD ======
+  // ====== SIGNATURE MODE ======
+  let sigMode = 'type'; // 'type' or 'draw'
+
+  function switchSigMode(mode) {
+    sigMode = mode;
+    document.getElementById('sigModeType').classList.toggle('active', mode === 'type');
+    document.getElementById('sigModeDraw').classList.toggle('active', mode === 'draw');
+    document.getElementById('sigToggleType').classList.toggle('active', mode === 'type');
+    document.getElementById('sigToggleDraw').classList.toggle('active', mode === 'draw');
+    if (mode === 'draw') {
+      setTimeout(initCanvas, 50);
+    }
+  }
+
+  // Typed signature
+  document.getElementById('sigTypeInput').addEventListener('input', function(e) {
+    const preview = document.getElementById('sigTypePreview');
+    const val = e.target.value.trim();
+    if (val) {
+      preview.innerHTML = '<span>' + val + '</span>';
+      preview.classList.add('has-value');
+      signatureData = 'typed:' + val;
+    } else {
+      preview.innerHTML = '<span class="empty">Your signature will appear here</span>';
+      preview.classList.remove('has-value');
+      signatureData = null;
+    }
+  });
+
+  // ====== SIGNATURE PAD (draw) ======
   const canvas = document.getElementById('signaturePad');
   const ctx = canvas.getContext('2d');
   let drawing = false;
