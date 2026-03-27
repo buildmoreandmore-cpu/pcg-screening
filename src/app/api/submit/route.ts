@@ -1,40 +1,60 @@
 import { Resend } from 'resend';
+import { getSupabase } from '@/lib/supabase';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-      console.log('RESEND_API_KEY not set — skipping email');
-      return NextResponse.json({ success: true, skipped: true });
+    const body = await req.json();
+    const { firstName, lastName, email, phone, dob, ssn4, address, packageName, packagePrice, confirmationCode, signatureType, signatureValue, clientName } = body;
+
+    // Store in Supabase
+    const supabase = getSupabase();
+    if (supabase) {
+      const { error: dbError } = await supabase.from('submissions').insert({
+        confirmation_code: confirmationCode,
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        phone,
+        dob: dob || null,
+        ssn_last4: ssn4 || null,
+        address,
+        package_name: packageName,
+        package_price: packagePrice,
+        signature_type: signatureType || null,
+        signature_value: signatureValue || null,
+        client_name: clientName || null,
+      });
+      if (dbError) console.error('Supabase insert error:', dbError);
     }
 
-    const resend = new Resend(apiKey);
-    const body = await req.json();
-    const { firstName, lastName, email, phone, dob, address, packageName, packagePrice, confirmationCode } = body;
+    // Send emails via Resend
+    const apiKey = process.env.RESEND_API_KEY;
+    if (apiKey) {
+      const resend = new Resend(apiKey);
+      const portalUrl = process.env.PORTAL_URL || 'https://pcg-screening.vercel.app';
+      const adminEmail = process.env.PCG_ADMIN_EMAIL;
+      const fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
 
-    const portalUrl = process.env.PORTAL_URL || 'https://pcg-screening.vercel.app';
-    const adminEmail = process.env.PCG_ADMIN_EMAIL;
-    const fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
-
-    // Send confirmation email to candidate
-    await resend.emails.send({
-      from: `PCG Screening Services <${fromEmail}>`,
-      to: email,
-      subject: `Screening Confirmed — ${confirmationCode}`,
-      html: buildCandidateEmail({ firstName, packageName, packagePrice, confirmationCode, portalUrl }),
-    });
-
-    // Send notification to PCG admin
-    if (adminEmail) {
+      // Send confirmation email to candidate
       await resend.emails.send({
-        from: `PCG Screening Portal <${fromEmail}>`,
-        to: adminEmail,
-        subject: `New Screening Submission — ${firstName} ${lastName} (${packageName})`,
-        html: buildAdminEmail({ firstName, lastName, email, phone, dob, address, packageName, packagePrice, confirmationCode }),
+        from: `PCG Screening Services <${fromEmail}>`,
+        to: email,
+        subject: `Screening Confirmed — ${confirmationCode}`,
+        html: buildCandidateEmail({ firstName, packageName, packagePrice, confirmationCode, portalUrl }),
       });
+
+      // Send notification to PCG admin
+      if (adminEmail) {
+        await resend.emails.send({
+          from: `PCG Screening Portal <${fromEmail}>`,
+          to: adminEmail,
+          subject: `New Screening Submission — ${firstName} ${lastName} (${packageName})`,
+          html: buildAdminEmail({ firstName, lastName, email, phone, dob, address, packageName, packagePrice, confirmationCode }),
+        });
+      }
     }
 
     return NextResponse.json({ success: true });

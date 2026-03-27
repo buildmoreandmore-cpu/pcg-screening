@@ -1629,10 +1629,14 @@
           email,
           phone: document.getElementById('phone').value,
           dob: document.getElementById('dob').value,
+          ssn4: document.getElementById('ssn4').value,
           address: document.getElementById('address').value,
           packageName: selectedPackage,
           packagePrice: selectedPrice,
           confirmationCode: code,
+          signatureType: sigMode,
+          signatureValue: sigMode === 'type' ? document.getElementById('sigTypeInput').value : signatureData,
+          clientName: new URLSearchParams(window.location.search).get('client') || null,
         }),
       });
     } catch (e) {
