@@ -11,7 +11,7 @@
 <meta property="og:type" content="website">
 <meta name="description" content="Complete your background screening authorization securely online. FCRA certified, BBB A+ rated. Trusted since 2003.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Serif+Display&family=Dancing+Script:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --navy: #1f2f4a;
@@ -524,13 +524,206 @@
     border: 1px solid var(--gray-100);
   }
 
-  /* ============ DROPBOX SIGN EMBED ============ */
-  #dropboxSignContainer iframe {
-    width: 100% !important;
-    min-height: 500px;
-    border: none;
+  /* ============ CONSENT ============ */
+  .consent-box {
+    padding: 16px;
+    background: var(--gray-50);
     border-radius: var(--radius-md);
+    border: 1px solid var(--gray-100);
+    margin-bottom: 16px;
+    max-height: 180px;
+    overflow-y: auto;
+    font-size: 12px;
+    color: var(--gray-700);
+    line-height: 1.7;
   }
+
+  .checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+    cursor: pointer;
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 2px solid var(--gray-200);
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: var(--transition);
+    position: relative;
+    background: var(--white);
+  }
+
+  .checkbox-group input[type="checkbox"]:checked {
+    background: var(--navy);
+    border-color: var(--navy);
+  }
+
+  .checkbox-group input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid var(--white);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .checkbox-group label {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    cursor: pointer;
+  }
+
+  /* ============ SIGNATURE ============ */
+  .sig-toggle {
+    display: flex;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-100);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    margin-bottom: 14px;
+    gap: 3px;
+  }
+
+  .sig-toggle button {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    background: transparent;
+    color: var(--gray-500);
+  }
+
+  .sig-toggle button.active {
+    background: var(--white);
+    color: var(--navy);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .sig-mode { display: none; }
+  .sig-mode.active { display: block; }
+
+  .sig-type-input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--gray-900);
+    background: var(--white);
+    outline: none;
+    transition: var(--transition);
+    margin-bottom: 8px;
+  }
+
+  .sig-type-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,164,76,0.12);
+  }
+
+  .sig-type-preview {
+    padding: 16px 20px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    background: var(--gray-50);
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    transition: var(--transition);
+  }
+
+  .sig-type-preview.has-value {
+    border-color: var(--gold);
+    border-style: solid;
+  }
+
+  .sig-type-preview span {
+    font-family: 'Dancing Script', 'Brush Script MT', 'Segoe Script', cursive;
+    font-size: 28px;
+    color: var(--navy);
+    letter-spacing: 0.02em;
+  }
+
+  .sig-type-preview .empty {
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--gray-300);
+  }
+
+  .signature-pad-wrapper {
+    border: 2px dashed var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    background: var(--white);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .signature-pad-wrapper.signed {
+    border-color: var(--gold);
+    border-style: solid;
+  }
+
+  .signature-pad {
+    width: 100%;
+    height: 120px;
+    cursor: crosshair;
+    display: block;
+    border-radius: 8px;
+  }
+
+  .signature-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 13px;
+    color: var(--gray-300);
+    pointer-events: none;
+    transition: var(--transition);
+  }
+
+  .signature-pad-wrapper.signed .signature-placeholder { opacity: 0; }
+
+  .sig-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .sig-actions button {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .sig-actions button:hover { background: var(--gray-50); }
 
   /* ============ REVIEW ============ */
   .review-row {
@@ -823,7 +1016,7 @@
     .package-name { font-size: 14px; }
     .package-price { font-size: 20px; }
     .btn { padding: 16px 20px; font-size: 16px; }
-    #dropboxSignContainer iframe { min-height: 400px; }
+    .consent-box { max-height: 150px; }
   }
 </style>
 </head>
@@ -860,11 +1053,11 @@
     </div>
     <div class="progress-step" data-step="3">
       <div class="step-dot">3</div>
-      <span class="step-label">Payment</span>
+      <span class="step-label">Consent</span>
     </div>
     <div class="progress-step" data-step="4">
       <div class="step-dot">4</div>
-      <span class="step-label">Sign</span>
+      <span class="step-label">Review</span>
     </div>
   </div>
 </div>
@@ -1065,12 +1258,75 @@
     </div>
   </section>
 
-  <!-- ====== STEP 3: REVIEW & PAY ====== -->
+  <!-- ====== STEP 3: CONSENT & SIGNATURE ====== -->
   <section class="step-section" id="step3">
     <div class="card">
       <div class="card-header">
-        <h2>Review & Pay</h2>
-        <p>Confirm your details are correct, then proceed to secure payment.</p>
+        <h2>Authorization & Consent</h2>
+        <p>Please review the disclosure below, then sign to authorize your screening.</p>
+      </div>
+
+      <div class="consent-box">
+        <strong>Disclosure & Authorization</strong><br><br>
+        In connection with my application for employment or continued employment, I understand that a consumer report and/or investigative consumer report may be requested by the prospective employer or current employer listed above. These reports may include, but are not limited to: criminal history records, court records, driving records, education verification, employment verification, professional references, credit reports, and drug testing results.<br><br>
+        I hereby authorize PCG Screening Services and its designated agents to conduct such investigations and to request any and all information deemed necessary. I understand that I have the right to request a complete and accurate disclosure of the nature and scope of the investigation and that I may request a summary of my rights under the Fair Credit Reporting Act (FCRA).<br><br>
+        I acknowledge that a telephonic facsimile (fax) or photographic copy of this authorization shall be as valid as the original. This authorization is valid for the duration of my employment or application process.
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="consent1">
+        <label for="consent1">I have read and understand the above disclosure and authorization statement.</label>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="consent2">
+        <label for="consent2">I authorize PCG Screening Services to conduct the background screening described above.</label>
+      </div>
+
+      <div class="divider"></div>
+
+      <label style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:10px;display:block;">Electronic Signature <span class="required">*</span></label>
+
+      <div class="sig-toggle">
+        <button class="active" onclick="switchSigMode('type')" id="sigToggleType">Type Name</button>
+        <button onclick="switchSigMode('draw')" id="sigToggleDraw">Draw Signature</button>
+      </div>
+
+      <!-- Type signature -->
+      <div class="sig-mode active" id="sigModeType">
+        <input type="text" class="sig-type-input" id="sigTypeInput" placeholder="Type your full legal name" autocomplete="name">
+        <div class="sig-type-preview" id="sigTypePreview">
+          <span class="empty">Your signature will appear here</span>
+        </div>
+      </div>
+
+      <!-- Draw signature -->
+      <div class="sig-mode" id="sigModeDraw">
+        <div class="signature-pad-wrapper" id="sigWrapper">
+          <canvas class="signature-pad" id="signaturePad"></canvas>
+          <div class="signature-placeholder">Sign here with your finger or mouse</div>
+        </div>
+        <div class="sig-actions">
+          <button onclick="clearSignature()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goToStep(2)">Back</button>
+      <button class="btn btn-primary" onclick="goToStep(4)" id="step3Next">
+        Continue to Review
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ====== STEP 4: REVIEW & SUBMIT ====== -->
+  <section class="step-section" id="step4">
+    <div class="card">
+      <div class="card-header">
+        <h2>Review & Submit</h2>
+        <p>Confirm your details are correct before submission.</p>
       </div>
 
       <div id="reviewDetails">
@@ -1089,33 +1345,12 @@
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goToStep(2)">Back</button>
-      <button class="btn btn-pay" onclick="startCheckout()" id="payBtn">
+      <button class="btn btn-secondary" onclick="goToStep(3)">Back</button>
+      <button class="btn btn-pay" onclick="submitForm()" id="payBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Pay $<span id="payAmount">0</span>
+        Submit
         <div class="spinner" id="paySpinner"></div>
       </button>
-    </div>
-  </section>
-
-  <!-- ====== STEP 4: CONSENT & SIGNATURE (Dropbox Sign) ====== -->
-  <section class="step-section" id="step4">
-    <div class="card">
-      <div class="card-header">
-        <h2>Authorization & Consent</h2>
-        <p>Sign the authorization form below to complete your screening submission.</p>
-      </div>
-
-      <div id="dropboxSignContainer" style="min-height:400px;display:flex;align-items:center;justify-content:center;">
-        <div id="signLoading" style="text-align:center;">
-          <div class="spinner" style="display:block;width:32px;height:32px;border-width:3px;margin:0 auto 16px;"></div>
-          <p style="font-size:14px;color:var(--gray-500);">Preparing your authorization form...</p>
-        </div>
-        <div id="signError" style="display:none;text-align:center;">
-          <p style="font-size:14px;color:#c62828;margin-bottom:12px;">Unable to load the signing form.</p>
-          <button class="btn btn-primary" onclick="initDropboxSign()" style="max-width:200px;">Try Again</button>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -1172,17 +1407,14 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/hellosign-embedded@2/umd/embedded.production.min.js"></script>
 <script>
   // ====== STATE ======
   let currentStep = 1;
   let selectedPackage = null;
   let selectedPrice = 0;
-  let stripeSessionId = null;
-  let signatureRequestId = null;
+  let signatureData = null;
 
   // ====== STEP NAVIGATION ======
-  // Flow: Step 1 (Info) → Step 2 (Package) → Step 3 (Review & Pay → Stripe) → Step 4 (Dropbox Sign) → Success
   function goToStep(step) {
     // Validate current step before advancing
     if (step > currentStep) {
@@ -1191,10 +1423,20 @@
         showToast('Please select a screening package');
         return;
       }
+      if (currentStep === 3 && !validateStep3()) return;
     }
 
-    // Populate review on step 3
-    if (step === 3) populateReview();
+    // Update review if going to step 4
+    if (step === 4) populateReview();
+
+    // Reset consent box scroll and re-init signature canvas on step 3
+    if (step === 3) {
+      setTimeout(() => {
+        const consentBox = document.querySelector('.consent-box');
+        if (consentBox) consentBox.scrollTop = 0;
+        initCanvas();
+      }, 50);
+    }
 
     currentStep = step;
 
@@ -1243,6 +1485,20 @@
     return valid;
   }
 
+  function validateStep3() {
+    const c1 = document.getElementById('consent1').checked;
+    const c2 = document.getElementById('consent2').checked;
+    if (!c1 || !c2) {
+      showToast('Please check both consent boxes');
+      return false;
+    }
+    if (!signatureData) {
+      showToast('Please provide your signature');
+      return false;
+    }
+    return true;
+  }
+
   // ====== PACKAGE SELECTION ======
   function selectPackage(el, name, price) {
     document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
@@ -1250,6 +1506,84 @@
     selectedPackage = name;
     selectedPrice = price;
     document.getElementById('step2Next').disabled = false;
+  }
+
+  // ====== SIGNATURE MODE ======
+  let sigMode = 'type'; // 'type' or 'draw'
+
+  function switchSigMode(mode) {
+    sigMode = mode;
+    document.getElementById('sigModeType').classList.toggle('active', mode === 'type');
+    document.getElementById('sigModeDraw').classList.toggle('active', mode === 'draw');
+    document.getElementById('sigToggleType').classList.toggle('active', mode === 'type');
+    document.getElementById('sigToggleDraw').classList.toggle('active', mode === 'draw');
+    if (mode === 'draw') {
+      setTimeout(initCanvas, 50);
+    }
+  }
+
+  // Typed signature
+  document.getElementById('sigTypeInput').addEventListener('input', function(e) {
+    const preview = document.getElementById('sigTypePreview');
+    const val = e.target.value.trim();
+    if (val) {
+      preview.innerHTML = '<span>' + val + '</span>';
+      preview.classList.add('has-value');
+      signatureData = 'typed:' + val;
+    } else {
+      preview.innerHTML = '<span class="empty">Your signature will appear here</span>';
+      preview.classList.remove('has-value');
+      signatureData = null;
+    }
+  });
+
+  // ====== SIGNATURE PAD (draw) ======
+  const canvas = document.getElementById('signaturePad');
+  const ctx = canvas.getContext('2d');
+  let drawing = false;
+  let canvasReady = false;
+
+  function initCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.strokeStyle = '#1f2f4a';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    canvasReady = true;
+  }
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  }
+
+  canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove', e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); markSigned(); });
+  canvas.addEventListener('mouseup', () => { drawing = false; saveSignature(); });
+  canvas.addEventListener('mouseleave', () => { drawing = false; });
+
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }, { passive: false });
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); markSigned(); }, { passive: false });
+  canvas.addEventListener('touchend', e => { e.preventDefault(); drawing = false; saveSignature(); });
+
+  function markSigned() {
+    document.getElementById('sigWrapper').classList.add('signed');
+  }
+
+  function saveSignature() {
+    signatureData = canvas.toDataURL();
+  }
+
+  function clearSignature() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    signatureData = null;
+    document.getElementById('sigWrapper').classList.remove('signed');
   }
 
   // ====== REVIEW ======
@@ -1269,126 +1603,21 @@
     ).join('');
 
     document.getElementById('reviewTotal').textContent = '$' + selectedPrice;
-    document.getElementById('payAmount').textContent = selectedPrice;
   }
 
-  // ====== STRIPE CHECKOUT ======
-  async function startCheckout() {
+  // ====== SUBMIT ======
+  async function submitForm() {
     const btn = document.getElementById('payBtn');
     const spinner = document.getElementById('paySpinner');
     btn.disabled = true;
     spinner.style.display = 'block';
 
-    // Save form data to sessionStorage before leaving for Stripe
-    const formData = {
-      firstName: document.getElementById('firstName').value,
-      lastName: document.getElementById('lastName').value,
-      email: document.getElementById('email').value,
-      phone: document.getElementById('phone').value,
-      dob: document.getElementById('dob').value,
-      ssn4: document.getElementById('ssn4').value,
-      address: document.getElementById('address').value,
-      packageName: selectedPackage,
-      packagePrice: selectedPrice,
-    };
-    sessionStorage.setItem('pcg_form', JSON.stringify(formData));
-
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          packageName: selectedPackage,
-          email: formData.email,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.url) {
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
-      } else {
-        showToast('Unable to start payment. Please try again.');
-        btn.disabled = false;
-        spinner.style.display = 'none';
-      }
-    } catch (e) {
-      console.error('Checkout error:', e);
-      showToast('Payment error. Please try again.');
-      btn.disabled = false;
-      spinner.style.display = 'none';
-    }
-  }
-
-  // ====== DROPBOX SIGN ======
-  async function initDropboxSign() {
-    const container = document.getElementById('dropboxSignContainer');
-    const loading = document.getElementById('signLoading');
-    const errorEl = document.getElementById('signError');
-    loading.style.display = 'block';
-    errorEl.style.display = 'none';
-
-    try {
-      const res = await fetch('/api/signature', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: document.getElementById('firstName').value,
-          lastName: document.getElementById('lastName').value,
-          email: document.getElementById('email').value,
-          packageName: selectedPackage,
-        }),
-      });
-
-      const data = await res.json();
-      if (!data.signUrl) {
-        throw new Error('No sign URL returned');
-      }
-
-      signatureRequestId = data.signatureRequestId;
-      loading.style.display = 'none';
-
-      // Initialize HelloSign embedded
-      const client = new HelloSign({
-        clientId: data.clientId || window.__DROPBOX_SIGN_CLIENT_ID || '',
-      });
-
-      client.open(data.signUrl, {
-        container: container,
-        skipDomainVerification: true,
-      });
-
-      client.on('sign', () => {
-        // Signing complete — submit everything
-        finalSubmit();
-      });
-
-      client.on('cancel', () => {
-        showToast('Signing was cancelled. Please sign to complete your submission.');
-      });
-
-      client.on('error', (err) => {
-        console.error('Dropbox Sign error:', err);
-        loading.style.display = 'none';
-        errorEl.style.display = 'block';
-      });
-
-    } catch (e) {
-      console.error('Signature init error:', e);
-      loading.style.display = 'none';
-      errorEl.style.display = 'block';
-    }
-  }
-
-  // ====== FINAL SUBMIT ======
-  async function finalSubmit() {
-    const code = 'PCG-' + Math.random().toString(36).substr(2, 6).toUpperCase();
     const firstName = document.getElementById('firstName').value;
     const lastName = document.getElementById('lastName').value;
     const email = document.getElementById('email').value;
+    const code = 'PCG-' + Math.random().toString(36).substr(2, 6).toUpperCase();
 
+    // Send to API
     try {
       await fetch('/api/submit', {
         method: 'POST',
@@ -1404,8 +1633,8 @@
           packageName: selectedPackage,
           packagePrice: selectedPrice,
           confirmationCode: code,
-          stripeSessionId: stripeSessionId,
-          signatureRequestId: signatureRequestId,
+          signatureType: sigMode,
+          signatureValue: sigMode === 'type' ? document.getElementById('sigTypeInput').value : signatureData,
           clientName: new URLSearchParams(window.location.search).get('client') || null,
         }),
       });
@@ -1413,17 +1642,29 @@
       console.log('Submit attempted:', e);
     }
 
+    spinner.style.display = 'none';
+
+    // Check for redirect param
+    const redirectUrl = new URLSearchParams(window.location.search).get('redirect');
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
+      return;
+    }
+
     // Set confirmation code
     document.getElementById('confirmationCode').textContent = code;
 
     // Personalize success message
-    document.getElementById('successHeading').textContent = 'Thanks, ' + firstName + '!';
-    document.getElementById('successMessage').innerHTML = 'Your screening authorization and payment have been received.<br>A confirmation has been sent to <strong>' + email + '</strong>';
+    if (firstName) {
+      document.getElementById('successHeading').textContent = 'Thanks, ' + firstName + '!';
+      document.getElementById('successMessage').innerHTML = 'Your screening authorization and payment have been received.<br>A confirmation has been sent to <strong>' + email + '</strong>';
+    }
 
     // Show success
     document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
     document.getElementById('stepSuccess').classList.add('active');
     document.getElementById('progressFill').style.width = '100%';
+
     document.querySelectorAll('.progress-step').forEach(s => s.classList.add('completed'));
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1468,7 +1709,6 @@
       document.getElementById('clientBadge').textContent = client;
     }
 
-    // Filter visible packages
     const pkgFilter = params.get('packages');
     if (pkgFilter) {
       const allowed = pkgFilter.split(',').map(p => p.trim().toLowerCase());
@@ -1480,52 +1720,9 @@
     }
   })();
 
-  // ====== HANDLE RETURN FROM STRIPE ======
-  (function() {
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('session_id');
-    const cancelled = params.get('cancelled');
-
-    if (sessionId) {
-      // Returning from successful Stripe payment
-      stripeSessionId = sessionId;
-
-      // Restore form data from sessionStorage
-      const saved = JSON.parse(sessionStorage.getItem('pcg_form') || '{}');
-      if (saved.firstName) document.getElementById('firstName').value = saved.firstName;
-      if (saved.lastName) document.getElementById('lastName').value = saved.lastName;
-      if (saved.email) document.getElementById('email').value = saved.email;
-      if (saved.phone) document.getElementById('phone').value = saved.phone;
-      if (saved.dob) document.getElementById('dob').value = saved.dob;
-      if (saved.ssn4) document.getElementById('ssn4').value = saved.ssn4;
-      if (saved.address) document.getElementById('address').value = saved.address;
-      selectedPackage = saved.packageName || params.get('package') || '';
-      selectedPrice = saved.packagePrice || parseFloat(params.get('price') || '0');
-
-      // Clean URL without reloading
-      window.history.replaceState({}, '', window.location.pathname);
-
-      // Jump to step 4 (signing)
-      currentStep = 4;
-      document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
-      document.getElementById('step4').classList.add('active');
-      document.getElementById('progressFill').style.width = '75%';
-      document.querySelectorAll('.progress-step').forEach(s => {
-        const sStep = parseInt(s.dataset.step);
-        s.classList.remove('active', 'completed');
-        if (sStep === 4) s.classList.add('active');
-        else if (sStep < 4) s.classList.add('completed');
-      });
-
-      // Start Dropbox Sign
-      initDropboxSign();
-    }
-
-    if (cancelled) {
-      window.history.replaceState({}, '', window.location.pathname);
-      showToast('Payment was cancelled. You can try again.');
-    }
-  })();
+  // ====== INIT ======
+  window.addEventListener('load', initCanvas);
+  window.addEventListener('resize', () => { clearSignature(); initCanvas(); });
 
   // Remove error state on input
   document.querySelectorAll('.form-input').forEach(input => {

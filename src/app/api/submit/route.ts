@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
     const {
       firstName, lastName, email, phone, dob, ssn4, address,
       packageName, packagePrice, confirmationCode,
+      signatureType, signatureValue,
       stripeSessionId, signatureRequestId,
       clientName,
     } = body;
@@ -28,10 +29,12 @@ export async function POST(req: NextRequest) {
         address,
         package_name: packageName,
         package_price: packagePrice,
+        signature_type: signatureType || null,
+        signature_value: signatureValue || null,
         stripe_session_id: stripeSessionId || null,
         signature_request_id: signatureRequestId || null,
         payment_status: stripeSessionId ? 'paid' : 'unpaid',
-        consent_status: signatureRequestId ? 'signed' : 'pending',
+        consent_status: signatureRequestId ? 'signed' : (signatureValue ? 'signed' : 'pending'),
         client_name: clientName || null,
       });
       if (dbError) console.error('Supabase insert error:', dbError);

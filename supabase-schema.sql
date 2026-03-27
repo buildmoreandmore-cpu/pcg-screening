@@ -13,8 +13,10 @@ create table submissions (
   address text,
   package_name text not null,
   package_price numeric not null,
-  stripe_session_id text, -- Stripe checkout session ID
-  signature_request_id text, -- Dropbox Sign signature request ID
+  signature_type text, -- 'typed' or 'drawn'
+  signature_value text, -- typed name or base64 image
+  stripe_session_id text, -- Stripe checkout session ID (when enabled)
+  signature_request_id text, -- Dropbox Sign signature request ID (when enabled)
   consent_status text default 'pending', -- pending, signed
   client_name text, -- from ?client= param
   status text default 'pending', -- pending, in_progress, completed, cancelled
