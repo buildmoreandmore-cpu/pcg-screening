@@ -118,24 +118,24 @@
 
   /* ============ PROGRESS ============ */
   .progress-bar {
-    background: var(--gold);
+    background: var(--navy);
     padding: 0;
     overflow: hidden;
   }
 
   .progress-track {
     height: 3px;
-    background: rgba(31,47,74,0.1);
+    background: rgba(255,255,255,0.08);
     position: relative;
   }
 
   .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--navy), var(--navy-light));
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
     width: 0%;
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 0 2px 2px 0;
-    box-shadow: 0 0 12px rgba(31,47,74,0.3);
+    box-shadow: 0 0 12px rgba(201,164,76,0.4);
   }
 
   .progress-steps {
@@ -152,20 +152,20 @@
     align-items: center;
     gap: 6px;
     font-size: 11px;
-    color: rgba(31,47,74,0.35);
+    color: rgba(255,255,255,0.35);
     font-weight: 500;
     transition: var(--transition);
     white-space: nowrap;
   }
 
-  .progress-step.active { color: var(--navy); }
-  .progress-step.completed { color: rgba(31,47,74,0.6); }
+  .progress-step.active { color: var(--gold-light); }
+  .progress-step.completed { color: rgba(255,255,255,0.6); }
 
   .step-dot {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    border: 2px solid rgba(31,47,74,0.15);
+    border: 2px solid rgba(255,255,255,0.15);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -176,16 +176,16 @@
   }
 
   .progress-step.active .step-dot {
-    border-color: var(--navy);
-    background: var(--navy);
-    color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(31,47,74,0.2);
+    border-color: var(--gold);
+    background: var(--gold);
+    color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(201,164,76,0.2);
   }
 
   .progress-step.completed .step-dot {
-    border-color: rgba(31,47,74,0.4);
-    background: rgba(31,47,74,0.15);
-    color: var(--navy);
+    border-color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.15);
+    color: var(--white);
   }
 
   .step-label { display: none; }
