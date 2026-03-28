@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us — PCG Screening Services</title>
+<link rel="icon" type="image/png" href="Copy_of_PCG_Logo_with_Soft_Typography.png">
+<meta name="description" content="Learn about PCG Screening Services — trusted since 2003, providing employment, tenant, and non-profit background screening services nationwide.">
+<meta property="og:title" content="About PCG Screening Services">
+<meta property="og:description" content="Trusted since 2003 — employment, tenant, and non-profit background checks nationwide.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1f2f4a;
+    --navy-light: #2a3f5f;
+    --gold: #c9a44c;
+    --gold-light: #e5c97a;
+    --gold-pale: #f5ecd4;
+    --white: #ffffff;
+    --off-white: #f8f7f4;
+    --gray-50: #fafaf9;
+    --gray-100: #f0efec;
+    --gray-200: #e2e0db;
+    --gray-300: #c8c5be;
+    --gray-500: #8a8680;
+    --gray-700: #4a4743;
+    --gray-900: #1c1b19;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 3px rgba(31,47,74,0.06), 0 1px 2px rgba(31,47,74,0.04);
+    --shadow-md: 0 4px 16px rgba(31,47,74,0.08), 0 2px 4px rgba(31,47,74,0.04);
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--off-white);
+    color: var(--gray-900);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .header {
+    background: var(--gold);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(201,164,76,0.3);
+  }
+
+  .header-inner {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+
+  .header-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    object-fit: contain;
+  }
+
+  .header-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--navy);
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+
+  .header-text span {
+    font-size: 11px;
+    color: var(--navy);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--navy);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    opacity: 0.7;
+  }
+
+  .back-link:hover { opacity: 1; }
+  .back-link svg { width: 16px; height: 16px; }
+
+  .content {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .page-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--navy);
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    font-size: 14px;
+    color: var(--gray-500);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gold-pale);
+    border: 1px solid var(--gold-light);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 28px;
+    margin-bottom: 16px;
+    border: 1px solid var(--gray-100);
+  }
+
+  .hero-card {
+    background: var(--navy);
+    color: var(--white);
+    text-align: center;
+    padding: 36px 28px;
+  }
+
+  .hero-card .icon-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  .hero-card .icon-circle svg {
+    width: 28px;
+    height: 28px;
+    color: var(--gold-light);
+  }
+
+  .hero-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 10px;
+    color: var(--white);
+  }
+
+  .hero-card p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.7;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .section-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .section-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--gold-light);
+  }
+
+  .section-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .section-text {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.8;
+  }
+
+  .values-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .value-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-100);
+  }
+
+  .value-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .value-item span {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+  }
+
+  .certs-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 16px;
+    flex-wrap: wrap;
+  }
+
+  .certs-row img {
+    height: 36px;
+    opacity: 0.7;
+    transition: var(--transition);
+  }
+
+  .certs-row img:hover { opacity: 1; }
+
+  .nav-links {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  .nav-link:hover {
+    border-color: var(--gold);
+    background: var(--gold-pale);
+  }
+
+  .footer {
+    text-align: center;
+    padding: 24px 20px;
+    border-top: 1px solid var(--gray-100);
+    margin-top: 20px;
+  }
+
+  .footer p {
+    font-size: 11px;
+    color: var(--gray-300);
+    line-height: 1.6;
+  }
+
+  .footer .quote {
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 480px) {
+    .values-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="header-brand">
+        <img src="Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG Logo" class="header-logo">
+        <div class="header-text">
+          <h1>PCG Screening Services</h1>
+          <span>About Us</span>
+        </div>
+      </a>
+      <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Portal
+      </a>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="page-header">
+      <div class="badge">Established 2003</div>
+      <h2>About PCG Screening Services</h2>
+      <p>Trusted background screening solutions for employers, landlords, and non-profit organizations nationwide.</p>
+    </div>
+
+    <!-- Purpose Hero -->
+    <div class="card hero-card">
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3>Our Purpose</h3>
+      <p>Getting our clients effective and reliable information. We go the extra mile to add service when needed and we always listen to customer input and feedback.</p>
+    </div>
+
+    <!-- Vision -->
+    <div class="card">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        </div>
+        <h3>Our Vision</h3>
+      </div>
+      <p class="section-text">To maintain a reputation for providing excellent background screening services with rapid delivery of requested services.</p>
+    </div>
+
+    <!-- Mission -->
+    <div class="card">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h3>Our Mission</h3>
+      </div>
+      <p class="section-text">To create devoted customers by exceeding expectations through guiding clients toward fair, legal, and ethical decisions.</p>
+    </div>
+
+    <!-- Values -->
+    <div class="card">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </div>
+        <h3>Our Values</h3>
+      </div>
+      <div class="values-grid">
+        <div class="value-item"><div class="value-dot"></div><span>Customer Retention</span></div>
+        <div class="value-item"><div class="value-dot"></div><span>Continuous Improvement</span></div>
+        <div class="value-item"><div class="value-dot"></div><span>Listening with Understanding</span></div>
+        <div class="value-item"><div class="value-dot"></div><span>Community Support</span></div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="card">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Our History</h3>
+      </div>
+      <p class="section-text">PCG Screening Services, LLC was established in 2003, specializing in employment, tenant, and non-profit background checks. The company expanded from small Chamber of Commerce registrations to serving corporations nationwide. We provide HR consulting and hold certifications including WBENC (woman-owned business), SHRM membership, and FCRA certification through NAPBS.</p>
+    </div>
+
+    <!-- Certifications -->
+    <div class="card" style="text-align:center;">
+      <p style="font-size:12px;color:var(--gray-500);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">Certifications & Memberships</p>
+      <div class="certs-row">
+        <img src="shrm-logo.png" alt="SHRM Member">
+        <img src="h2r-logo.png" alt="H2R Member">
+        <img src="bbb-logo.png" alt="BBB Accredited">
+      </div>
+      <p style="font-size:12px;color:var(--gray-300);margin-top:8px;">WBENC Certified &middot; FCRA Certified through NAPBS &middot; BBB Accredited</p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-links">
+      <a href="/" class="nav-link">Candidate Portal</a>
+      <a href="/faq.html" class="nav-link">FAQ</a>
+      <a href="/resources.html" class="nav-link">Resources</a>
+      <a href="/privacy.html" class="nav-link">Privacy Policy</a>
+    </div>
+
+    <div class="footer">
+      <p>&copy; 2003–2026 PCG Screening Services, LLC &middot; Metro Atlanta &middot; Serving Nationwide</p>
+      <p class="quote">"The advantage of knowledge is that wisdom preserves the lives of its possessors."</p>
+    </div>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ — PCG Screening Services</title>
+<link rel="icon" type="image/png" href="Copy_of_PCG_Logo_with_Soft_Typography.png">
+<meta name="description" content="Frequently asked questions about background screening — criminal history searches, FCRA compliance, applicant rights, and more.">
+<meta property="og:title" content="FAQ — PCG Screening Services">
+<meta property="og:description" content="Common questions about background checks, criminal history searches, and your rights.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1f2f4a;
+    --navy-light: #2a3f5f;
+    --gold: #c9a44c;
+    --gold-light: #e5c97a;
+    --gold-pale: #f5ecd4;
+    --white: #ffffff;
+    --off-white: #f8f7f4;
+    --gray-50: #fafaf9;
+    --gray-100: #f0efec;
+    --gray-200: #e2e0db;
+    --gray-300: #c8c5be;
+    --gray-500: #8a8680;
+    --gray-700: #4a4743;
+    --gray-900: #1c1b19;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 3px rgba(31,47,74,0.06), 0 1px 2px rgba(31,47,74,0.04);
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--off-white);
+    color: var(--gray-900);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .header {
+    background: var(--gold);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(201,164,76,0.3);
+  }
+
+  .header-inner {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+
+  .header-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    object-fit: contain;
+  }
+
+  .header-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--navy);
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+
+  .header-text span {
+    font-size: 11px;
+    color: var(--navy);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--navy);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    opacity: 0.7;
+  }
+
+  .back-link:hover { opacity: 1; }
+  .back-link svg { width: 16px; height: 16px; }
+
+  .content {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .page-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--navy);
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    font-size: 14px;
+    color: var(--gray-500);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gold-pale);
+    border: 1px solid var(--gold-light);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 28px;
+    margin-bottom: 16px;
+    border: 1px solid var(--gray-100);
+  }
+
+  .quote-card {
+    background: var(--navy);
+    color: var(--white);
+    text-align: center;
+    padding: 32px 28px;
+  }
+
+  .quote-card .icon-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  .quote-card .icon-circle svg {
+    width: 28px;
+    height: 28px;
+    color: var(--gold-light);
+  }
+
+  .quote-card p {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.6;
+    font-style: italic;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--gray-100);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+
+  .faq-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  .faq-question {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+
+  .faq-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--gold-pale);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--navy);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .faq-question h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1.4;
+  }
+
+  .faq-answer {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.8;
+    padding-left: 38px;
+  }
+
+  .faq-answer ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+  }
+
+  .faq-answer ul li {
+    position: relative;
+    padding: 8px 0 8px 20px;
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.6;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .faq-answer ul li:last-child { border-bottom: none; }
+
+  .faq-answer ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 15px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  .faq-answer ul li strong {
+    color: var(--navy);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  .nav-link:hover {
+    border-color: var(--gold);
+    background: var(--gold-pale);
+  }
+
+  .footer {
+    text-align: center;
+    padding: 24px 20px;
+    border-top: 1px solid var(--gray-100);
+    margin-top: 20px;
+  }
+
+  .footer p {
+    font-size: 11px;
+    color: var(--gray-300);
+    line-height: 1.6;
+  }
+
+  .footer .quote { font-style: italic; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="header-brand">
+        <img src="Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG Logo" class="header-logo">
+        <div class="header-text">
+          <h1>PCG Screening Services</h1>
+          <span>Information Center</span>
+        </div>
+      </a>
+      <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Portal
+      </a>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="page-header">
+      <div class="badge">Information Center</div>
+      <h2>Frequently Asked Questions</h2>
+      <p>Everything you need to know about background screening, your rights, and how the process works.</p>
+    </div>
+
+    <!-- Quote -->
+    <div class="card quote-card">
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      </div>
+      <p>"The advantage of knowledge is that wisdom preserves the lives of its possessors."</p>
+    </div>
+
+    <!-- FAQ Items -->
+    <div class="card">
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <div class="faq-num">1</div>
+          <h3>What types of criminal history searches are available?</h3>
+        </div>
+        <div class="faq-answer">
+          <p>No single database contains all criminal records. The type of search depends on your needs and budget:</p>
+          <ul>
+            <li><strong>Fingerprint Record Check (NCIC)</strong> — Most accurate but costly. Available at state and federal levels.</li>
+            <li><strong>State Criminal History Files</strong> — Court system or statewide repository records. May include arrests and convictions.</li>
+            <li><strong>County Criminal History Files</strong> — County courthouse searches with the most current data available.</li>
+            <li><strong>Federal Criminal Search Files</strong> — Covers federal crimes not found on state records.</li>
+            <li><strong>National Criminal Database Search</strong> — Proprietary database updated periodically. May not include all states.</li>
+            <li><strong>Incarceration/Correction Search</strong> — Covers state or federal prison records only.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <div class="faq-num">2</div>
+          <h3>Why shouldn't I just Google search my applicants?</h3>
+        </div>
+        <div class="faq-answer">
+          <p>Using internet search engines to screen applicants requires the applicant's written permission and creates significant legal risk. If a hiring manager discovers protected class information (race, religion, disability, age, etc.) during an online search, the organization could face discrimination claims — even if the information wasn't used in the hiring decision.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <div class="faq-num">3</div>
+          <h3>Can I use a report the applicant provides?</h3>
+        </div>
+        <div class="faq-answer">
+          <p>While applicants can provide their own reports, outsourcing to a professional Consumer Reporting Agency ensures accuracy, legal compliance, and adherence to FCRA and EEOC guidelines. Self-provided reports may be outdated, incomplete, or altered.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <div class="faq-num">4</div>
+          <h3>Do I need to share the report with the applicant?</h3>
+        </div>
+        <div class="faq-answer">
+          <p>Yes. If you are considering an adverse decision based on the screening results, applicants must receive a copy of their report along with a summary of their rights under the FCRA. Some states require you to provide a copy regardless of the outcome.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <div class="faq-num">5</div>
+          <h3>What does a Social Security verification include?</h3>
+        </div>
+        <div class="faq-answer">
+          <p>A Social Security Number trace provides the year and state of issuance, names associated with the number, possible date of birth, and previous addresses. This is commonly used to identify additional jurisdictions that should be searched for criminal records.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <div class="faq-num">6</div>
+          <h3>How are criminal records searched?</h3>
+        </div>
+        <div class="faq-answer">
+          <p>Records are typically searched by name, with additional options for aliases, dates of birth, and Social Security numbers depending on the source. County-level searches tend to be the most thorough and up-to-date, while national databases provide broader but potentially less current coverage.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-links">
+      <a href="/" class="nav-link">Candidate Portal</a>
+      <a href="/about.html" class="nav-link">About Us</a>
+      <a href="/resources.html" class="nav-link">Resources</a>
+      <a href="/privacy.html" class="nav-link">Privacy Policy</a>
+    </div>
+
+    <div class="footer">
+      <p>&copy; 2003–2026 PCG Screening Services, LLC &middot; Metro Atlanta &middot; Serving Nationwide</p>
+      <p class="quote">"The advantage of knowledge is that wisdom preserves the lives of its possessors."</p>
+    </div>
+  </main>
+
+</body>
+</html>
