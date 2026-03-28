@@ -123,7 +123,6 @@ function buildCandidateEmail({ firstName, packageName, packagePrice, confirmatio
             <tr><td style="padding:4px 0;font-size:14px;color:#4a4743;line-height:1.6;">1. Our team will begin processing your screening immediately.</td></tr>
             <tr><td style="padding:4px 0;font-size:14px;color:#4a4743;line-height:1.6;">2. Most screenings are completed within <strong>1\u20133 business days</strong>.</td></tr>
             <tr><td style="padding:4px 0;font-size:14px;color:#4a4743;line-height:1.6;">3. Results will be shared with the requesting employer per your authorization.</td></tr>
-            <tr><td style="padding:4px 0;font-size:14px;color:#4a4743;line-height:1.6;">4. Track your status anytime at <a href="${portalUrl}/track.html" style="color:#c9a44c;font-weight:600;">${portalUrl}/track.html</a> using your code above.</td></tr>
           </table>
 
           <!-- Referral CTA -->
