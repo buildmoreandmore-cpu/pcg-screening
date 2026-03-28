@@ -56,12 +56,12 @@
 
   /* ============ HEADER ============ */
   .header {
-    background: var(--navy);
+    background: var(--gold);
     padding: 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 20px rgba(31,47,74,0.3);
+    box-shadow: 0 2px 20px rgba(201,164,76,0.3);
   }
 
   .header-inner {
@@ -90,17 +90,18 @@
     font-family: 'DM Serif Display', serif;
     font-size: 17px;
     font-weight: 400;
-    color: var(--white);
+    color: var(--navy);
     letter-spacing: 0.01em;
     line-height: 1.2;
   }
 
   .header-text span {
     font-size: 11px;
-    color: var(--gold-light);
+    color: var(--navy);
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    opacity: 0.7;
   }
 
   .header-secure {
@@ -108,9 +109,9 @@
     align-items: center;
     gap: 5px;
     font-size: 11px;
-    color: var(--gold-light);
+    color: var(--navy);
     font-weight: 500;
-    opacity: 0.8;
+    opacity: 0.7;
   }
 
   .header-secure svg { width: 14px; height: 14px; }
@@ -297,17 +298,19 @@
 
   .info-item {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 16px;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 16px;
     background: var(--gray-50);
     border-radius: var(--radius-md);
     border: 1px solid var(--gray-100);
+    text-align: center;
   }
 
   .info-icon {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
     background: var(--navy);
     display: flex;
