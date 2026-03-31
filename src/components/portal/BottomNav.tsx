@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { signOut } from '@/app/portal/actions/auth'
 
 const tabs = [
   {
@@ -76,14 +77,12 @@ export default function BottomNav() {
                 {item.label}
               </Link>
             ))}
-            <form action="/portal/actions/auth" method="post">
-              <button
-                type="submit"
-                className="w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-              >
-                Log Out
-              </button>
-            </form>
+            <button
+              onClick={() => signOut()}
+              className="w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+            >
+              Log Out
+            </button>
           </div>
         </div>
       )}

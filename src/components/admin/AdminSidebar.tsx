@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { adminSignOut } from '@/app/admin/actions/auth'
 
 const primaryNav = [
   {
@@ -86,6 +87,15 @@ export default function AdminSidebar({ adminName, adminEmail }: { adminName: str
       <div className="px-4 py-3 border-t border-white/10">
         <p className="text-white text-sm truncate">{adminName}</p>
         <p className="text-white/40 text-xs truncate">{adminEmail}</p>
+        <button
+          onClick={() => adminSignOut()}
+          className="mt-2 flex items-center gap-2 text-white/40 hover:text-red-400 text-xs transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Log Out
+        </button>
       </div>
     </>
   )
