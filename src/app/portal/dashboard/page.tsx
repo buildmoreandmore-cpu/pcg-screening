@@ -1,6 +1,7 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
-import { requireAuth } from '@/lib/auth'
+import { getClientUser } from '@/lib/auth'
 import StatusBadge from '@/components/portal/StatusBadge'
 import EmptyState from '@/components/portal/EmptyState'
 
@@ -18,7 +19,8 @@ function timeAgo(date: string) {
 }
 
 export default async function DashboardPage() {
-  const clientUser = await requireAuth()
+  const clientUser = await getClientUser()
+  if (!clientUser) redirect('/portal/login')
   const supabase = await createClient()
   const clientId = clientUser.client_id
 
