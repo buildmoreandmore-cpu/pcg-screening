@@ -1,17 +1,56 @@
 import { redirect } from 'next/navigation'
-import { createClient } from './supabase-server'
+import { cookies } from 'next/headers'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+
+async function getAuthUser() {
+  const cookieStore = await cookies()
+  const allCookies = cookieStore.getAll()
+
+  // Find the Supabase auth token cookie(s)
+  // @supabase/ssr stores tokens in cookies with names like:
+  // sb-<ref>-auth-token or sb-<ref>-auth-token.0, .1, etc (chunked)
+  const authCookies = allCookies
+    .filter(c => c.name.includes('auth-token'))
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  if (authCookies.length === 0) return null
+
+  // Combine chunked cookies
+  let encoded = authCookies.map(c => c.value).join('')
+
+  try {
+    // Decode base64url
+    const padding = '='.repeat((4 - encoded.length % 4) % 4)
+    const decoded = Buffer.from(encoded + padding, 'base64url').toString('utf-8')
+    const session = JSON.parse(decoded)
+
+    if (!session.access_token) return null
+
+    // Verify the token using Supabase service client
+    const supabaseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\\n/g, '').trim()
+    const serviceKey = (process.env.SUPABASE_SERVICE_KEY || '').replace(/\\n/g, '').trim()
+    const supabase = createSupabaseClient(supabaseUrl, serviceKey)
+
+    const { data: { user }, error } = await supabase.auth.getUser(session.access_token)
+    if (error || !user) return null
+
+    return user
+  } catch {
+    return null
+  }
+}
 
 export async function getSession() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  return user
+  return await getAuthUser()
 }
 
 export async function getClientUser() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const user = await getAuthUser()
   if (!user) return null
+
+  const supabaseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\\n/g, '').trim()
+  const serviceKey = (process.env.SUPABASE_SERVICE_KEY || '').replace(/\\n/g, '').trim()
+  const supabase = createSupabaseClient(supabaseUrl, serviceKey)
 
   const { data: clientUser } = await supabase
     .from('client_users')
