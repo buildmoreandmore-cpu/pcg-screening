@@ -1,5 +1,5 @@
 import '../portal/globals.css'
-import { requireAdmin } from '@/lib/admin-auth'
+import { getAdminUser } from '@/lib/admin-auth'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 
 export const metadata = {
@@ -7,7 +7,12 @@ export const metadata = {
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const admin = await requireAdmin()
+  const admin = await getAdminUser()
+
+  // Login page renders without chrome (middleware handles redirect for protected routes)
+  if (!admin) {
+    return <>{children}</>
+  }
 
   return (
     <div className="portal-root">

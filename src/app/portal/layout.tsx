@@ -1,5 +1,6 @@
 import './globals.css'
-import { requireAuth } from '@/lib/auth'
+import { headers } from 'next/headers'
+import { getClientUser } from '@/lib/auth'
 import { PortalProvider } from '@/components/portal/PortalContext'
 import Sidebar from '@/components/portal/Sidebar'
 import BottomNav from '@/components/portal/BottomNav'
@@ -10,7 +11,22 @@ export const metadata = {
 }
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
-  const clientUser = await requireAuth()
+  const headersList = await headers()
+  const pathname = headersList.get('x-nextjs-matched-path') || headersList.get('x-invoke-path') || ''
+
+  // Login and auth callback pages render without auth/chrome
+  const isPublicRoute = pathname.includes('/portal/login') || pathname.includes('/portal/auth')
+
+  if (isPublicRoute) {
+    return <>{children}</>
+  }
+
+  const clientUser = await getClientUser()
+
+  // Not authenticated — render children without chrome (middleware handles redirect)
+  if (!clientUser) {
+    return <>{children}</>
+  }
 
   return (
     <PortalProvider user={clientUser}>
