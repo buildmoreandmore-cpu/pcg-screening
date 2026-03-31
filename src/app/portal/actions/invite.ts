@@ -92,20 +92,27 @@ export async function inviteCandidateManual({
   email,
   phone,
   packageName,
+  screeningComponents,
 }: {
   firstName: string
   lastName: string
   email: string
   phone: string
   packageName: string
+  screeningComponents?: any
 }) {
   const clientUser = await requireAuth()
   const supabase = createAdminClient()
   const client = clientUser.client
 
-  const pkg = client.packages?.find((p: any) => p.name === packageName)
-  if (!pkg) return { error: 'Invalid package selected' }
+  const isCustom = packageName === 'Custom Screening'
 
+  if (!isCustom) {
+    const pkg = client.packages?.find((p: any) => p.name === packageName)
+    if (!pkg) return { error: 'Invalid package selected' }
+  }
+
+  const pkg = client.packages?.find((p: any) => p.name === packageName)
   const trackingCode = generateTrackingCode()
 
   const { error: insertError } = await supabase.from('candidates').insert({
@@ -117,8 +124,9 @@ export async function inviteCandidateManual({
     email,
     phone: phone || null,
     package_name: packageName,
-    package_price: pkg.price,
+    package_price: isCustom ? 0 : (pkg?.price || 0),
     status: 'submitted',
+    ...(screeningComponents ? { screening_components: screeningComponents } : {}),
   })
 
   if (insertError) return { error: 'Failed to create candidate record' }

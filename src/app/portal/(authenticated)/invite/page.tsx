@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { usePortal } from '@/components/portal/PortalContext'
 import { inviteCandidate, inviteCandidateManual } from '@/app/portal/actions/invite'
+import ScreeningSelector from '@/components/screening/ScreeningSelector'
+import type { ScreeningSelections } from '@/components/screening/screening-types'
+import { DEFAULT_SELECTIONS } from '@/components/screening/screening-types'
 
 export default function InvitePage() {
   const { client } = usePortal()
@@ -21,6 +24,10 @@ export default function InvitePage() {
   // Manual mode extra fields
   const [lastName, setLastName] = useState('')
   const [phone, setPhone] = useState('')
+
+  // Screening type: 'package' or 'custom'
+  const [screeningType, setScreeningType] = useState<'package' | 'custom'>('package')
+  const [screeningSelections, setScreeningSelections] = useState<ScreeningSelections>({ ...DEFAULT_SELECTIONS })
 
   async function handleSendLink(e: React.FormEvent) {
     e.preventDefault()
@@ -53,7 +60,8 @@ export default function InvitePage() {
       lastName,
       email,
       phone,
-      packageName: selectedPackage,
+      packageName: screeningType === 'package' ? selectedPackage : 'Custom Screening',
+      ...(screeningType === 'custom' ? { screeningComponents: screeningSelections } : {}),
     })
 
     setLoading(false)
@@ -73,6 +81,8 @@ export default function InvitePage() {
     setEmail('')
     setPhone('')
     setSelectedPackage(packages[0]?.name || '')
+    setScreeningType('package')
+    setScreeningSelections({ ...DEFAULT_SELECTIONS })
     setError('')
   }
 
@@ -179,73 +189,110 @@ export default function InvitePage() {
           </button>
         </form>
       ) : (
-        <form onSubmit={handleManualSubmit} className="bg-white rounded-xl shadow-sm p-5 space-y-4">
-          <p className="text-sm text-gray-500">
-            Enter candidate details manually. Use this for employer-paid screenings or candidates who need help.
-          </p>
-          <div className="grid grid-cols-2 gap-3">
+        <form onSubmit={handleManualSubmit} className="space-y-4">
+          <div className="bg-white rounded-xl shadow-sm p-5 space-y-4">
+            <p className="text-sm text-gray-500">
+              Enter candidate details manually. Use this for employer-paid screenings or candidates who need help.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <input
+                  type="text"
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                <input
+                  type="text"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
+                />
+              </div>
+            </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input
-                type="text"
+                type="email"
                 required
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone <span className="text-gray-400">(optional)</span></label>
               <input
-                type="text"
-                required
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
               />
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone <span className="text-gray-400">(optional)</span></label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Package</label>
-            <select
-              value={selectedPackage}
-              onChange={(e) => setSelectedPackage(e.target.value)}
-              required
-              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold"
-            >
-              {packages.map((pkg: any) => (
-                <option key={pkg.name} value={pkg.name}>
-                  {pkg.name} — ${pkg.price}
-                </option>
-              ))}
-              {packages.length === 0 && <option>No packages configured</option>}
-            </select>
+
+          {/* Screening Type Toggle */}
+          <div className="bg-white rounded-xl shadow-sm p-5 space-y-4">
+            <label className="block text-sm font-medium text-gray-700">Select Screening Type</label>
+            <div className="flex bg-gray-100 rounded-lg p-0.5">
+              <button
+                type="button"
+                onClick={() => setScreeningType('package')}
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  screeningType === 'package' ? 'bg-white text-navy shadow-sm' : 'text-gray-500'
+                }`}
+              >
+                Package
+              </button>
+              <button
+                type="button"
+                onClick={() => setScreeningType('custom')}
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  screeningType === 'custom' ? 'bg-white text-navy shadow-sm' : 'text-gray-500'
+                }`}
+              >
+                Custom / A La Carte
+              </button>
+            </div>
+
+            {screeningType === 'package' ? (
+              <div>
+                <select
+                  value={selectedPackage}
+                  onChange={(e) => setSelectedPackage(e.target.value)}
+                  required={screeningType === 'package'}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold"
+                >
+                  {packages.map((pkg: any) => (
+                    <option key={pkg.name} value={pkg.name}>
+                      {pkg.name} — ${pkg.price}
+                    </option>
+                  ))}
+                  {packages.length === 0 && <option>No packages configured</option>}
+                </select>
+              </div>
+            ) : (
+              <div className="pt-2">
+                <ScreeningSelector
+                  mode="edit"
+                  initialSelections={screeningSelections}
+                  onChange={setScreeningSelections}
+                />
+              </div>
+            )}
           </div>
 
           {error && <p className="text-red-600 text-sm">{error}</p>}
 
           <button
             type="submit"
-            disabled={loading || packages.length === 0}
+            disabled={loading || (screeningType === 'package' && packages.length === 0)}
             className="w-full bg-navy text-white py-2.5 rounded-lg font-medium text-sm hover:bg-navy-light transition-colors disabled:opacity-50"
           >
             {loading ? 'Submitting...' : 'Submit Candidate'}

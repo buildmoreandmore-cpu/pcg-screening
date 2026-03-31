@@ -6,6 +6,7 @@ import StatusBadge from '@/components/portal/StatusBadge'
 import CandidateStatusUpdate from './CandidateStatusUpdate'
 import JurisdictionManager from './JurisdictionManager'
 import ReportUpload from './ReportUpload'
+import ScreeningComponentsView from './ScreeningComponentsView'
 
 function formatDate(date: string | null) {
   if (!date) return '—'
@@ -118,6 +119,11 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
           </div>
         </div>
       </div>
+
+      {/* Screening Components (à la carte) */}
+      {c.screening_components && (
+        <ScreeningComponentsView candidateId={c.id} components={c.screening_components} />
+      )}
 
       {/* Search Jurisdictions */}
       <JurisdictionManager candidateId={c.id} jurisdictions={c.search_jurisdictions || []} candidateAddress={c.address} />

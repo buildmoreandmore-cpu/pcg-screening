@@ -105,6 +105,27 @@ export async function updateCandidateStatus({
   return {}
 }
 
+export async function updateScreeningComponents(candidateId: string, components: any) {
+  const admin = await requireAdmin()
+  const supabase = createAdminClient()
+
+  const { error } = await supabase
+    .from('candidates')
+    .update({ screening_components: components })
+    .eq('id', candidateId)
+
+  if (!error) {
+    await supabase.from('status_history').insert({
+      candidate_id: candidateId,
+      new_status: 'updated',
+      notes: `Screening components updated by ${admin.name}`,
+      changed_by: admin.name,
+    })
+  }
+
+  return { error: error?.message }
+}
+
 export async function updateJurisdictions({
   candidateId,
   jurisdictions,

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { adminSignOut } from '@/app/admin/actions/auth'
+import AnnouncementManager from '@/components/admin/AnnouncementManager'
 
 export default function AdminSettingsPage() {
   const [exporting, setExporting] = useState(false)
@@ -28,6 +29,9 @@ export default function AdminSettingsPage() {
   return (
     <div className="max-w-lg mx-auto space-y-6">
       <h1 className="font-heading text-2xl text-navy">Settings</h1>
+
+      {/* Announcements */}
+      <AnnouncementManager />
 
       {/* Profile */}
       <div className="bg-white rounded-xl shadow-sm p-5 space-y-4">
