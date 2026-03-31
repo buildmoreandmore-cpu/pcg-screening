@@ -27,7 +27,7 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/portal/dashboard')
+    window.location.href = '/portal/dashboard'
   }
 
   async function handleMagicLink(e: React.FormEvent) {
