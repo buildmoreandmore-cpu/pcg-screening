@@ -3,14 +3,14 @@ import { createClient } from './supabase-server'
 
 export async function getAdminUser() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!session) return null
+  if (!user) return null
 
   const { data: adminUser } = await supabase
     .from('admin_users')
     .select('*')
-    .eq('auth_user_id', session.user.id)
+    .eq('auth_user_id', user.id)
     .eq('active', true)
     .single()
 

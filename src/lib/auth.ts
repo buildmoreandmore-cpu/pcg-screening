@@ -3,20 +3,20 @@ import { createClient } from './supabase-server'
 
 export async function getSession() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  return session
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
 }
 
 export async function getClientUser() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!session) return null
+  if (!user) return null
 
   const { data: clientUser } = await supabase
     .from('client_users')
     .select('*, client:clients(*)')
-    .eq('auth_user_id', session.user.id)
+    .eq('auth_user_id', user.id)
     .eq('active', true)
     .single()
 

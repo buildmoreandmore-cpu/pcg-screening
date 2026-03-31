@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
           supabaseResponse = NextResponse.next({ request })
@@ -33,10 +33,12 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
+  // Refresh the session — this is the primary purpose of the middleware
+  // It ensures auth cookies stay fresh on every request
+  const { data: { user } } = await supabase.auth.getUser()
 
   // Not logged in — redirect to appropriate login
-  if (!session) {
+  if (!user) {
     const url = request.nextUrl.clone()
     const isAdmin = request.nextUrl.pathname.startsWith('/admin')
     url.pathname = isAdmin ? '/admin/login' : '/portal/login'
