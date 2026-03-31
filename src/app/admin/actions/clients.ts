@@ -1,0 +1,162 @@
+'use server'
+
+import { createClient } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
+import { Resend } from 'resend'
+import { buildWelcomeEmail, buildTeamInviteEmail } from '@/lib/email-templates'
+
+export async function createNewClient({
+  name,
+  slug,
+  contactName,
+  contactEmail,
+  contactPhone,
+  website,
+  address,
+  city,
+  state,
+  zip,
+  packages,
+  inviteUser,
+}: {
+  name: string
+  slug: string
+  contactName: string
+  contactEmail: string
+  contactPhone: string
+  website: string
+  address: string
+  city: string
+  state: string
+  zip: string
+  packages: Array<{ name: string; price: number; description: string; features: string[] }>
+  inviteUser: boolean
+}) {
+  await requireAdmin()
+  const supabase = await createClient()
+
+  // Insert client
+  const { data: client, error: clientError } = await supabase
+    .from('clients')
+    .insert({
+      name,
+      slug,
+      contact_name: contactName,
+      contact_email: contactEmail,
+      contact_phone: contactPhone,
+      website: website || null,
+      address: address || null,
+      city: city || null,
+      state: state || null,
+      zip: zip || null,
+      packages,
+      notification_email: contactEmail || 'accounts@pcgscreening.com',
+    })
+    .select('id')
+    .single()
+
+  if (clientError) {
+    if (clientError.code === '23505') return { error: 'A client with this slug already exists' }
+    return { error: 'Failed to create client' }
+  }
+
+  // Create first admin user for this client
+  if (contactEmail) {
+    await supabase.from('client_users').insert({
+      client_id: client.id,
+      email: contactEmail,
+      name: contactName || name,
+      role: 'admin',
+    })
+  }
+
+  // Send welcome email
+  if (inviteUser && contactEmail) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY)
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+
+      await resend.emails.send({
+        from: process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>',
+        to: contactEmail,
+        subject: 'Welcome to PCG Screening Services',
+        html: buildWelcomeEmail({
+          contactName: contactName || name,
+          portalUrl: `${siteUrl}/portal/login`,
+        }),
+      })
+    } catch {
+      // Email failure shouldn't block client creation
+    }
+  }
+
+  return { clientId: client.id }
+}
+
+export async function addClientUser({
+  clientId,
+  name,
+  email,
+  role,
+}: {
+  clientId: string
+  name: string
+  email: string
+  role: string
+}) {
+  await requireAdmin()
+  const supabase = await createClient()
+
+  const { error } = await supabase.from('client_users').insert({
+    client_id: clientId,
+    email,
+    name,
+    role: role === 'admin' ? 'admin' : 'user',
+  })
+
+  if (error) {
+    if (error.code === '23505') return { error: 'This email already exists' }
+    return { error: 'Failed to add user' }
+  }
+
+  // Send invite email
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+
+    const { data: client } = await supabase.from('clients').select('name').eq('id', clientId).single()
+
+    await resend.emails.send({
+      from: process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>',
+      to: email,
+      subject: `You've been added to ${client?.name || 'a company'}'s PCG Screening Portal`,
+      html: buildTeamInviteEmail({
+        memberName: name,
+        companyName: client?.name || 'your company',
+        portalUrl: `${siteUrl}/portal/login`,
+      }),
+    })
+  } catch {
+    // Non-critical
+  }
+
+  return {}
+}
+
+export async function toggleClientUser({
+  userId,
+  active,
+}: {
+  userId: string
+  active: boolean
+}) {
+  await requireAdmin()
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('client_users')
+    .update({ active })
+    .eq('id', userId)
+
+  return { error: error?.message }
+}

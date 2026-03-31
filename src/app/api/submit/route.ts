@@ -67,6 +67,31 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Link to employer portal candidate record if submitted via client link
+    if (supabase && clientName) {
+      const { data: candidate } = await supabase
+        .from('candidates')
+        .select('id')
+        .eq('client_slug', clientName)
+        .eq('email', email)
+        .eq('status', 'submitted')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (candidate) {
+        await supabase
+          .from('candidates')
+          .update({
+            status: 'in_progress',
+            screening_started_at: new Date().toISOString(),
+            payment_status: stripeSessionId ? 'paid' : 'pending',
+            consent_status: signatureValue || signatureRequestId ? 'signed' : 'pending',
+          })
+          .eq('id', candidate.id);
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Submit error:', error);

@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #1f2f4a;
+  --color-navy-light: #2a3f5f;
+  --color-teal: #043b3e;
+  --color-teal-light: #065a5e;
+  --color-gold: #c9a44c;
+  --color-gold-light: #e5c97a;
+  --color-gold-pale: #f5ecd4;
+  --color-off-white: #f8f7f4;
+  --color-gray-50: #fafaf9;
+  --color-gray-100: #f0efec;
+  --color-gray-200: #e2e0db;
+  --color-gray-300: #c8c5be;
+  --color-gray-500: #8a8680;
+  --color-gray-700: #4a4743;
+  --color-gray-900: #1c1b19;
+
+  --font-heading: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+
+/* Base portal styles */
+.portal-root {
+  font-family: var(--font-body);
+  background: var(--color-off-white);
+  color: var(--color-gray-900);
+  min-height: 100dvh;
+}
