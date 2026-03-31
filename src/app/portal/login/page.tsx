@@ -1,15 +1,36 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [mode, setMode] = useState<'password' | 'magic'>('password')
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handlePasswordLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    const supabase = createClient()
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (error) {
+      setError('Invalid email or password.')
+      setLoading(false)
+      return
+    }
+
+    router.push('/portal/dashboard')
+  }
+
+  async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -59,13 +80,54 @@ export default function LoginPage() {
                 We sent a login link to <strong className="text-gray-700">{email}</strong>. Click the link to access your dashboard.
               </p>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit}>
+          ) : mode === 'password' ? (
+            <form onSubmit={handlePasswordLogin}>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
                 Email Address
               </label>
               <input
                 id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent text-sm"
+                autoFocus
+              />
+
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5 mt-3">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent text-sm"
+              />
+
+              {error && (
+                <p className="text-red-600 text-sm mt-2">{error}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-4 bg-navy text-white py-2.5 rounded-lg font-medium text-sm hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleMagicLink}>
+              <label htmlFor="email-magic" className="block text-sm font-medium text-gray-700 mb-1.5">
+                Email Address
+              </label>
+              <input
+                id="email-magic"
                 type="email"
                 required
                 value={email}
@@ -90,9 +152,14 @@ export default function LoginPage() {
           )}
         </div>
 
-        <p className="text-center text-xs text-gray-500 mt-6">
-          No password needed — we&apos;ll send you a secure link.
-        </p>
+        {!sent && (
+          <button
+            onClick={() => { setMode(mode === 'password' ? 'magic' : 'password'); setError('') }}
+            className="block w-full text-center text-xs text-gray-500 mt-4 hover:text-gold transition-colors"
+          >
+            {mode === 'password' ? 'Use magic link instead' : 'Sign in with password'}
+          </button>
+        )}
       </div>
     </div>
   )
