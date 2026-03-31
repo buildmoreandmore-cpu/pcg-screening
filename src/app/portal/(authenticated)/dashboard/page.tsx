@@ -20,7 +20,7 @@ function timeAgo(date: string) {
 
 export default async function DashboardPage() {
   const clientUser = await getClientUser()
-  if (!clientUser) redirect('/portal/login')
+  if (!clientUser) return null
   const supabase = await createClient()
   const clientId = clientUser.client_id
 
