@@ -46,6 +46,7 @@ const tabs = [
 ]
 
 const moreItems = [
+  { label: 'Team', href: '/portal/team' },
   { label: 'Resources', href: '/portal/resources' },
   { label: 'Settings', href: '/portal/settings' },
 ]
