@@ -20,11 +20,16 @@ export async function GET() {
     })
   }
 
-  const encoded = authCookies.map(c => c.value).join('')
+  let combined = authCookies.map(c => c.value).join('')
+  const hasBase64Prefix = combined.startsWith('base64-')
 
   try {
-    const padding = '='.repeat((4 - encoded.length % 4) % 4)
-    const decoded = Buffer.from(encoded + padding, 'base64url').toString('utf-8')
+    if (hasBase64Prefix) {
+      combined = combined.substring(7)
+    }
+
+    const padding = '='.repeat((4 - combined.length % 4) % 4)
+    const decoded = Buffer.from(combined + padding, 'base64url').toString('utf-8')
     const session = JSON.parse(decoded)
 
     const hasAccessToken = !!session.access_token
@@ -73,6 +78,7 @@ export async function GET() {
 
     return NextResponse.json({
       status: 'authenticated',
+      hasBase64Prefix,
       userId: user.id,
       email: user.email,
       clientUser: clientUser || null,
@@ -86,8 +92,8 @@ export async function GET() {
       status: 'decode_error',
       error: err.message,
       authCookieNames: authCookies.map(c => c.name),
-      encodedLength: encoded.length,
-      encodedPrefix: encoded.substring(0, 50) + '...',
+      encodedLength: combined.length,
+      encodedPrefix: combined.substring(0, 50) + '...',
     })
   }
 }

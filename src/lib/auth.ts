@@ -16,12 +16,17 @@ async function getAuthUser() {
   if (authCookies.length === 0) return null
 
   // Combine chunked cookies
-  let encoded = authCookies.map(c => c.value).join('')
+  let combined = authCookies.map(c => c.value).join('')
 
   try {
+    // @supabase/ssr v0.10 stores cookies with a "base64-" prefix before the base64url data
+    if (combined.startsWith('base64-')) {
+      combined = combined.substring(7)
+    }
+
     // Decode base64url
-    const padding = '='.repeat((4 - encoded.length % 4) % 4)
-    const decoded = Buffer.from(encoded + padding, 'base64url').toString('utf-8')
+    const padding = '='.repeat((4 - combined.length % 4) % 4)
+    const decoded = Buffer.from(combined + padding, 'base64url').toString('utf-8')
     const session = JSON.parse(decoded)
 
     if (!session.access_token) return null
