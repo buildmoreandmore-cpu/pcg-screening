@@ -18,16 +18,28 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    try {
+      const supabase = createClient()
+      const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
 
-    if (error) {
-      setError('Invalid email or password.')
+      if (authError) {
+        setError(`Login failed: ${authError.message}`)
+        setLoading(false)
+        return
+      }
+
+      if (!data.session) {
+        setError('Login succeeded but no session returned.')
+        setLoading(false)
+        return
+      }
+
+      // Session is set — full page reload to pick up cookies
+      window.location.href = '/portal/dashboard'
+    } catch (err: any) {
+      setError(`Error: ${err?.message || 'Unknown error'}`)
       setLoading(false)
-      return
     }
-
-    window.location.href = '/portal/dashboard'
   }
 
   async function handleMagicLink(e: React.FormEvent) {

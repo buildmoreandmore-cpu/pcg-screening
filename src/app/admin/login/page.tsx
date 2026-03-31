@@ -16,16 +16,27 @@ export default function AdminLoginPage() {
     setLoading(true)
     setError('')
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    try {
+      const supabase = createClient()
+      const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
 
-    if (error) {
+      if (authError) {
+        setLoading(false)
+        setError(`Login failed: ${authError.message}`)
+        return
+      }
+
+      if (!data.session) {
+        setLoading(false)
+        setError('Login succeeded but no session returned.')
+        return
+      }
+
+      window.location.href = '/admin/dashboard'
+    } catch (err: any) {
       setLoading(false)
-      setError('Invalid email or password')
-      return
+      setError(`Error: ${err?.message || 'Unknown error'}`)
     }
-
-    window.location.href = '/admin/dashboard'
   }
 
   return (
