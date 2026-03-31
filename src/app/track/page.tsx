@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -67,11 +67,12 @@ function TrackPageInner() {
   }
 
   // Auto-search if code came from URL
-  useState(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
     if (searchParams.get('code')) {
       handleSearch()
     }
-  })
+  }, [])
 
   function formatDate(dateStr: string | null) {
     if (!dateStr) return null

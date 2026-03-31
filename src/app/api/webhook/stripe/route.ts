@@ -54,9 +54,9 @@ export async function POST(req: NextRequest) {
       // Insert status history
       await supabase.from('status_history').insert({
         candidate_id: candidateId,
-        from_status: 'submitted',
-        to_status: 'in_progress',
-        changed_by: 'system',
+        previous_status: 'submitted',
+        new_status: 'in_progress',
+        updated_by: 'system',
         notes: 'Payment completed via Stripe',
       })
 
