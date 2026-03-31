@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAuth } from '@/lib/auth'
 import TeamManager from './TeamManager'
 
@@ -11,7 +11,7 @@ export default async function TeamPage() {
     redirect('/portal/dashboard')
   }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: members } = await supabase
     .from('client_users')

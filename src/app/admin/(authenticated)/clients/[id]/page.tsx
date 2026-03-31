@@ -1,14 +1,14 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin-auth'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import StatusBadge from '@/components/portal/StatusBadge'
 import ClientDetail from './ClientDetail'
 
 export default async function AdminClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const [clientRes, candidatesRes, usersRes] = await Promise.all([
     supabase.from('clients').select('*').eq('id', id).single(),

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAuth } from '@/lib/auth'
 
 const categoryLabels: Record<string, string> = {
@@ -17,7 +17,7 @@ const typeIcons: Record<string, string> = {
 
 export default async function ResourcesPage() {
   await requireAuth()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: documents } = await supabase
     .from('compliance_documents')

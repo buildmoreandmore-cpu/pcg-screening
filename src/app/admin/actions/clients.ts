@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
 import { Resend } from 'resend'
 import { buildWelcomeEmail, buildTeamInviteEmail } from '@/lib/email-templates'
@@ -33,7 +33,7 @@ export async function createNewClient({
   inviteUser: boolean
 }) {
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Insert client
   const { data: client, error: clientError } = await supabase
@@ -105,7 +105,7 @@ export async function addClientUser({
   role: string
 }) {
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { error } = await supabase.from('client_users').insert({
     client_id: clientId,
@@ -151,7 +151,7 @@ export async function toggleClientUser({
   active: boolean
 }) {
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { error } = await supabase
     .from('client_users')

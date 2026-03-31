@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAuth } from '@/lib/auth'
 import { Resend } from 'resend'
 import { buildCandidateInviteEmail } from '@/lib/email-templates'
@@ -24,7 +24,7 @@ export async function inviteCandidate({
   packageName: string
 }) {
   const clientUser = await requireAuth()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const client = clientUser.client
 
   // Find package price
@@ -100,7 +100,7 @@ export async function inviteCandidateManual({
   packageName: string
 }) {
   const clientUser = await requireAuth()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const client = clientUser.client
 
   const pkg = client.packages?.find((p: any) => p.name === packageName)

@@ -1,11 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [sent, setSent] = useState(false)
@@ -34,8 +32,18 @@ export default function LoginPage() {
         return
       }
 
-      // Session is set — full page reload to pick up cookies
-      window.location.href = '/portal/dashboard'
+      // Check user type and redirect accordingly
+      const res = await fetch('/api/auth/user-type')
+      const { type } = await res.json()
+
+      if (type === 'admin') {
+        window.location.href = '/admin/dashboard'
+      } else if (type === 'employer') {
+        window.location.href = '/portal/dashboard'
+      } else {
+        setError('Your account is not linked to any organization. Contact support.')
+        setLoading(false)
+      }
     } catch (err: any) {
       setError(`Error: ${err?.message || 'Unknown error'}`)
       setLoading(false)
@@ -75,7 +83,8 @@ export default function LoginPage() {
             alt="PCG Screening Services"
             className="h-16 mx-auto mb-4"
           />
-          <h1 className="font-heading text-2xl text-navy">Employer Portal</h1>
+          <h1 className="font-heading text-2xl text-navy">Sign In</h1>
+          <p className="text-gray-500 text-sm mt-1">PCG Screening Services</p>
         </div>
 
         {/* Card */}

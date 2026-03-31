@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin-auth'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 
 export default async function AdminClientsPage() {
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Get clients with candidate counts
   const { data: clients } = await supabase

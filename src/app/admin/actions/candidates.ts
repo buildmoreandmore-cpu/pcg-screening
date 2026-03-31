@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
 import { Resend } from 'resend'
 import { buildScreeningCompleteEmail } from '@/lib/email-templates'
@@ -15,7 +15,7 @@ export async function updateCandidateStatus({
   notes?: string
 }) {
   const admin = await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Get current candidate
   const { data: candidate } = await supabase
@@ -57,7 +57,7 @@ export async function updateCandidateStatus({
     previous_status: previousStatus,
     new_status: newStatus,
     notes: notes || null,
-    updated_by: admin.name,
+    changed_by: admin.name,
   })
 
   // Send notification emails
@@ -113,7 +113,7 @@ export async function updateJurisdictions({
   jurisdictions: any[]
 }) {
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { error } = await supabase
     .from('candidates')
@@ -125,7 +125,7 @@ export async function updateJurisdictions({
 
 export async function uploadReport(formData: FormData) {
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const file = formData.get('file') as File
   const candidateId = formData.get('candidateId') as string

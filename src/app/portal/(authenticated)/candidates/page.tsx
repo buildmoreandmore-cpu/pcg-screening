@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAuth } from '@/lib/auth'
 import EmptyState from '@/components/portal/EmptyState'
 import CandidatesList from './CandidatesList'
@@ -9,7 +9,7 @@ export default async function CandidatesPage({
   searchParams: Promise<{ q?: string; status?: string; page?: string }>
 }) {
   const clientUser = await requireAuth()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const clientId = clientUser.client_id
   const params = await searchParams
 

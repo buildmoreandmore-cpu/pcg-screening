@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { getClientUser } from '@/lib/auth'
 import StatusBadge from '@/components/portal/StatusBadge'
 import EmptyState from '@/components/portal/EmptyState'
@@ -21,7 +21,7 @@ function timeAgo(date: string) {
 export default async function DashboardPage() {
   const clientUser = await getClientUser()
   if (!clientUser) return null
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const clientId = clientUser.client_id
 
   // Parallel queries

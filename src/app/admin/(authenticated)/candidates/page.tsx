@@ -1,5 +1,5 @@
 import { requireAdmin } from '@/lib/admin-auth'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import AdminCandidatesList from './AdminCandidatesList'
 
 export default async function AdminCandidatesPage({
@@ -8,7 +8,7 @@ export default async function AdminCandidatesPage({
   searchParams: Promise<{ q?: string; status?: string; client?: string; payment?: string; sla?: string; page?: string }>
 }) {
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const params = await searchParams
 
   const search = params.q || ''

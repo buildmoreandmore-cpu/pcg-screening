@@ -1,11 +1,11 @@
 'use server'
 
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
 
 export async function uploadDocument(formData: FormData) {
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const file = formData.get('file') as File
   const name = formData.get('name') as string
@@ -45,7 +45,7 @@ export async function uploadDocument(formData: FormData) {
 
 export async function deleteDocument(documentId: string) {
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { error } = await supabase
     .from('compliance_documents')

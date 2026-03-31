@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin-auth'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import StatusBadge from '@/components/portal/StatusBadge'
 import CandidateStatusUpdate from './CandidateStatusUpdate'
 import JurisdictionManager from './JurisdictionManager'
@@ -15,7 +15,7 @@ function formatDate(date: string | null) {
 export default async function AdminCandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const [candidateRes, historyRes] = await Promise.all([
     supabase.from('candidates').select('*, client:clients(id, name, slug)').eq('id', id).single(),
@@ -141,7 +141,7 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
                     <span className="font-medium capitalize">{h.new_status.replace('_', ' ')}</span>
                   </p>
                   {h.notes && <p className="text-xs text-gray-500 mt-0.5">{h.notes}</p>}
-                  <p className="text-xs text-gray-400 mt-0.5">{h.updated_by} · {formatDate(h.created_at)}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{h.changed_by} · {formatDate(h.created_at)}</p>
                 </div>
               </div>
             ))}

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin-auth'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import StatusBadge from '@/components/portal/StatusBadge'
 
 function timeAgo(date: string) {
@@ -18,7 +18,7 @@ function timeAgo(date: string) {
 
 export default async function AdminDashboard() {
   await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -33,7 +33,7 @@ export default async function AdminDashboard() {
     supabase.from('candidates').select('id', { count: 'exact', head: true }).eq('sla_flagged', true).neq('status', 'completed').neq('status', 'cancelled'),
     supabase.from('candidates').select('package_price').eq('payment_status', 'paid').gte('created_at', monthStart.toISOString()),
     supabase.from('candidates').select('id, first_name, last_name, package_name, status, payment_status, consent_status, created_at, client_slug, sla_flagged').order('created_at', { ascending: false }).limit(10),
-    supabase.from('status_history').select('id, candidate_id, new_status, notes, updated_by, created_at, candidate:candidates(first_name, last_name, client_slug)').order('created_at', { ascending: false }).limit(20),
+    supabase.from('status_history').select('id, candidate_id, new_status, notes, changed_by, created_at, candidate:candidates(first_name, last_name, client_slug)').order('created_at', { ascending: false }).limit(20),
   ])
 
   const stats = [
@@ -134,7 +134,7 @@ export default async function AdminDashboard() {
                     <span className="font-medium capitalize">{a.new_status?.replace('_', ' ')}</span>
                   </p>
                   {a.notes && <p className="text-xs text-gray-400 truncate">{a.notes}</p>}
-                  <p className="text-xs text-gray-400 mt-0.5">{a.updated_by} · {timeAgo(a.created_at)}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{a.changed_by} · {timeAgo(a.created_at)}</p>
                 </Link>
               )
             })}

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAuth } from '@/lib/auth'
 import StatusBadge from '@/components/portal/StatusBadge'
 
@@ -24,7 +24,7 @@ export default async function CandidateDetailPage({
 }) {
   const { id } = await params
   const clientUser = await requireAuth()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: candidate } = await supabase
     .from('candidates')

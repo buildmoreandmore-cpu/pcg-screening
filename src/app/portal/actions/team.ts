@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/auth'
 import { Resend } from 'resend'
 import { buildTeamInviteEmail } from '@/lib/email-templates'
@@ -15,7 +15,7 @@ export async function inviteTeamMember({
   role: string
 }) {
   const clientUser = await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Check for existing member
   const { data: existing } = await supabase
@@ -61,7 +61,7 @@ export async function inviteTeamMember({
 
 export async function deactivateTeamMember(memberId: string) {
   const clientUser = await requireAdmin()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Can't deactivate yourself
   if (memberId === clientUser.id) {
