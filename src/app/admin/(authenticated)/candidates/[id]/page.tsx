@@ -6,6 +6,7 @@ import StatusBadge from '@/components/portal/StatusBadge'
 import CandidateStatusUpdate from './CandidateStatusUpdate'
 import JurisdictionManager from './JurisdictionManager'
 import ReportUpload from './ReportUpload'
+import InternalNotes from './InternalNotes'
 import ScreeningComponentsView from './ScreeningComponentsView'
 
 function formatDate(date: string | null) {
@@ -128,8 +129,11 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
       {/* Search Jurisdictions */}
       <JurisdictionManager candidateId={c.id} jurisdictions={c.search_jurisdictions || []} candidateAddress={c.address} />
 
-      {/* Report Upload */}
-      <ReportUpload candidateId={c.id} reportUrl={c.report_url} />
+      {/* Internal Notes */}
+      <InternalNotes candidateId={c.id} initialNotes={c.internal_notes} />
+
+      {/* Report Upload & Sent Status */}
+      <ReportUpload candidateId={c.id} reportUrl={c.report_url} reportSentAt={c.report_sent_at} reportSentBy={c.report_sent_by} />
 
       {/* Status Timeline */}
       <div className="bg-white rounded-xl shadow-sm p-5">

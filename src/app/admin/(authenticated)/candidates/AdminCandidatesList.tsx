@@ -175,6 +175,7 @@ export default function AdminCandidatesList({
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Consent</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Report</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking</th>
               </tr>
@@ -201,6 +202,15 @@ export default function AdminCandidatesList({
                   <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
                   <td className="px-4 py-3"><StatusBadge status={c.payment_status} /></td>
                   <td className="px-4 py-3"><StatusBadge status={c.consent_status} /></td>
+                  <td className="px-4 py-3">
+                    {c.report_sent_at ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-50 text-blue-700">Sent</span>
+                    ) : c.status === 'completed' ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-50 text-amber-700">Pending</span>
+                    ) : (
+                      <span className="text-xs text-gray-300">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-sm text-gray-500">{timeAgo(c.created_at)}</td>
                   <td className="px-4 py-3 text-xs text-gray-400 font-mono">{c.tracking_code}</td>
                 </tr>

@@ -30,7 +30,7 @@ export default async function AdminCandidatesPage({
   // Build candidates query
   let query = supabase
     .from('candidates')
-    .select('id, first_name, last_name, email, package_name, status, payment_status, consent_status, tracking_code, sla_flagged, created_at, client_slug, client:clients(name)', { count: 'exact' })
+    .select('id, first_name, last_name, email, package_name, status, payment_status, consent_status, tracking_code, sla_flagged, created_at, client_slug, report_sent_at, client:clients(name)', { count: 'exact' })
     .order('created_at', { ascending: false })
 
   if (statusFilter !== 'all') query = query.eq('status', statusFilter)

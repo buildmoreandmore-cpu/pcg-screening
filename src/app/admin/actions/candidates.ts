@@ -175,3 +175,45 @@ export async function uploadReport(formData: FormData) {
 
   return { url: urlData.publicUrl }
 }
+
+export async function updateInternalNotes({
+  candidateId,
+  notes,
+}: {
+  candidateId: string
+  notes: string
+}) {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  const { error } = await supabase
+    .from('candidates')
+    .update({ internal_notes: notes })
+    .eq('id', candidateId)
+
+  return { error: error?.message }
+}
+
+export async function markReportSent(candidateId: string) {
+  const admin = await requireAdmin()
+  const supabase = createAdminClient()
+
+  const { error } = await supabase
+    .from('candidates')
+    .update({
+      report_sent_at: new Date().toISOString(),
+      report_sent_by: admin.name,
+    })
+    .eq('id', candidateId)
+
+  if (!error) {
+    await supabase.from('status_history').insert({
+      candidate_id: candidateId,
+      new_status: 'report_sent',
+      notes: `Report sent to employer by ${admin.name}`,
+      changed_by: admin.name,
+    })
+  }
+
+  return { error: error?.message }
+}
