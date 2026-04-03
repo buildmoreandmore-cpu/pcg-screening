@@ -300,8 +300,8 @@ export default function InvitePage() {
           <div className="bg-white rounded-xl shadow-sm p-5 space-y-4">
             <p className="text-sm text-gray-500">
               {deliveryMode === 'link'
-                ? 'Send a screening link. The candidate completes their info, consent, and payment.'
-                : 'Enter candidate details manually. For employer-paid screenings or candidates who need help.'
+                ? 'Send a screening link. The candidate completes their info and consent. Payment is billed to your company.'
+                : 'Enter candidate details manually. The screening is billed to your company.'
               }
             </p>
 
