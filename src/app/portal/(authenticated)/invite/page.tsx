@@ -39,13 +39,14 @@ export default function InvitePage() {
     if (deliveryMode === 'link') {
       const result = await inviteCandidate({
         firstName,
+        lastName,
         email,
         packageName: screeningType === 'package' ? selectedPackage : 'Custom Screening',
         ...(screeningType === 'custom' ? { screeningComponents: screeningSelections } : {}),
       })
       setLoading(false)
       if (result.error) { setError(result.error); return }
-      setSuccess({ trackingCode: result.trackingCode!, name: firstName })
+      setSuccess({ trackingCode: result.trackingCode!, name: `${firstName} ${lastName}` })
     } else {
       const result = await inviteCandidateManual({
         firstName,
@@ -306,15 +307,27 @@ export default function InvitePage() {
 
             {deliveryMode === 'link' ? (
               <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={firstName}
-                    onChange={e => setFirstName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={firstName}
+                      onChange={e => setFirstName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={lastName}
+                      onChange={e => setLastName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>

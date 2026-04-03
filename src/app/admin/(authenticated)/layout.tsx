@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getAdminUser } from '@/lib/admin-auth'
 import AdminSidebar from '@/components/admin/AdminSidebar'
+import AdminCobrowseButton from '@/components/cobrowse/AdminCobrowseButton'
 
 export default async function AdminAuthLayout({ children }: { children: React.ReactNode }) {
   const admin = await getAdminUser()
@@ -14,6 +15,9 @@ export default async function AdminAuthLayout({ children }: { children: React.Re
       <AdminSidebar adminName={admin.name} adminEmail={admin.email} />
       <main className="lg:ml-56 min-h-dvh pt-14 lg:pt-0">
         <div className="max-w-7xl mx-auto px-4 py-6 lg:px-8 lg:py-8">
+          <div className="flex justify-end mb-4">
+            <AdminCobrowseButton />
+          </div>
           {children}
         </div>
       </main>

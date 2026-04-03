@@ -6,6 +6,9 @@ import Sidebar from '@/components/portal/Sidebar'
 import BottomNav from '@/components/portal/BottomNav'
 import FcraModal from '@/components/portal/FcraModal'
 import AnnouncementBanner from '@/components/portal/AnnouncementBanner'
+import CobrowseProvider from '@/components/cobrowse/CobrowseProvider'
+import RequestHelpButton from '@/components/cobrowse/RequestHelpButton'
+import CobrowseOverlay from '@/components/cobrowse/CobrowseOverlay'
 
 async function getActiveAnnouncement() {
   const supabase = createAdminClient()
@@ -31,17 +34,21 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
 
   return (
     <PortalProvider user={clientUser}>
-      <div className="portal-root">
-        {!clientUser.client.fcra_accepted_at && <FcraModal />}
-        <Sidebar />
-        <main className="lg:ml-56 min-h-dvh pb-20 lg:pb-0 pt-14 lg:pt-0">
-          <AnnouncementBanner announcement={announcement} />
-          <div className="max-w-5xl mx-auto px-4 py-6 lg:px-8 lg:py-8">
-            {children}
-          </div>
-        </main>
-        <BottomNav />
-      </div>
+      <CobrowseProvider>
+        <div className="portal-root">
+          {!clientUser.client.fcra_accepted_at && <FcraModal />}
+          <CobrowseOverlay />
+          <Sidebar />
+          <main className="lg:ml-56 min-h-dvh pb-20 lg:pb-0 pt-14 lg:pt-0">
+            <AnnouncementBanner announcement={announcement} />
+            <div className="max-w-5xl mx-auto px-4 py-6 lg:px-8 lg:py-8">
+              {children}
+            </div>
+          </main>
+          <BottomNav />
+          <RequestHelpButton />
+        </div>
+      </CobrowseProvider>
     </PortalProvider>
   )
 }

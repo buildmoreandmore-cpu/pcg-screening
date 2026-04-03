@@ -17,11 +17,13 @@ function generateTrackingCode() {
 
 export async function inviteCandidate({
   firstName,
+  lastName,
   email,
   packageName,
   screeningComponents,
 }: {
   firstName: string
+  lastName: string
   email: string
   packageName: string
   screeningComponents?: any
@@ -47,7 +49,7 @@ export async function inviteCandidate({
     client_id: client.id,
     client_slug: client.slug,
     first_name: firstName,
-    last_name: '',
+    last_name: lastName,
     email,
     package_name: packageName,
     package_price: isCustom ? 0 : (pkg?.price || 0),
@@ -82,7 +84,7 @@ export async function inviteCandidate({
     audience: 'client',
     event: 'order_received',
     to: notifyEmail,
-    subject: `Screening Invite Sent — ${firstName}`,
+    subject: `Screening Invite Sent — ${firstName} ${lastName}`,
     html: `<p>A screening invitation has been sent to <strong>${email}</strong> for the <strong>${packageName}</strong> package.</p><p>Tracking code: <strong>${trackingCode}</strong></p>`,
   })
 
@@ -92,8 +94,8 @@ export async function inviteCandidate({
     audience: 'pcg_admin',
     event: 'new_order',
     to: 'accounts@pcgscreening.com',
-    subject: `New Screening Order — ${firstName} (${client.name})`,
-    html: `<p>New screening order from <strong>${client.name}</strong>.</p><p>Candidate: <strong>${firstName}</strong> (${email})</p><p>Package: <strong>${packageName}</strong></p><p>Tracking: <strong>${trackingCode}</strong></p>`,
+    subject: `New Screening Order — ${firstName} ${lastName} (${client.name})`,
+    html: `<p>New screening order from <strong>${client.name}</strong>.</p><p>Candidate: <strong>${firstName} ${lastName}</strong> (${email})</p><p>Package: <strong>${packageName}</strong></p><p>Tracking: <strong>${trackingCode}</strong></p>`,
   })
 
   return { trackingCode }
