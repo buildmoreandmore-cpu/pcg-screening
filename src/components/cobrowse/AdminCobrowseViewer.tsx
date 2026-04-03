@@ -67,7 +67,7 @@ export default function AdminCobrowseViewer({ sessionId }: { sessionId: string }
             replayer = new RRwebReplayer(events, {
               root: containerRef.current,
               liveMode: true,
-            })
+            } as any)
             replayer.startLive()
             replayerRef.current = replayer
             setConnected(true)
