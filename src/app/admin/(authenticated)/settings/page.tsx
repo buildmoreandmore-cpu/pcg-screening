@@ -40,22 +40,11 @@ export default function AdminSettingsPage() {
       </div>
 
       {/* Notifications */}
-      <div className="bg-white rounded-xl shadow-sm p-5 space-y-4">
+      <div className="bg-white rounded-xl shadow-sm p-5 space-y-3">
         <h2 className="text-sm font-medium text-gray-700">Notifications</h2>
-        <div className="space-y-3">
-          {[
-            'Email me on every new submission',
-            'Email me on payment completed',
-            'SLA alert emails (48-hour flag)',
-          ].map((label) => (
-            <label key={label} className="flex items-center justify-between cursor-pointer">
-              <span className="text-sm text-gray-700">{label}</span>
-              <div className="w-10 h-6 rounded-full bg-gold relative">
-                <div className="w-4 h-4 bg-white rounded-full absolute top-1 translate-x-5" />
-              </div>
-            </label>
-          ))}
-        </div>
+        <p className="text-sm text-gray-500">
+          Email notification preferences are configured per client. Go to <strong>Clients → [Client Name] → Settings</strong> to manage notification preferences for each audience (PCG Admin, Client, Candidate).
+        </p>
       </div>
 
       {/* Data Export */}

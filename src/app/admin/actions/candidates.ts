@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
 import { Resend } from 'resend'
 import { buildScreeningCompleteEmail } from '@/lib/email-templates'
+import { sendNotification } from '@/lib/notifications'
 
 export async function updateCandidateStatus({
   candidateId,
@@ -60,46 +61,58 @@ export async function updateCandidateStatus({
     changed_by: admin.name,
   })
 
-  // Send notification emails
-  try {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    const fromEmail = process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>'
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  // Send notification emails (preference-aware)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  const clientId = candidate.client_id
+  const candidateName = `${candidate.first_name} ${candidate.last_name}`
 
-    if (newStatus === 'completed') {
-      // Notify candidate
-      await resend.emails.send({
-        from: fromEmail,
-        to: candidate.email,
-        subject: `Screening Complete — ${candidate.first_name} ${candidate.last_name}`,
-        html: `<p>Hi ${candidate.first_name},</p><p>Your <strong>${candidate.package_name}</strong> screening has been completed. Results have been delivered to your employer.</p><p>Questions? Contact accounts@pcgscreening.com or 770-716-1278.</p>`,
-      })
+  if (newStatus === 'completed') {
+    // Notify candidate
+    sendNotification({
+      clientId,
+      audience: 'candidate',
+      event: 'status_updates',
+      to: candidate.email,
+      subject: `Screening Complete — ${candidateName}`,
+      html: `<p>Hi ${candidate.first_name},</p><p>Your <strong>${candidate.package_name}</strong> screening has been completed. Results have been delivered to your employer.</p><p>Questions? Contact accounts@pcgscreening.com or 770-716-1278.</p>`,
+    })
 
-      // Notify employer
-      const notifyEmail = candidate.client?.notification_email || 'accounts@pcgscreening.com'
-      await resend.emails.send({
-        from: fromEmail,
-        to: notifyEmail,
-        subject: `Screening Complete — ${candidate.first_name} ${candidate.last_name}`,
-        html: buildScreeningCompleteEmail({
-          candidateName: `${candidate.first_name} ${candidate.last_name}`,
-          packageName: candidate.package_name,
-          trackingCode: candidate.tracking_code,
-          detailUrl: `${siteUrl}/portal/candidates/${candidateId}`,
-        }),
-      })
-    }
+    // Notify employer
+    const notifyEmail = candidate.client?.notification_email || 'accounts@pcgscreening.com'
+    sendNotification({
+      clientId,
+      audience: 'client',
+      event: 'report_completed',
+      to: notifyEmail,
+      subject: `Screening Complete — ${candidateName}`,
+      html: buildScreeningCompleteEmail({
+        candidateName,
+        packageName: candidate.package_name,
+        trackingCode: candidate.tracking_code,
+        detailUrl: `${siteUrl}/portal/candidates/${candidateId}`,
+      }),
+    })
 
-    if (newStatus === 'in_progress') {
-      await resend.emails.send({
-        from: fromEmail,
-        to: candidate.email,
-        subject: `Your screening is underway`,
-        html: `<p>Hi ${candidate.first_name},</p><p>Your <strong>${candidate.package_name}</strong> screening is now being processed. Most screenings complete within 1-3 business days.</p><p>Track your status: ${siteUrl}/track with code <strong>${candidate.tracking_code}</strong></p>`,
-      })
-    }
-  } catch {
-    // Email failures shouldn't block status updates
+    // Notify PCG admin
+    sendNotification({
+      clientId,
+      audience: 'pcg_admin',
+      event: 'report_completed',
+      to: 'accounts@pcgscreening.com',
+      subject: `Report Complete — ${candidateName} (${candidate.client?.name})`,
+      html: `<p><strong>${candidateName}</strong>'s <em>${candidate.package_name}</em> screening for <strong>${candidate.client?.name}</strong> has been completed.</p><p><a href="${siteUrl}/admin/candidates/${candidateId}">View in dashboard</a></p>`,
+    })
+  }
+
+  if (newStatus === 'in_progress') {
+    sendNotification({
+      clientId,
+      audience: 'candidate',
+      event: 'status_updates',
+      to: candidate.email,
+      subject: `Your screening is underway`,
+      html: `<p>Hi ${candidate.first_name},</p><p>Your <strong>${candidate.package_name}</strong> screening is now being processed. Most screenings complete within 1-3 business days.</p><p>Track your status: ${siteUrl}/track with code <strong>${candidate.tracking_code}</strong></p>`,
+    })
   }
 
   return {}

@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAuth } from '@/lib/auth'
 import { Resend } from 'resend'
 import { buildCandidateInviteEmail } from '@/lib/email-templates'
+import { sendNotification } from '@/lib/notifications'
 
 function generateTrackingCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -51,45 +52,49 @@ export async function inviteCandidate({
     package_name: packageName,
     package_price: isCustom ? 0 : (pkg?.price || 0),
     status: 'submitted',
+    submitted_by_user_id: clientUser.id,
     ...(screeningComponents ? { screening_components: screeningComponents } : {}),
   })
 
   if (insertError) return { error: 'Failed to create candidate record' }
 
-  // Send invite email to candidate
-  try {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'
+  // Send invite email to candidate (preference-aware)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
-    await resend.emails.send({
-      from: process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>',
-      to: email,
-      subject: `Background Screening Request — ${client.name}`,
-      html: buildCandidateInviteEmail({
-        candidateName: firstName,
-        companyName: client.name,
-        packageName,
-        applyUrl: `${siteUrl}/?client=${client.slug}`,
-      }),
-    })
-  } catch {
-    // Email failed but record was created — don't block
-  }
+  sendNotification({
+    clientId: client.id,
+    audience: 'candidate',
+    event: 'intake_link',
+    to: email,
+    subject: `Background Screening Request — ${client.name}`,
+    html: buildCandidateInviteEmail({
+      candidateName: firstName,
+      companyName: client.name,
+      packageName,
+      applyUrl: `${siteUrl}/?client=${client.slug}`,
+    }),
+  })
 
-  // Notify employer if notification email set
-  try {
-    const notifyEmail = client.notification_email || clientUser.email
-    const resend = new Resend(process.env.RESEND_API_KEY)
+  // Notify employer
+  const notifyEmail = client.notification_email || clientUser.email
+  sendNotification({
+    clientId: client.id,
+    audience: 'client',
+    event: 'order_received',
+    to: notifyEmail,
+    subject: `Screening Invite Sent — ${firstName}`,
+    html: `<p>A screening invitation has been sent to <strong>${email}</strong> for the <strong>${packageName}</strong> package.</p><p>Tracking code: <strong>${trackingCode}</strong></p>`,
+  })
 
-    await resend.emails.send({
-      from: process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>',
-      to: notifyEmail,
-      subject: `Screening Invite Sent — ${firstName}`,
-      html: `<p>A screening invitation has been sent to <strong>${email}</strong> for the <strong>${packageName}</strong> package.</p><p>Tracking code: <strong>${trackingCode}</strong></p>`,
-    })
-  } catch {
-    // Non-critical
-  }
+  // Notify PCG admin
+  sendNotification({
+    clientId: client.id,
+    audience: 'pcg_admin',
+    event: 'new_order',
+    to: 'accounts@pcgscreening.com',
+    subject: `New Screening Order — ${firstName} (${client.name})`,
+    html: `<p>New screening order from <strong>${client.name}</strong>.</p><p>Candidate: <strong>${firstName}</strong> (${email})</p><p>Package: <strong>${packageName}</strong></p><p>Tracking: <strong>${trackingCode}</strong></p>`,
+  })
 
   return { trackingCode }
 }
@@ -134,6 +139,7 @@ export async function inviteCandidateManual({
     package_name: packageName,
     package_price: isCustom ? 0 : (pkg?.price || 0),
     status: 'submitted',
+    submitted_by_user_id: clientUser.id,
     ...(screeningComponents ? { screening_components: screeningComponents } : {}),
   })
 

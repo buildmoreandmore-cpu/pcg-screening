@@ -115,7 +115,9 @@ export default function Sidebar() {
 
       {/* Secondary Nav */}
       <div className="px-3 py-3 border-t border-white/10 space-y-1">
-        {secondaryNav.map((item) => (
+        {secondaryNav
+          .filter(item => item.href !== '/portal/team' || user.role === 'admin')
+          .map((item) => (
           <Link
             key={item.href}
             href={item.href}

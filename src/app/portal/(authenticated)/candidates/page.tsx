@@ -25,6 +25,11 @@ export default async function CandidatesPage({
     .eq('client_id', clientId)
     .order('created_at', { ascending: false })
 
+  // User role: only see their own candidates; admin role: see all
+  if (clientUser.role === 'user') {
+    query = query.eq('submitted_by_user_id', clientUser.id)
+  }
+
   if (statusFilter !== 'all') {
     query = query.eq('status', statusFilter)
   }

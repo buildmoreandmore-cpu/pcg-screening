@@ -143,6 +143,60 @@ export async function addClientUser({
   return {}
 }
 
+export async function updateClientSettings({
+  clientId,
+  name,
+  contactName,
+  contactEmail,
+  contactPhone,
+  website,
+  address,
+  city,
+  state,
+  zip,
+  packages,
+  billingType,
+  notificationPreferences,
+}: {
+  clientId: string
+  name: string
+  contactName: string
+  contactEmail: string
+  contactPhone: string
+  website: string
+  address: string
+  city: string
+  state: string
+  zip: string
+  packages: Array<{ name: string; price: number; description: string; features: string[] }>
+  billingType: string
+  notificationPreferences: any
+}) {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  const { error } = await supabase
+    .from('clients')
+    .update({
+      name,
+      contact_name: contactName,
+      contact_email: contactEmail,
+      contact_phone: contactPhone,
+      notification_email: contactEmail || 'accounts@pcgscreening.com',
+      website: website || null,
+      address: address || null,
+      city: city || null,
+      state: state || null,
+      zip: zip || null,
+      packages,
+      billing_type: billingType,
+      notification_preferences: notificationPreferences,
+    })
+    .eq('id', clientId)
+
+  return { error: error?.message }
+}
+
 export async function toggleClientUser({
   userId,
   active,

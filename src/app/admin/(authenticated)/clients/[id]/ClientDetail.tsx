@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import StatusBadge from '@/components/portal/StatusBadge'
+import ClientSettingsForm from '@/components/admin/ClientSettingsForm'
 import { addClientUser, toggleClientUser } from '@/app/admin/actions/clients'
 
 function timeAgo(date: string) {
@@ -213,9 +214,7 @@ export default function ClientDetail({
 
       {/* Settings Tab */}
       {tab === 'settings' && (
-        <div className="bg-white rounded-xl shadow-sm p-5 text-center text-sm text-gray-400">
-          Client settings editor coming soon. Use the database directly for now.
-        </div>
+        <ClientSettingsForm client={client} />
       )}
     </div>
   )

@@ -24,12 +24,25 @@ export default async function DashboardPage() {
   const supabase = createAdminClient()
   const clientId = clientUser.client_id
 
+  // Role-based filter: user sees only their own candidates
+  const isUser = clientUser.role === 'user'
+  const userId = clientUser.id
+
   // Parallel queries
+  let totalQ = supabase.from('candidates').select('id', { count: 'exact', head: true }).eq('client_id', clientId)
+  let pendingQ = supabase.from('candidates').select('id', { count: 'exact', head: true }).eq('client_id', clientId).in('status', ['submitted', 'in_progress'])
+  let completedQ = supabase.from('candidates').select('id', { count: 'exact', head: true }).eq('client_id', clientId).eq('status', 'completed')
+  let recentQ = supabase.from('candidates').select('id, first_name, last_name, package_name, status, created_at').eq('client_id', clientId).order('created_at', { ascending: false }).limit(5)
+
+  if (isUser) {
+    totalQ = totalQ.eq('submitted_by_user_id', userId)
+    pendingQ = pendingQ.eq('submitted_by_user_id', userId)
+    completedQ = completedQ.eq('submitted_by_user_id', userId)
+    recentQ = recentQ.eq('submitted_by_user_id', userId)
+  }
+
   const [totalRes, pendingRes, completedRes, recentRes] = await Promise.all([
-    supabase.from('candidates').select('id', { count: 'exact', head: true }).eq('client_id', clientId),
-    supabase.from('candidates').select('id', { count: 'exact', head: true }).eq('client_id', clientId).in('status', ['submitted', 'in_progress']),
-    supabase.from('candidates').select('id', { count: 'exact', head: true }).eq('client_id', clientId).eq('status', 'completed'),
-    supabase.from('candidates').select('id, first_name, last_name, package_name, status, created_at').eq('client_id', clientId).order('created_at', { ascending: false }).limit(5),
+    totalQ, pendingQ, completedQ, recentQ,
   ])
 
   const total = totalRes.count ?? 0

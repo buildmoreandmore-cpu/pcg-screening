@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { signOut } from '@/app/portal/actions/auth'
+import { usePortal } from './PortalContext'
 
 const tabs = [
   {
@@ -54,6 +55,7 @@ const moreItems = [
 export default function BottomNav() {
   const pathname = usePathname()
   const [showMore, setShowMore] = useState(false)
+  const { user } = usePortal()
 
   function isActive(href: string) {
     if (href === '/portal/dashboard') return pathname === '/portal/dashboard'
@@ -68,7 +70,9 @@ export default function BottomNav() {
         <div className="lg:hidden fixed inset-0 z-40" onClick={() => setShowMore(false)}>
           <div className="absolute inset-0 bg-black/30" />
           <div className="absolute bottom-16 left-0 right-0 bg-white rounded-t-2xl p-4 space-y-1 shadow-lg">
-            {moreItems.map((item) => (
+            {moreItems
+              .filter(item => item.href !== '/portal/team' || user.role === 'admin')
+              .map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
