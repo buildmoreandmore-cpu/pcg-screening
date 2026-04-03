@@ -74,8 +74,8 @@ export default function ScreeningSelector({ mode: initialMode, initialSelections
         )}
       </div>
 
-      {/* Tab bar — scrollable on mobile */}
-      <div className="flex gap-1 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+      {/* Tab bar — wraps to show all */}
+      <div className="flex flex-wrap gap-1.5 pb-2">
         {TABS.map(tab => {
           const section = selections[tab.key] as any
           const enabled = section?.enabled
@@ -89,7 +89,7 @@ export default function ScreeningSelector({ mode: initialMode, initialSelections
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap shrink-0 transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                 isActive
                   ? 'bg-navy text-white shadow-sm'
                   : enabled
