@@ -82,7 +82,7 @@ export default function ClientSettingsForm({ client }: { client: any }) {
   const [zip, setZip] = useState(client.zip || '')
 
   // Billing type
-  const [billingType, setBillingType] = useState(client.billing_type || 'candidate_pay')
+  const [billingType, setBillingType] = useState(client.billing_type || 'net_30')
 
   // Packages
   const [packages, setPackages] = useState<Package[]>(
@@ -222,19 +222,22 @@ export default function ClientSettingsForm({ client }: { client: any }) {
         </div>
       </div>
 
-      {/* Billing Type */}
+      {/* Billing Terms */}
       <div className="bg-white rounded-xl shadow-sm p-5 space-y-3">
-        <h3 className="text-sm font-medium text-gray-700">Billing Type</h3>
-        <div className="flex gap-3">
+        <h3 className="text-sm font-medium text-gray-700">Billing Terms</h3>
+        <p className="text-xs text-gray-400">Employer pays for all candidate screenings. Select the payment terms for this client.</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {[
-            { value: 'candidate_pay', label: 'Candidate Pay', desc: 'Candidate pays at checkout' },
-            { value: 'employer_pay', label: 'Employer Pay', desc: 'Employer pays, invoiced Net 30' },
+            { value: 'immediate', label: 'Immediate', desc: 'Due on completion' },
+            { value: 'net_30', label: 'Net 30', desc: 'Due in 30 days' },
+            { value: 'net_60', label: 'Net 60', desc: 'Due in 60 days' },
+            { value: 'net_90', label: 'Net 90', desc: 'Due in 90 days' },
           ].map(opt => (
             <button
               key={opt.value}
               type="button"
               onClick={() => setBillingType(opt.value)}
-              className={`flex-1 py-3 px-4 rounded-xl text-left border-2 transition-all ${
+              className={`py-3 px-3 rounded-xl text-center border-2 transition-all ${
                 billingType === opt.value
                   ? 'border-navy bg-navy/[0.03]'
                   : 'border-gray-100 hover:border-gray-200'

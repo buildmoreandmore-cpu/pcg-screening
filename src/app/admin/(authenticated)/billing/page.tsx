@@ -28,7 +28,7 @@ export default async function BillingPage({
   // Get all candidates for this month
   const { data: candidates } = await supabase
     .from('candidates')
-    .select('id, client_id, client_slug, package_name, package_price, payment_status, status, first_name, last_name, created_at, client:clients(id, name)')
+    .select('id, client_id, client_slug, package_name, package_price, payment_status, status, first_name, last_name, created_at, client:clients(id, name, billing_type)')
     .gte('created_at', month.start)
     .lte('created_at', month.end)
     .order('created_at', { ascending: false })
@@ -103,11 +103,8 @@ export default async function BillingPage({
           <p className="font-heading text-2xl text-green-600 mt-1">${grandPaid.toLocaleString()}</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-gray-500 text-[11px] uppercase tracking-wider">Outstanding (Net 30)</p>
+          <p className="text-gray-500 text-[11px] uppercase tracking-wider">Outstanding</p>
           <p className="font-heading text-2xl text-amber-600 mt-1">${grandPending.toLocaleString()}</p>
-          {grandPending > 0 && (
-            <p className="text-xs text-gray-400 mt-0.5">Due by {month.dueDate}</p>
-          )}
         </div>
       </div>
 
@@ -122,6 +119,12 @@ export default async function BillingPage({
                   {entry.client.name}
                 </Link>
                 <span className="text-xs text-gray-400">{entry.candidates.length} screening{entry.candidates.length !== 1 ? 's' : ''}</span>
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-navy/5 text-navy">
+                  {entry.client.billing_type === 'immediate' ? 'Immediate' :
+                   entry.client.billing_type === 'net_60' ? 'Net 60' :
+                   entry.client.billing_type === 'net_90' ? 'Net 90' :
+                   'Net 30'}
+                </span>
               </div>
               <div className="flex items-center gap-4 text-sm">
                 <span className="text-green-600 font-medium">${entry.paid.toLocaleString()} paid</span>
