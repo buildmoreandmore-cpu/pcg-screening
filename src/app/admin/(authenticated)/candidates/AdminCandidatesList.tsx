@@ -160,8 +160,42 @@ export default function AdminCandidatesList({
         </button>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      {/* Mobile card list */}
+      <div className="md:hidden space-y-2">
+        {candidates.map((c: any) => (
+          <Link
+            key={c.id}
+            href={`/admin/candidates/${c.id}`}
+            className="block bg-white rounded-xl shadow-sm p-4"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-medium text-gray-900 truncate">{c.first_name} {c.last_name}</p>
+                  {c.sla_flagged && <span className="text-red-500 text-xs shrink-0">⚑</span>}
+                </div>
+                <p className="text-xs text-gray-500 truncate">{c.email}</p>
+                <p className="text-xs text-gray-400 mt-1 truncate">{c.client?.name || c.client_slug} · {c.package_name}</p>
+              </div>
+              <div className="flex flex-col items-end gap-1 shrink-0">
+                <StatusBadge status={c.status} />
+                <span className="text-[10px] text-gray-400">{timeAgo(c.created_at)}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-2.5 text-[11px]">
+              <StatusBadge status={c.payment_status} />
+              <StatusBadge status={c.consent_status} />
+              <span className="ml-auto text-gray-400 font-mono">{c.tracking_code}</span>
+            </div>
+          </Link>
+        ))}
+        {candidates.length === 0 && (
+          <div className="bg-white rounded-xl shadow-sm text-center py-12 text-sm text-gray-400">No candidates found</div>
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>

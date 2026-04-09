@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase'
 import { Resend } from 'resend'
+import { dispatchAgentEvent } from '@/lib/agent-webhook'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,6 +60,37 @@ export async function POST(req: NextRequest) {
         updated_by: 'system',
         notes: 'Payment completed via Stripe',
       })
+
+      const candidateName = `${session.metadata?.firstName ?? ''} ${session.metadata?.lastName ?? ''}`.trim() || 'Candidate'
+      const amount = (session.amount_total ?? 0) / 100
+
+      dispatchAgentEvent(
+        'payment.received',
+        `Payment received: $${amount.toFixed(2)} for ${candidateName}`,
+        {
+          candidate_id: candidateId,
+          candidate_name: candidateName,
+          tracking_code: trackingCode,
+          amount,
+          currency: session.currency,
+          stripe_session_id: session.id,
+          package_name: session.metadata?.packageName,
+          client_slug: session.metadata?.clientSlug,
+        }
+      )
+
+      dispatchAgentEvent(
+        'candidate.status_changed',
+        `${candidateName}: submitted → in_progress (Stripe payment)`,
+        {
+          candidate_id: candidateId,
+          candidate_name: candidateName,
+          tracking_code: trackingCode,
+          previous_status: 'submitted',
+          new_status: 'in_progress',
+          trigger: 'stripe_payment',
+        }
+      )
 
       // Update submissions table too
       if (session.customer_email) {
@@ -118,6 +150,16 @@ export async function POST(req: NextRequest) {
         .from('candidates')
         .update({ payment_status: 'expired' })
         .eq('id', candidateId)
+
+      dispatchAgentEvent(
+        'payment.failed',
+        `Stripe checkout expired for candidate ${candidateId}`,
+        {
+          candidate_id: candidateId,
+          stripe_session_id: session.id,
+          reason: 'checkout_session_expired',
+        }
+      )
     }
   }
 

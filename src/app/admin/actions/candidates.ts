@@ -5,6 +5,7 @@ import { requireAdmin } from '@/lib/admin-auth'
 import { Resend } from 'resend'
 import { buildScreeningCompleteEmail } from '@/lib/email-templates'
 import { sendNotification } from '@/lib/notifications'
+import { dispatchAgentEvent } from '@/lib/agent-webhook'
 
 export async function updateCandidateStatus({
   candidateId,
@@ -60,6 +61,53 @@ export async function updateCandidateStatus({
     notes: notes || null,
     changed_by: admin.name,
   })
+
+  const candidateName = `${candidate.first_name} ${candidate.last_name}`
+  const clientName = candidate.client?.name ?? 'unknown client'
+
+  dispatchAgentEvent(
+    'candidate.status_changed',
+    `${candidateName}: ${previousStatus} → ${newStatus} (${clientName})`,
+    {
+      candidate_id: candidateId,
+      candidate_name: candidateName,
+      client_id: candidate.client_id,
+      client_name: clientName,
+      previous_status: previousStatus,
+      new_status: newStatus,
+      notes: notes || null,
+      changed_by: admin.name,
+    }
+  )
+
+  if (newStatus === 'completed') {
+    dispatchAgentEvent(
+      'screening.completed',
+      `${candidateName} screening completed (${clientName})`,
+      {
+        candidate_id: candidateId,
+        candidate_name: candidateName,
+        client_id: candidate.client_id,
+        client_name: clientName,
+        package_name: candidate.package_name,
+        tracking_code: candidate.tracking_code,
+      }
+    )
+  }
+
+  if (candidate.sla_flagged) {
+    dispatchAgentEvent(
+      'screening.flagged',
+      `${candidateName} screening flagged (SLA)`,
+      {
+        candidate_id: candidateId,
+        candidate_name: candidateName,
+        client_id: candidate.client_id,
+        client_name: clientName,
+        reason: 'sla_flagged',
+      }
+    )
+  }
 
   // Send notification emails (preference-aware)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')

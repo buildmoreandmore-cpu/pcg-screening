@@ -1,9 +1,11 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
 import { Resend } from 'resend'
 import { buildWelcomeEmail, buildTeamInviteEmail } from '@/lib/email-templates'
+import { dispatchAgentEvent } from '@/lib/agent-webhook'
 
 export async function createNewClient({
   name,
@@ -16,6 +18,7 @@ export async function createNewClient({
   city,
   state,
   zip,
+  billingType,
   packages,
   inviteUser,
 }: {
@@ -29,6 +32,7 @@ export async function createNewClient({
   city: string
   state: string
   zip: string
+  billingType?: string
   packages: Array<{ name: string; price: number; description: string; features: string[] }>
   inviteUser: boolean
 }) {
@@ -50,6 +54,7 @@ export async function createNewClient({
       state: state || null,
       zip: zip || null,
       packages,
+      billing_type: billingType || 'net_30',
       notification_email: contactEmail || 'accounts@pcgscreening.com',
     })
     .select('id')
@@ -59,6 +64,19 @@ export async function createNewClient({
     if (clientError.code === '23505') return { error: 'A client with this slug already exists' }
     return { error: 'Failed to create client' }
   }
+
+  dispatchAgentEvent(
+    'client.created',
+    `New employer client onboarded: ${name}`,
+    {
+      client_id: client.id,
+      client_name: name,
+      slug,
+      contact_name: contactName,
+      contact_email: contactEmail,
+      billing_type: billingType || 'net_30',
+    }
+  )
 
   // Create first admin user for this client
   if (contactEmail) {
@@ -195,6 +213,22 @@ export async function updateClientSettings({
     .eq('id', clientId)
 
   return { error: error?.message }
+}
+
+export async function deleteClient({ clientId }: { clientId: string }) {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  // Soft-delete: deactivate the client to preserve candidate FKs and history
+  const { error } = await supabase
+    .from('clients')
+    .update({ active: false })
+    .eq('id', clientId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/admin/clients')
+  return {}
 }
 
 export async function toggleClientUser({

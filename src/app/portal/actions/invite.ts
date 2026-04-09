@@ -5,6 +5,7 @@ import { requireAuth } from '@/lib/auth'
 import { Resend } from 'resend'
 import { buildCandidateInviteEmail } from '@/lib/email-templates'
 import { sendNotification } from '@/lib/notifications'
+import { dispatchAgentEvent } from '@/lib/agent-webhook'
 
 function generateTrackingCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -59,6 +60,19 @@ export async function inviteCandidate({
   })
 
   if (insertError) return { error: 'Failed to create candidate record' }
+
+  dispatchAgentEvent(
+    'candidate.submitted',
+    `${firstName} ${lastName} invited for ${packageName} (${client.name})`,
+    {
+      tracking_code: trackingCode,
+      client_id: client.id,
+      client_name: client.name,
+      candidate_email: email,
+      package_name: packageName,
+      source: 'portal_invite',
+    }
+  )
 
   // Send invite email to candidate (preference-aware)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
@@ -146,6 +160,19 @@ export async function inviteCandidateManual({
   })
 
   if (insertError) return { error: 'Failed to create candidate record' }
+
+  dispatchAgentEvent(
+    'candidate.submitted',
+    `${firstName} ${lastName} added manually for ${packageName} (${client.name})`,
+    {
+      tracking_code: trackingCode,
+      client_id: client.id,
+      client_name: client.name,
+      candidate_email: email,
+      package_name: packageName,
+      source: 'portal_manual',
+    }
+  )
 
   return { trackingCode }
 }

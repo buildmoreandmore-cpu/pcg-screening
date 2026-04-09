@@ -69,11 +69,11 @@ export default async function AdminDashboard() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
         {stats.map((s) => (
-          <div key={s.label} className="bg-white rounded-xl p-4 shadow-sm">
-            <p className="text-gray-500 text-[11px] uppercase tracking-wider">{s.label}</p>
-            <p className={`font-heading text-2xl mt-1 ${s.color}`}>
+          <div key={s.label} className="bg-white rounded-xl p-3 sm:p-4 shadow-sm">
+            <p className="text-gray-500 text-[10px] sm:text-[11px] uppercase tracking-wider">{s.label}</p>
+            <p className={`font-heading text-xl sm:text-2xl mt-1 ${s.color}`}>
               {typeof s.value === 'number' ? s.value : s.value}
             </p>
           </div>
@@ -146,15 +146,15 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="flex flex-wrap gap-3">
-        <Link href="/admin/clients/new" className="inline-flex items-center gap-2 bg-navy text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-navy-light transition-colors">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3">
+        <Link href="/admin/clients/new" className="inline-flex items-center justify-center gap-2 bg-navy text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-navy-light transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
           Add New Client
         </Link>
-        <Link href="/admin/candidates" className="inline-flex items-center gap-2 bg-white text-navy px-4 py-2.5 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50 transition-colors">
+        <Link href="/admin/candidates" className="inline-flex items-center justify-center gap-2 bg-white text-navy px-4 py-2.5 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50 transition-colors">
           View All Candidates
         </Link>
-        <Link href="/admin/documents" className="inline-flex items-center gap-2 bg-white text-navy px-4 py-2.5 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50 transition-colors">
+        <Link href="/admin/documents" className="inline-flex items-center justify-center gap-2 bg-white text-navy px-4 py-2.5 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50 transition-colors">
           Upload Document
         </Link>
       </div>

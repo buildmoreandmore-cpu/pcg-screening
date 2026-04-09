@@ -35,6 +35,9 @@ export default function NewClientPage() {
   const [state, setState] = useState('')
   const [zip, setZip] = useState('')
 
+  // Billing terms
+  const [billingType, setBillingType] = useState('net_30')
+
   // Packages
   const [packages, setPackages] = useState<Package[]>(defaultPackages)
 
@@ -71,6 +74,7 @@ export default function NewClientPage() {
       city,
       state,
       zip,
+      billingType,
       packages: packages.filter(p => p.name && p.price).map(p => ({
         name: p.name,
         price: Number(p.price),
@@ -111,11 +115,10 @@ export default function NewClientPage() {
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">Portal Slug</label>
-              <div className="flex items-center">
-                <span className="text-xs text-gray-400 mr-1">apply.pcgscreening.com/</span>
-                <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)}
-                  className="flex-1 px-2 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent font-mono" />
-              </div>
+              <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)}
+                placeholder="acme-corp"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent font-mono" />
+              <p className="text-[11px] text-gray-400 mt-1 truncate">apply.pcgscreening.com/{slug || 'your-slug'}</p>
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">Website</label>
@@ -161,6 +164,34 @@ export default function NewClientPage() {
                   className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Billing Terms */}
+        <div className="bg-white rounded-xl shadow-sm p-5 space-y-3">
+          <h2 className="text-sm font-medium text-gray-700">Billing Terms</h2>
+          <p className="text-xs text-gray-400">Employer pays for all candidate screenings. Select the payment terms for this client.</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { value: 'immediate', label: 'Immediate', desc: 'Due on completion' },
+              { value: 'net_30', label: 'Net 30', desc: 'Due in 30 days' },
+              { value: 'net_60', label: 'Net 60', desc: 'Due in 60 days' },
+              { value: 'net_90', label: 'Net 90', desc: 'Due in 90 days' },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setBillingType(opt.value)}
+                className={`py-3 px-3 rounded-xl text-center border-2 transition-all ${
+                  billingType === opt.value
+                    ? 'border-navy bg-navy/[0.03]'
+                    : 'border-gray-100 hover:border-gray-200'
+                }`}
+              >
+                <p className={`text-sm font-semibold ${billingType === opt.value ? 'text-navy' : 'text-gray-600'}`}>{opt.label}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{opt.desc}</p>
+              </button>
+            ))}
           </div>
         </div>
 

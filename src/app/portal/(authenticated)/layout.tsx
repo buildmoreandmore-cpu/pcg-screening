@@ -3,6 +3,7 @@ import { getClientUser } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { PortalProvider } from '@/components/portal/PortalContext'
 import Sidebar from '@/components/portal/Sidebar'
+import MobileHeader from '@/components/portal/MobileHeader'
 import BottomNav from '@/components/portal/BottomNav'
 import FcraModal from '@/components/portal/FcraModal'
 import AnnouncementBanner from '@/components/portal/AnnouncementBanner'
@@ -38,6 +39,7 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
         <div className="portal-root">
           {!clientUser.client.fcra_accepted_at && <FcraModal />}
           <CobrowseOverlay />
+          <MobileHeader />
           <Sidebar />
           <main className="lg:ml-56 min-h-dvh pb-20 lg:pb-0 pt-14 lg:pt-0">
             <AnnouncementBanner announcement={announcement} />

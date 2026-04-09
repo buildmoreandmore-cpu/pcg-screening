@@ -105,7 +105,7 @@ function TrackPageInner() {
     <div className="min-h-dvh bg-[#f8f7f4]">
       {/* Gold Header */}
       <header className="bg-[#c9a44c] sticky top-0 z-50" style={{ boxShadow: '0 2px 20px rgba(201,164,76,0.3)' }}>
-        <div className="max-w-lg mx-auto px-5 py-4 flex items-center justify-between">
+        <div className="max-w-2xl mx-auto px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <img src="/Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG" className="h-9" />
             <div>
@@ -125,40 +125,40 @@ function TrackPageInner() {
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-5 py-10 space-y-8">
+      <div className="max-w-2xl mx-auto px-4 sm:px-5 py-6 sm:py-10 space-y-6 sm:space-y-8">
         {/* Hero Section */}
         <div className="text-center">
-          <div className="w-20 h-20 bg-white rounded-3xl shadow-md flex items-center justify-center mx-auto mb-5">
-            <svg className="w-10 h-10 text-[#c9a44c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-3xl shadow-md flex items-center justify-center mx-auto mb-4 sm:mb-5">
+            <svg className="w-8 h-8 sm:w-10 sm:h-10 text-[#c9a44c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="8" strokeWidth="2" />
               <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-semibold text-[#1f2f4a]" style={{ fontFamily: "'DM Serif Display', serif" }}>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#1f2f4a]" style={{ fontFamily: "'DM Serif Display', serif" }}>
             Track Your Screening
           </h1>
-          <p className="text-base text-[#8a8680] mt-2 max-w-md mx-auto">
+          <p className="text-sm sm:text-base text-[#8a8680] mt-2 max-w-md mx-auto">
             Enter the tracking code from your confirmation email to check the status of your background screening.
           </p>
         </div>
 
         {/* Search Card */}
-        <form onSubmit={handleSearch} className="bg-white rounded-2xl p-8" style={{ boxShadow: '0 4px 16px rgba(31,47,74,0.08), 0 2px 4px rgba(31,47,74,0.04)' }}>
+        <form onSubmit={handleSearch} className="bg-white rounded-2xl p-5 sm:p-8" style={{ boxShadow: '0 4px 16px rgba(31,47,74,0.08), 0 2px 4px rgba(31,47,74,0.04)' }}>
           <label className="block text-xs uppercase tracking-wider text-[#8a8680] font-medium mb-3">Tracking Code</label>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="PCG-XXXXXXXX"
-              className="flex-1 px-5 py-4 rounded-xl border border-[#e2e0db] text-base font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-[#c9a44c] focus:border-transparent uppercase bg-[#fafaf9]"
-              style={{ fontSize: '18px' }}
+              className="flex-1 px-4 sm:px-5 py-3.5 sm:py-4 rounded-xl border border-[#e2e0db] text-base font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-[#c9a44c] focus:border-transparent uppercase bg-[#fafaf9]"
+              style={{ fontSize: '16px' }}
               maxLength={12}
             />
             <button
               type="submit"
               disabled={loading || !code.trim()}
-              className="bg-[#1f2f4a] text-white px-8 py-4 rounded-xl text-base font-semibold hover:bg-[#2a3f5f] transition-all disabled:opacity-40 shrink-0"
+              className="bg-[#1f2f4a] text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-base font-semibold hover:bg-[#2a3f5f] transition-all disabled:opacity-40 shrink-0 flex items-center justify-center"
               style={{ boxShadow: '0 2px 8px rgba(31,47,74,0.2)' }}
             >
               {loading ? (
@@ -193,25 +193,25 @@ function TrackPageInner() {
             {/* Status Hero Card */}
             <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: '0 4px 16px rgba(31,47,74,0.08), 0 2px 4px rgba(31,47,74,0.04)' }}>
               {/* Status Banner */}
-              <div className={`px-8 py-6 flex items-center gap-4 ${
+              <div className={`px-5 py-5 sm:px-8 sm:py-6 flex items-center gap-3 sm:gap-4 ${
                 result.status === 'completed' ? 'bg-green-50' :
                 result.status === 'in_progress' ? 'bg-blue-50' :
                 result.status === 'cancelled' ? 'bg-red-50' :
                 'bg-[#f8f7f4]'
               }`}>
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
+                <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 ${
                   result.status === 'completed' ? 'bg-green-100' :
                   result.status === 'in_progress' ? 'bg-blue-100' :
                   result.status === 'cancelled' ? 'bg-red-100' :
                   'bg-[#e2e0db]'
                 }`}>
-                  <svg className={`w-7 h-7 ${statusConfig.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-6 h-6 sm:w-7 sm:h-7 ${statusConfig.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={statusConfig.icon} />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-lg font-semibold ${statusConfig.color}`}>{statusConfig.label}</p>
-                  <p className="text-sm text-[#8a8680]">
+                <div className="flex-1 min-w-0">
+                  <p className={`text-base sm:text-lg font-semibold ${statusConfig.color}`}>{statusConfig.label}</p>
+                  <p className="text-xs sm:text-sm text-[#8a8680]">
                     {result.status === 'completed' ? 'Results delivered to your employer.' :
                      result.status === 'in_progress' ? 'Usually completes within 1-3 business days.' :
                      result.status === 'cancelled' ? 'This screening has been cancelled.' :
@@ -221,7 +221,7 @@ function TrackPageInner() {
               </div>
 
               {/* Details */}
-              <div className="p-8 space-y-4">
+              <div className="p-5 sm:p-8 space-y-4">
                 <div className="flex items-center justify-between py-3">
                   <span className="text-sm text-[#8a8680] uppercase tracking-wider font-medium">Candidate</span>
                   <span className="text-base font-semibold text-[#1f2f4a]">{result.firstName}</span>
@@ -235,8 +235,8 @@ function TrackPageInner() {
             </div>
 
             {/* Timeline Card */}
-            <div className="bg-white rounded-2xl p-8" style={{ boxShadow: '0 4px 16px rgba(31,47,74,0.08), 0 2px 4px rgba(31,47,74,0.04)' }}>
-              <h2 className="text-sm text-[#8a8680] uppercase tracking-wider font-medium mb-6">Screening Timeline</h2>
+            <div className="bg-white rounded-2xl p-5 sm:p-8" style={{ boxShadow: '0 4px 16px rgba(31,47,74,0.08), 0 2px 4px rgba(31,47,74,0.04)' }}>
+              <h2 className="text-xs sm:text-sm text-[#8a8680] uppercase tracking-wider font-medium mb-5 sm:mb-6">Screening Timeline</h2>
               <div className="space-y-0">
                 <TimelineStep
                   title="Submitted"
@@ -266,7 +266,7 @@ function TrackPageInner() {
             </div>
 
             {/* Info Banner */}
-            <div className="bg-[#f5ecd4] rounded-2xl px-6 py-5 flex items-start gap-4">
+            <div className="bg-[#f5ecd4] rounded-2xl px-5 sm:px-6 py-4 sm:py-5 flex items-start gap-3 sm:gap-4">
               <svg className="w-6 h-6 text-[#c9a44c] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>

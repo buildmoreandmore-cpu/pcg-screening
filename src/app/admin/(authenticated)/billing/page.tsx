@@ -80,7 +80,7 @@ export default async function BillingPage({
           >
             &larr;
           </Link>
-          <span className="text-sm font-medium text-navy min-w-[140px] text-center">{month.label}</span>
+          <span className="text-sm font-medium text-navy sm:min-w-[140px] text-center">{month.label}</span>
           <Link
             href={`/admin/billing?month=${monthOffset + 1}`}
             className={`px-3 py-1.5 rounded-lg text-sm border border-gray-200 ${

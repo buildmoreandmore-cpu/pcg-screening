@@ -21,6 +21,39 @@ export async function updatePreferences({ name }: { name: string }) {
   return { error: error?.message }
 }
 
+export async function changePasswordAction({
+  currentPassword,
+  newPassword,
+}: {
+  currentPassword: string
+  newPassword: string
+}) {
+  const clientUser = await requireAuth()
+  if (newPassword.length < 8) return { error: 'New password must be at least 8 characters' }
+
+  const supabaseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\\n/g, '').trim()
+  const anonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').replace(/\\n/g, '').trim()
+
+  // Verify current password via a fresh anon client (no persisted session)
+  const verifier = createSupabaseClient(supabaseUrl, anonKey, { auth: { persistSession: false } })
+  const { error: signInErr } = await verifier.auth.signInWithPassword({
+    email: clientUser.email,
+    password: currentPassword,
+  })
+  if (signInErr) return { error: 'Current password is incorrect' }
+
+  // Update password via service-key admin API
+  const service = getServiceClient()
+  if (!clientUser.auth_user_id) return { error: 'No auth user linked to this account' }
+
+  const { error: updateErr } = await service.auth.admin.updateUserById(clientUser.auth_user_id, {
+    password: newPassword,
+  })
+  if (updateErr) return { error: updateErr.message }
+
+  return {}
+}
+
 export async function acceptFcra() {
   const clientUser = await requireAuth()
   const supabase = getServiceClient()

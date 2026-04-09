@@ -127,7 +127,8 @@ export default function InvitePage() {
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
             ) : '1'}
           </span>
-          What to Screen
+          <span className="hidden sm:inline">What to Screen</span>
+          <span className="sm:hidden">Screening</span>
         </button>
         <div className="flex-1 h-px bg-gray-200" />
         <button
@@ -139,7 +140,8 @@ export default function InvitePage() {
           <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
             step === 2 ? 'bg-navy text-white' : 'bg-gray-200 text-gray-400'
           }`}>2</span>
-          Who to Screen
+          <span className="hidden sm:inline">Who to Screen</span>
+          <span className="sm:hidden">Candidate</span>
         </button>
       </div>
 
@@ -307,7 +309,7 @@ export default function InvitePage() {
 
             {deliveryMode === 'link' ? (
               <>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                     <input
@@ -342,7 +344,7 @@ export default function InvitePage() {
               </>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                     <input

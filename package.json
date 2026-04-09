@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/buildmoreandmore-cpu/pcg-screening#readme",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.86.1",
     "@dropbox/sign": "^1.10.0",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.100.1",
