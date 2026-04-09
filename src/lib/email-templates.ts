@@ -1,4 +1,10 @@
+function getSiteUrl() {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pcgscreening.net'
+  return raw.trim().replace(/\/+$/, '')
+}
+
 function emailWrapper(content: string) {
+  const siteUrl = getSiteUrl()
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -23,7 +29,7 @@ function emailWrapper(content: string) {
   <div class="container">
     <div class="card">
       <div class="header">
-        <img src="https://pcgscreening.com/Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG Screening Services">
+        <img src="${siteUrl}/Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG Screening Services">
       </div>
       <hr class="divider">
       ${content}
