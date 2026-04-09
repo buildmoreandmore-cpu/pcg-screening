@@ -112,7 +112,6 @@ export async function updateCandidateStatus({
   // Send notification emails (preference-aware)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
   const clientId = candidate.client_id
-  const candidateName = `${candidate.first_name} ${candidate.last_name}`
 
   if (newStatus === 'completed') {
     // Notify candidate
