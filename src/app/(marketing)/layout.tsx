@@ -17,7 +17,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <img
               src="/Copy_of_PCG_Logo_with_Soft_Typography.png"
               alt="PCG Screening"
-              className="w-12 h-12 rounded-lg object-contain"
+              className="w-16 h-16 rounded-lg object-contain"
             />
             <div>
               <p className="font-heading text-navy text-lg leading-tight">PCG Screening</p>
