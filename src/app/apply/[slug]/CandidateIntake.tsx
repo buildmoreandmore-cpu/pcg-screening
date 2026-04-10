@@ -27,8 +27,11 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
   const searchParams = useSearchParams()
   const packages = client.packages || []
 
-  // Auto-skip package step if only 1 package
-  const skipPackageStep = packages.length <= 1
+  // Auto-skip package step if only 1 package, OR if the candidate arrived
+  // via an employer invite — in that case the employer already chose the
+  // package on their behalf and the candidate shouldn't be asked to re-pick.
+  const inviteCodeParam = searchParams.get('invite') || ''
+  const skipPackageStep = packages.length <= 1 || !!inviteCodeParam
 
   const [step, setStep] = useState(() => {
     const s = searchParams.get('step')
@@ -42,7 +45,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
   // flow), look up the pre-seeded candidate row and prefill the contact
   // fields. The invite code is also forwarded on submit so the API route
   // can UPDATE the existing row instead of creating a duplicate.
-  const inviteCode = searchParams.get('invite') || ''
+  const inviteCode = inviteCodeParam
   const [invitePrefilled, setInvitePrefilled] = useState(false)
 
   // Step 1 — Personal Info
