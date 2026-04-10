@@ -151,6 +151,60 @@ export async function createNewClient({
   return { clientId: client.id, warning: inviteWarning }
 }
 
+export async function resendPortalInvite({ clientUserId }: { clientUserId: string }) {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  // Look up the client_users row + parent client name (for the email body).
+  const { data: user, error: userErr } = await supabase
+    .from('client_users')
+    .select('id, email, name, client_id, clients(name)')
+    .eq('id', clientUserId)
+    .single()
+
+  if (userErr || !user) {
+    return { error: 'Could not find that user' }
+  }
+
+  if (!user.email) {
+    return { error: 'User has no email address on file' }
+  }
+
+  try {
+    const invite = await issuePortalInvite({
+      email: user.email,
+      clientUserId: user.id,
+      next: '/portal/setup-password',
+    })
+
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not set')
+    }
+
+    const companyName = (user as any).clients?.name as string | undefined
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    const sendRes = await resend.emails.send({
+      from: process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>',
+      to: user.email,
+      subject: 'Your PCG Screening portal access',
+      html: buildWelcomeEmail({
+        contactName: user.name || 'there',
+        portalUrl: invite.magicLinkUrl,
+      }),
+    })
+
+    if (sendRes.error) {
+      throw new Error(`Resend API: ${sendRes.error.message || JSON.stringify(sendRes.error)}`)
+    }
+
+    return { ok: true as const, sentTo: user.email }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[resendPortalInvite] failed:', err)
+    return { error: `Failed to resend invite: ${message}` }
+  }
+}
+
 export async function addClientUser({
   clientId,
   name,

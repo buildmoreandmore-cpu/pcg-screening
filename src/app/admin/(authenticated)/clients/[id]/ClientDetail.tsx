@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import StatusBadge from '@/components/portal/StatusBadge'
 import ClientSettingsForm from '@/components/admin/ClientSettingsForm'
 import ClientPackagesManager from '@/components/admin/ClientPackagesManager'
-import { addClientUser, toggleClientUser } from '@/app/admin/actions/clients'
+import { addClientUser, toggleClientUser, resendPortalInvite } from '@/app/admin/actions/clients'
 
 function timeAgo(date: string) {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
@@ -40,6 +40,18 @@ export default function ClientDetail({
   const [userEmail, setUserEmail] = useState('')
   const [userRole, setUserRole] = useState('user')
   const [addingUser, setAddingUser] = useState(false)
+  const [resendingId, setResendingId] = useState<string | null>(null)
+
+  async function handleResendInvite(userId: string) {
+    setResendingId(userId)
+    const result = await resendPortalInvite({ clientUserId: userId })
+    setResendingId(null)
+    if (result.error) {
+      alert(result.error)
+    } else {
+      alert(`Invite resent to ${result.sentTo}`)
+    }
+  }
 
   async function handleAddUser(e: React.FormEvent) {
     e.preventDefault()
@@ -210,6 +222,13 @@ export default function ClientDetail({
                 <div className="flex items-center gap-3">
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${u.role === 'admin' ? 'bg-navy/10 text-navy' : 'bg-gray-100 text-gray-600'}`}>{u.role}</span>
                   <span className={`text-xs ${u.active ? 'text-green-600' : 'text-gray-400'}`}>{u.active ? 'Active' : 'Inactive'}</span>
+                  <button
+                    onClick={() => handleResendInvite(u.id)}
+                    disabled={resendingId === u.id}
+                    className="text-xs text-gray-400 hover:text-gold transition-colors disabled:opacity-50"
+                  >
+                    {resendingId === u.id ? 'Sending...' : 'Resend invite'}
+                  </button>
                   <button onClick={() => handleToggleUser(u.id, u.active)} className="text-xs text-gray-400 hover:text-navy transition-colors">
                     {u.active ? 'Deactivate' : 'Reactivate'}
                   </button>
