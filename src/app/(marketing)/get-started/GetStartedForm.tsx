@@ -8,7 +8,7 @@ type LeadType = 'screen' | 'package' | 'call'
 const TYPE_OPTIONS: { value: LeadType; label: string; desc: string }[] = [
   { value: 'screen', label: 'Run my first screen', desc: 'Set me up so I can submit a candidate today.' },
   { value: 'package', label: 'Build a custom package', desc: 'I want help putting together the right components for my industry.' },
-  { value: 'call', label: 'Schedule a call', desc: 'I have questions — let&apos;s talk.' },
+  { value: 'call', label: 'Schedule a call', desc: "I have questions \u2014 let\u2019s talk." },
 ]
 
 export default function GetStartedForm({ initialType }: { initialType: LeadType }) {
@@ -162,9 +162,6 @@ export default function GetStartedForm({ initialType }: { initialType: LeadType 
         )}
       </button>
 
-      <p className="text-[11px] text-gray-400 text-center">
-        Your info goes straight to Gwen at PCG. We never share or resell contact details.
-      </p>
     </form>
   )
 }
