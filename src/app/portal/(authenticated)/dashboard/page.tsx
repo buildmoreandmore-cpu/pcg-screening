@@ -4,7 +4,6 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { getClientUser } from '@/lib/auth'
 import StatusBadge from '@/components/portal/StatusBadge'
 import EmptyState from '@/components/portal/EmptyState'
-import AssistantChat from '@/components/portal/AssistantChat'
 
 function timeAgo(date: string) {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
@@ -132,8 +131,6 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* AI Assistant */}
-      <AssistantChat />
     </div>
   )
 }
