@@ -134,6 +134,15 @@ const industries: Record<string, Industry> = {
 
 const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_URL || '/portal/login'
 
+// Map industry slugs to their recommended order-page package slugs
+const industryToPackage: Record<string, string> = {
+  logistics: 'driver-pro',
+  healthcare: 'clinical-compliance',
+  'home-health': 'caregiver-trust',
+  'general-hiring': 'standard',
+  'high-risk-executive': 'executive-diligence',
+}
+
 export function generateStaticParams() {
   return Object.keys(industries).map((slug) => ({ slug }))
 }
@@ -142,6 +151,8 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
   const { slug } = await params
   const data = industries[slug]
   if (!data) notFound()
+
+  const orderSlug = industryToPackage[slug] || 'standard'
 
   return (
     <>
@@ -156,10 +167,10 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
           <p className="text-base md:text-lg text-gray-700 max-w-3xl leading-relaxed mb-8">{data.hero}</p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
-              href="/apply/individuals"
+              href={`/order/${orderSlug}`}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-navy text-white font-medium hover:bg-navy-light transition-colors shadow-md"
             >
-              Run Your First Screen
+              Order {data.package.name}
             </Link>
             <a
               href={calendlyUrl}
@@ -211,10 +222,10 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
               </div>
             </div>
             <Link
-              href="/apply/individuals"
+              href={`/order/${orderSlug}`}
               className="block w-full text-center px-4 py-3 rounded-xl bg-navy text-white font-medium hover:bg-navy-light transition-colors"
             >
-              Start Screening
+              Order This Package
             </Link>
           </div>
         </div>

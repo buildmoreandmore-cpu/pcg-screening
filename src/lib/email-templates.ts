@@ -140,6 +140,58 @@ export function buildCandidateInviteEmail({
   `)
 }
 
+export function buildGuestOrderConsentEmail({
+  candidateName,
+  companyName,
+  packageName,
+  applyUrl,
+}: {
+  candidateName: string
+  companyName: string
+  packageName: string
+  applyUrl: string
+}) {
+  return emailWrapper(`
+    <h1>Background Screening Authorization Required</h1>
+    <p>Hi ${candidateName},</p>
+    <p><strong>${companyName}</strong> has ordered a <strong>${packageName}</strong> background screening on your behalf through PCG Screening Services.</p>
+    <p>Before we can begin, federal law (FCRA) requires your written authorization. Please click the link below to review the disclosure, provide your personal information, and sign the consent form.</p>
+    <p style="text-align: center;">
+      <a href="${applyUrl}" class="btn">Complete Consent Form</a>
+    </p>
+    <p style="font-size: 13px; color: #8a8680;">This is a secure, encrypted process. Your personal information (SSN, address, etc.) is protected under FCRA regulations and will only be used for the authorized screening.</p>
+    <p style="font-size: 13px; color: #8a8680;">If you have questions, contact PCG Screening at accounts@pcgscreening.com or 770-716-1278.</p>
+  `)
+}
+
+export function buildGuestOrderBuyerConfirmationEmail({
+  buyerName,
+  companyName,
+  candidateName,
+  packageName,
+  trackingCode,
+}: {
+  buyerName: string
+  companyName: string
+  candidateName: string
+  packageName: string
+  trackingCode: string
+}) {
+  return emailWrapper(`
+    <h1>Order Confirmed</h1>
+    <p>Hi ${buyerName},</p>
+    <p>Your <strong>${packageName}</strong> screening order for <strong>${candidateName}</strong> has been received and payment confirmed.</p>
+    <div class="tracking">
+      <p style="margin: 0; color: #8a8680; font-size: 12px;">Tracking Code</p>
+      <p class="tracking-code" style="margin: 4px 0 0;">${trackingCode}</p>
+    </div>
+    <p><strong>What happens next:</strong></p>
+    <p>We've sent ${candidateName} a secure link to complete the FCRA consent form and provide their personal information. Once they complete it, the screening will begin automatically.</p>
+    <p>You'll receive an email when results are ready. Most screenings complete within 1–3 business days after consent is received.</p>
+    <p style="font-size: 13px; color: #8a8680;">Questions? Contact us at accounts@pcgscreening.com or 770-716-1278.</p>
+  `)
+}
+
 export function buildScreeningCompleteEmail({
   candidateName,
   packageName,
