@@ -192,6 +192,43 @@ export function buildGuestOrderBuyerConfirmationEmail({
   `)
 }
 
+export function buildCandidateSubmissionConfirmationEmail({
+  candidateName,
+  companyName,
+  trackingCode,
+  trackUrl,
+}: {
+  candidateName: string
+  companyName: string
+  trackingCode: string
+  trackUrl: string
+}) {
+  return emailWrapper(`
+    <h1>Background Screening Confirmation</h1>
+    <p>${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+    <p>Hello ${candidateName},</p>
+    <p>Thank you for completing your background screening questionnaire. <strong>Your file number is ${trackingCode}.</strong> Use this number when referring to your background screening report. If you have any questions regarding next steps, please contact us using the information below.</p>
+    <div class="tracking">
+      <p style="margin: 0; color: #8a8680; font-size: 12px;">Your File Number</p>
+      <p class="tracking-code" style="margin: 4px 0 0;">${trackingCode}</p>
+    </div>
+    <p>Thank you,</p>
+    <p><strong>${companyName}</strong></p>
+    <hr style="border: none; border-top: 1px solid #e5e4e0; margin: 20px 0;">
+    <p style="font-size: 13px; color: #8a8680;">NOTE: If you have any questions regarding your background screening report, please contact the background screening agency below.</p>
+    <p style="font-size: 13px; color: #4a4743;">
+      <strong>PCG Screening Services</strong><br>
+      Phone: (770) 716-1278<br>
+      Email: accounts@pcgscreening.com<br>
+      Website: www.pcgscreening.net
+    </p>
+    <p style="text-align: center;">
+      <a href="${trackUrl}" class="btn">Track Your Screening</a>
+    </p>
+    <p style="font-size: 11px; color: #8a8680;">This email is intended only for the person or entity to which it is addressed and may contain information that is privileged, confidential, or otherwise protected from disclosure. If you have received this email in error, please notify us immediately by replying to the sender.</p>
+  `)
+}
+
 export function buildScreeningCompleteEmail({
   candidateName,
   packageName,

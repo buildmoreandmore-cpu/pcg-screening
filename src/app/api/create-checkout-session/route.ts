@@ -2,6 +2,8 @@ import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase'
 import { FCRA_DISCLOSURE_VERSION } from '@/lib/fcra-disclosure'
+import { buildCandidateSubmissionConfirmationEmail } from '@/lib/email-templates'
+import { Resend } from 'resend'
 
 export const dynamic = 'force-dynamic'
 
@@ -207,6 +209,30 @@ export async function POST(req: NextRequest) {
     })
 
     const portalUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PORTAL_URL || 'https://www.pcgscreening.net').trim().replace(/\/+$/, '')
+
+    // Send confirmation email to candidate (best-effort, don't block the response)
+    if (signatureData && email) {
+      const resendKey = process.env.RESEND_API_KEY
+      if (resendKey) {
+        const resend = new Resend(resendKey)
+        const fromEmail = process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>'
+        try {
+          await resend.emails.send({
+            from: fromEmail,
+            to: email.trim().toLowerCase(),
+            subject: 'Background Screening Confirmation',
+            html: buildCandidateSubmissionConfirmationEmail({
+              candidateName: `${firstName} ${lastName}`.toUpperCase(),
+              companyName: client.name,
+              trackingCode,
+              trackUrl: `${portalUrl}/track?code=${trackingCode}`,
+            }),
+          })
+        } catch (emailErr) {
+          console.error('Failed to send candidate confirmation email:', emailErr)
+        }
+      }
+    }
 
     // Employer-paid path: candidate arrived via an invite link, the employer
     // is billed via the client's billing terms (immediate / net_30 / etc).
