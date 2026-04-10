@@ -6,7 +6,7 @@ import { useCobrowse } from './CobrowseProvider'
 const SUPPORT_EMAIL = 'accounts@pcgscreening.com'
 const SUPPORT_PHONE_DISPLAY = '(770) 716-1278'
 const SUPPORT_PHONE_TEL = '+17707161278'
-const USER_GUIDE_URL = '/employer-user-guide.pdf'
+const USER_GUIDE_URL = '/portal/guide'
 
 export default function RequestHelpButton() {
   const { state, requestHelp } = useCobrowse()
@@ -108,8 +108,6 @@ export default function RequestHelpButton() {
             </button>
             <a
               href={USER_GUIDE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
             >
               <span className="flex items-center justify-center w-9 h-9 rounded-full bg-navy/5 text-navy shrink-0">
@@ -118,8 +116,8 @@ export default function RequestHelpButton() {
                 </svg>
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900">How-to guide</p>
-                <p className="text-xs text-gray-500">Employer portal user guide (PDF)</p>
+                <p className="text-sm font-medium text-gray-900">User guide</p>
+                <p className="text-xs text-gray-500">How to use the employer portal</p>
               </div>
             </a>
           </div>
