@@ -317,12 +317,36 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
             {/* Trust signals */}
             <div className="grid grid-cols-3 gap-2">
               {[
-                { icon: '🔒', title: 'Secure', desc: 'Encrypted & confidential' },
-                { icon: '⚡', title: 'Quick', desc: '1–3 business days' },
-                { icon: '✓', title: 'FCRA', desc: 'Fully compliant' },
+                {
+                  title: 'Secure',
+                  desc: 'Encrypted & confidential',
+                  icon: (
+                    <svg className="w-5 h-5 mx-auto text-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 11c0-1.657 1.343-3 3-3s3 1.343 3 3v3M5 11h14a1 1 0 011 1v8a1 1 0 01-1 1H5a1 1 0 01-1-1v-8a1 1 0 011-1z" />
+                    </svg>
+                  ),
+                },
+                {
+                  title: 'Quick',
+                  desc: '1–3 business days',
+                  icon: (
+                    <svg className="w-5 h-5 mx-auto text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  ),
+                },
+                {
+                  title: 'FCRA',
+                  desc: 'Fully compliant',
+                  icon: (
+                    <svg className="w-5 h-5 mx-auto text-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ),
+                },
               ].map((t) => (
                 <div key={t.title} className="bg-white rounded-lg p-3 text-center shadow-sm">
-                  <span className="text-lg">{t.icon}</span>
+                  {t.icon}
                   <p className="text-xs font-medium text-navy mt-1">{t.title}</p>
                   <p className="text-[10px] text-gray-500">{t.desc}</p>
                 </div>
