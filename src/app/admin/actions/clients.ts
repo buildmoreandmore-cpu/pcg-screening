@@ -112,6 +112,7 @@ export async function createNewClient({
   }
 
   // Send welcome email with magic-link sign-in URL
+  let inviteWarning: string | undefined
   if (inviteUser && contactEmail && newClientUserId) {
     try {
       const invite = await issuePortalInvite({
@@ -120,8 +121,12 @@ export async function createNewClient({
         next: '/portal/setup-password',
       })
 
+      if (!process.env.RESEND_API_KEY) {
+        throw new Error('RESEND_API_KEY is not set')
+      }
+
       const resend = new Resend(process.env.RESEND_API_KEY)
-      await resend.emails.send({
+      const sendRes = await resend.emails.send({
         from: process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>',
         to: contactEmail,
         subject: 'Welcome to PCG Screening Services',
@@ -130,13 +135,20 @@ export async function createNewClient({
           portalUrl: invite.magicLinkUrl,
         }),
       })
+
+      // Resend's SDK returns { data, error } instead of throwing on API errors
+      if (sendRes.error) {
+        throw new Error(`Resend API: ${sendRes.error.message || JSON.stringify(sendRes.error)}`)
+      }
     } catch (err) {
-      // Email/invite failure shouldn't block client creation, but log it.
+      // Don't block client creation, but surface the message to the caller.
+      const message = err instanceof Error ? err.message : String(err)
       console.error('[createNewClient] invite failed:', err)
+      inviteWarning = `Client created, but invite email failed: ${message}`
     }
   }
 
-  return { clientId: client.id }
+  return { clientId: client.id, warning: inviteWarning }
 }
 
 export async function addClientUser({
@@ -170,6 +182,7 @@ export async function addClientUser({
   }
 
   // Send invite email with magic-link sign-in URL
+  let inviteWarning: string | undefined
   try {
     const { data: client } = await supabase.from('clients').select('name').eq('id', clientId).single()
 
@@ -179,8 +192,12 @@ export async function addClientUser({
       next: '/portal/setup-password',
     })
 
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not set')
+    }
+
     const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
+    const sendRes = await resend.emails.send({
       from: process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>',
       to: email,
       subject: `You've been added to ${client?.name || 'a company'}'s PCG Screening Portal`,
@@ -190,11 +207,17 @@ export async function addClientUser({
         portalUrl: invite.magicLinkUrl,
       }),
     })
+
+    if (sendRes.error) {
+      throw new Error(`Resend API: ${sendRes.error.message || JSON.stringify(sendRes.error)}`)
+    }
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
     console.error('[addClientUser] invite failed:', err)
+    inviteWarning = `User added, but invite email failed: ${message}`
   }
 
-  return {}
+  return { warning: inviteWarning }
 }
 
 export async function updateClientSettings({

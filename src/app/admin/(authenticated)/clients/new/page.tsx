@@ -118,6 +118,12 @@ export default function NewClientPage() {
       return
     }
 
+    if (result.warning) {
+      // Client was created, but the invite email blew up. Surface it before
+      // navigating away so the admin actually sees what went wrong.
+      alert(result.warning)
+    }
+
     router.push(`/admin/clients/${result.clientId}`)
   }
 
