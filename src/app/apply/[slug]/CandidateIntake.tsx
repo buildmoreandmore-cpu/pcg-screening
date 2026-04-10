@@ -295,11 +295,13 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/Copy_of_PCG_Logo_with_Soft_Typography.png"
-              alt="PCG Screening Services"
-              className="h-16 sm:h-20 w-auto shrink-0"
-            />
+            <a href="/">
+              <img
+                src="/Copy_of_PCG_Logo_with_Soft_Typography.png"
+                alt="PCG Screening Services"
+                className="h-16 sm:h-20 w-auto shrink-0"
+              />
+            </a>
             <div className="min-w-0">
               <p className="text-xs text-gray-500">Screening for</p>
               <p className="text-base font-medium text-navy truncate">{client.name}</p>
