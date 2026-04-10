@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAuth } from '@/lib/auth'
 import StatusBadge from '@/components/portal/StatusBadge'
+import CandidateActions from './CandidateActions'
 
 const steps = ['submitted', 'in_progress', 'completed'] as const
 
@@ -124,24 +125,25 @@ export default async function CandidateDetailPage({
         )}
       </div>
 
-      {/* Info Card */}
+      {/* Info Card (editable) */}
+      <CandidateActions
+        candidate={{
+          id: candidate.id,
+          first_name: candidate.first_name,
+          last_name: candidate.last_name,
+          email: candidate.email,
+          phone: candidate.phone,
+          package_name: candidate.package_name,
+          payment_status: candidate.payment_status,
+          consent_status: candidate.consent_status,
+          status: candidate.status,
+        }}
+        packages={(clientUser.client.packages as any[]) || []}
+      />
+
       <div className="bg-white rounded-xl shadow-sm p-5">
-        <h2 className="text-sm font-medium text-gray-700 mb-3">Candidate Information</h2>
+        <h2 className="text-sm font-medium text-gray-700 mb-3">Order Details</h2>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-          <div>
-            <dt className="text-xs text-gray-500">Email</dt>
-            <dd className="text-sm text-gray-900">{candidate.email}</dd>
-          </div>
-          {candidate.phone && (
-            <div>
-              <dt className="text-xs text-gray-500">Phone</dt>
-              <dd className="text-sm text-gray-900">{candidate.phone}</dd>
-            </div>
-          )}
-          <div>
-            <dt className="text-xs text-gray-500">Package</dt>
-            <dd className="text-sm text-gray-900">{candidate.package_name}</dd>
-          </div>
           <div>
             <dt className="text-xs text-gray-500">Price</dt>
             <dd className="text-sm text-gray-900">${Number(candidate.package_price).toFixed(2)}</dd>

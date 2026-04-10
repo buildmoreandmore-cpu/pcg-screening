@@ -79,9 +79,14 @@ export async function sendNotification({
     const resend = new Resend(process.env.RESEND_API_KEY)
     const fromEmail = process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>'
 
-    await resend.emails.send({ from: fromEmail, to, subject, html })
+    const result = await resend.emails.send({ from: fromEmail, to, subject, html })
+    if (result.error) {
+      console.error('[sendNotification] Resend error', { audience, event, to, error: result.error })
+      return false
+    }
     return true
-  } catch {
+  } catch (err) {
+    console.error('[sendNotification] threw', { audience, event, to, err })
     return false
   }
 }

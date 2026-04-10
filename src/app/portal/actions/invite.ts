@@ -77,7 +77,7 @@ export async function inviteCandidate({
   // Send invite email to candidate (preference-aware)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
-  sendNotification({
+  const candidateEmailSent = await sendNotification({
     clientId: client.id,
     audience: 'candidate',
     event: 'intake_link',
@@ -90,6 +90,13 @@ export async function inviteCandidate({
       applyUrl: `${siteUrl}/apply/${client.slug}?invite=${trackingCode}`,
     }),
   })
+
+  if (!candidateEmailSent) {
+    return {
+      trackingCode,
+      warning: `Candidate record was created (${trackingCode}) but the invite email could not be delivered to ${email}. Check the email address and try Resend Invite from the candidate detail page.`,
+    }
+  }
 
   // Notify employer
   const notifyEmail = client.notification_email || clientUser.email
