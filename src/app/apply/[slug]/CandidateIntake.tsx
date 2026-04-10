@@ -59,16 +59,22 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
   // Step 1 — Personal Info
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [maidenName, setMaidenName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [dob, setDob] = useState('')
-  const [ssn4, setSsn4] = useState('')
+  const [ssn, setSsn] = useState('')
+  const [sex, setSex] = useState('')
+  const [race, setRace] = useState('')
+  const [driversLicense, setDriversLicense] = useState('')
+  const [dlState, setDlState] = useState('')
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
   const [state, setState] = useState('')
   const [zip, setZip] = useState('')
   const [referralSource, setReferralSource] = useState('')
   const [referralOther, setReferralOther] = useState('')
+  const [referralEmployer, setReferralEmployer] = useState('')
 
   // Step 2 — Package
   const [selectedPackage, setSelectedPackage] = useState(
@@ -137,6 +143,13 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
     return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
   }
 
+  function formatSsn(value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 9)
+    if (digits.length <= 3) return digits
+    if (digits.length <= 5) return `${digits.slice(0, 3)}-${digits.slice(3)}`
+    return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`
+  }
+
   function validateStep1() {
     const e: Record<string, string> = {}
     if (!firstName.trim()) e.firstName = 'Required'
@@ -148,11 +161,16 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
       const age = (Date.now() - new Date(dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000)
       if (age < 18) e.dob = 'Must be 18 or older'
     }
-    if (!/^\d{4}$/.test(ssn4)) e.ssn4 = 'Exactly 4 digits'
+    if (ssn.replace(/\D/g, '').length !== 9) e.ssn = 'Full 9-digit SSN required'
+    if (!sex) e.sex = 'Required'
+    if (!race) e.race = 'Required'
+    if (!driversLicense.trim()) e.driversLicense = 'Required'
+    if (!dlState) e.dlState = 'Required'
     if (!address.trim()) e.address = 'Required'
     if (!city.trim()) e.city = 'Required'
     if (!state) e.state = 'Required'
     if (!/^\d{5}$/.test(zip)) e.zip = '5 digit zip required'
+    if (referralSource === 'referral' && !referralEmployer.trim()) e.referralEmployer = 'Please name the employer or contact'
     setErrors(e)
     if (Object.keys(e).length > 0) showToast('Please complete all required fields')
     return Object.keys(e).length === 0
@@ -194,14 +212,19 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
         body: JSON.stringify({
           clientSlug: client.slug,
           inviteCode,
-          firstName, lastName, email,
+          firstName, lastName, maidenName, email,
           phone: phone.replace(/\D/g, ''),
-          dob, ssn4, address, city, state, zip,
+          dob,
+          ssn: ssn.replace(/\D/g, ''),
+          sex, race,
+          driversLicense, dlState,
+          address, city, state, zip,
           packageName: selectedPackage,
           packagePrice: pkg?.price || 0,
           signatureData,
           signatureMethod: signatureMode === 'typed' ? 'typed' : 'canvas',
           referralSource: referralSource === 'other' ? (referralOther.trim() || 'other') : referralSource,
+          referralEmployer: referralSource === 'referral' ? referralEmployer.trim() : undefined,
         }),
       })
 
@@ -457,15 +480,58 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                 <Field label="First Name" value={firstName} onChange={setFirstName} error={errors.firstName} autoFocus />
                 <Field label="Last Name" value={lastName} onChange={setLastName} error={errors.lastName} />
               </div>
+              <Field label="Maiden Name / Other Name Used" value={maidenName} onChange={setMaidenName} placeholder="If applicable" />
               <Field label="Email Address" type="email" value={email} onChange={setEmail} error={errors.email} />
               <Field label="Phone Number" type="tel" value={phone} onChange={(v) => setPhone(formatPhone(v))} error={errors.phone} inputMode="tel" />
-              <Field label="Date of Birth" type="date" value={dob} onChange={setDob} error={errors.dob} />
-              <Field label="Last 4 of SSN" value={ssn4} onChange={(v) => setSsn4(v.replace(/\D/g, '').slice(0, 4))} error={errors.ssn4} inputMode="numeric" maxLength={4} placeholder="••••" />
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Date of Birth" type="date" value={dob} onChange={setDob} error={errors.dob} />
+                <Field label="Social Security Number" value={ssn} onChange={(v) => setSsn(formatSsn(v))} error={errors.ssn} inputMode="numeric" maxLength={11} placeholder="XXX-XX-XXXX" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Sex / Gender <span className="text-red-400">*</span></label>
+                  <select value={sex} onChange={(e) => setSex(e.target.value)} className={`w-full px-3 py-2.5 rounded-lg border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent ${errors.sex ? 'border-red-300' : 'border-gray-200'}`}>
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  {errors.sex && <p className="text-[11px] text-red-500 mt-0.5">{errors.sex}</p>}
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Race <span className="text-red-400">*</span></label>
+                  <select value={race} onChange={(e) => setRace(e.target.value)} className={`w-full px-3 py-2.5 rounded-lg border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent ${errors.race ? 'border-red-300' : 'border-gray-200'}`}>
+                    <option value="">Select</option>
+                    <option value="American Indian or Alaska Native">American Indian or Alaska Native</option>
+                    <option value="Asian">Asian</option>
+                    <option value="Black or African American">Black or African American</option>
+                    <option value="Hispanic or Latino">Hispanic or Latino</option>
+                    <option value="Native Hawaiian or Pacific Islander">Native Hawaiian or Pacific Islander</option>
+                    <option value="White">White</option>
+                    <option value="Two or More Races">Two or More Races</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  {errors.race && <p className="text-[11px] text-red-500 mt-0.5">{errors.race}</p>}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                  <Field label="Driver's License / ID #" value={driversLicense} onChange={setDriversLicense} error={errors.driversLicense} />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">DL State <span className="text-red-400">*</span></label>
+                  <select value={dlState} onChange={(e) => setDlState(e.target.value)} className={`w-full px-2 py-2.5 rounded-lg border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent ${errors.dlState ? 'border-red-300' : 'border-gray-200'}`}>
+                    <option value="">—</option>
+                    {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                  {errors.dlState && <p className="text-[11px] text-red-500 mt-0.5">{errors.dlState}</p>}
+                </div>
+              </div>
               <Field label="Street Address" value={address} onChange={setAddress} error={errors.address} />
               <div className="grid grid-cols-5 gap-2">
                 <div className="col-span-2"><Field label="City" value={city} onChange={setCity} error={errors.city} /></div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">State</label>
+                  <label className="block text-xs text-gray-500 mb-1">State <span className="text-red-400">*</span></label>
                   <select value={state} onChange={(e) => setState(e.target.value)} className={`w-full px-2 py-2.5 rounded-lg border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent ${errors.state ? 'border-red-300' : 'border-gray-200'}`}>
                     <option value="">—</option>
                     {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -479,17 +545,20 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                   <label className="block text-xs text-gray-500 mb-1">How did you hear about us?</label>
                   <select
                     value={referralSource}
-                    onChange={(e) => { setReferralSource(e.target.value); if (e.target.value !== 'other') setReferralOther('') }}
+                    onChange={(e) => { setReferralSource(e.target.value); if (e.target.value !== 'other') setReferralOther(''); if (e.target.value !== 'referral') setReferralEmployer('') }}
                     className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
                   >
                     <option value="">— Select one —</option>
                     <option value="google">Google search</option>
-                    <option value="referral">Referral from a friend or colleague</option>
+                    <option value="referral">Referral from a company</option>
                     <option value="linkedin">LinkedIn</option>
                     <option value="event">Event or conference</option>
                     <option value="employer">My employer told me</option>
                     <option value="other">Other</option>
                   </select>
+                  {referralSource === 'referral' && (
+                    <Field label="Referring employer or contact name" value={referralEmployer} onChange={setReferralEmployer} error={errors.referralEmployer} />
+                  )}
                   {referralSource === 'other' && (
                     <input
                       type="text"
@@ -751,7 +820,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                   ['Email', email],
                   ['Phone', phone],
                   ['Date of Birth', dob ? new Date(dob + 'T12:00:00').toLocaleDateString() : ''],
-                  ['SSN', `••••${ssn4}`],
+                  ['SSN', `•••-••-${ssn.replace(/\D/g, '').slice(-4)}`],
                   ['Address', `${address}, ${city}, ${state} ${zip}`],
                   ['Package', selectedPackage],
                 ].map(([label, value]) => (

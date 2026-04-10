@@ -23,11 +23,14 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     const {
-      clientSlug, inviteCode, firstName, lastName, email, phone,
-      dob, ssn4, address, city, state, zip,
+      clientSlug, inviteCode, firstName, lastName, maidenName, email, phone,
+      dob, ssn, sex, race, driversLicense, dlState,
+      address, city, state, zip,
       packageName, packagePrice, signatureData, signatureMethod,
-      referralSource,
+      referralSource, referralEmployer,
     } = body
+    // Derive last-4 for legacy column from full SSN
+    const ssn4 = ssn ? ssn.slice(-4) : null
 
     // Audit headers captured at consent time. These get written into the
     // candidates row alongside consent_signed_at so we can defensibly prove
@@ -100,10 +103,16 @@ export async function POST(req: NextRequest) {
           .update({
             first_name: firstName.trim(),
             last_name: lastName.trim(),
+            maiden_name: maidenName?.trim() || null,
             email: email.trim().toLowerCase(),
             phone: phone || null,
             dob: dob || null,
-            ssn_last4: ssn4 || null,
+            ssn_last4: ssn4,
+            ssn_full: ssn || null,
+            sex: sex || null,
+            race: race || null,
+            drivers_license_number: driversLicense?.trim() || null,
+            drivers_license_state: dlState || null,
             address: address ? `${address}, ${city}, ${state} ${zip}` : null,
             package_name: packageName,
             package_price: packagePrice || 0,
@@ -149,10 +158,16 @@ export async function POST(req: NextRequest) {
           client_slug: client.slug,
           first_name: firstName.trim(),
           last_name: lastName.trim(),
+          maiden_name: maidenName?.trim() || null,
           email: email.trim().toLowerCase(),
           phone: phone || null,
           dob: dob || null,
-          ssn_last4: ssn4 || null,
+          ssn_last4: ssn4,
+          ssn_full: ssn || null,
+          sex: sex || null,
+          race: race || null,
+          drivers_license_number: driversLicense?.trim() || null,
+          drivers_license_state: dlState || null,
           address: address ? `${address}, ${city}, ${state} ${zip}` : null,
           package_name: packageName,
           package_price: packagePrice || 0,

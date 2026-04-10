@@ -39,15 +39,21 @@ export async function GET(request: NextRequest) {
     .replace(/\\n/g, '')
     .trim()
 
+  // Build the redirect response first so we can set cookies on it.
+  // Setting cookies on `cookieStore` alone doesn't propagate them to
+  // the outgoing NextResponse.redirect().
+  const redirectUrl = `${origin}${next}`
+  const response = NextResponse.redirect(redirectUrl)
+
   const supabase = createServerClient(url, anonKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll()
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) =>
-          cookieStore.set(name, value, options)
-        )
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options)
+        })
       },
     },
   })
@@ -63,5 +69,5 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  return NextResponse.redirect(`${origin}${next}`)
+  return response
 }
