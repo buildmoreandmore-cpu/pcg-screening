@@ -79,11 +79,13 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <img
-            src="/Copy_of_PCG_Logo_with_Soft_Typography.png"
-            alt="PCG Screening Services"
-            className="h-16 mx-auto mb-4"
-          />
+          <Link href="/" className="inline-block mb-4" aria-label="Back to home">
+            <img
+              src="/Copy_of_PCG_Logo_with_Soft_Typography.png"
+              alt="PCG Screening Services"
+              className="h-16 mx-auto"
+            />
+          </Link>
           <h1 className="font-heading text-2xl text-navy">Sign In</h1>
           <p className="text-gray-500 text-sm mt-1">PCG Screening Services</p>
         </div>

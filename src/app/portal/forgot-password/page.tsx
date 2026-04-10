@@ -27,11 +27,13 @@ export default function ForgotPasswordPage() {
     <div className="min-h-dvh bg-off-white flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <img
-            src="/Copy_of_PCG_Logo_with_Soft_Typography.png"
-            alt="PCG Screening Services"
-            className="h-16 mx-auto mb-4"
-          />
+          <Link href="/" className="inline-block mb-4" aria-label="Back to home">
+            <img
+              src="/Copy_of_PCG_Logo_with_Soft_Typography.png"
+              alt="PCG Screening Services"
+              className="h-16 mx-auto"
+            />
+          </Link>
           <h1 className="font-heading text-2xl text-navy">Reset Password</h1>
           <p className="text-gray-500 text-sm mt-1">
             We&apos;ll email you a secure link to choose a new password.
