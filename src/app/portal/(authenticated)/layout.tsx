@@ -6,6 +6,7 @@ import Sidebar from '@/components/portal/Sidebar'
 import MobileHeader from '@/components/portal/MobileHeader'
 import BottomNav from '@/components/portal/BottomNav'
 import FcraModal from '@/components/portal/FcraModal'
+import ReferralSourceModal from '@/components/portal/ReferralSourceModal'
 import AnnouncementBanner from '@/components/portal/AnnouncementBanner'
 import CobrowseProvider from '@/components/cobrowse/CobrowseProvider'
 import RequestHelpButton from '@/components/cobrowse/RequestHelpButton'
@@ -38,6 +39,9 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
       <CobrowseProvider>
         <div className="portal-root">
           {!clientUser.client.fcra_accepted_at && <FcraModal />}
+          {clientUser.client.fcra_accepted_at && !clientUser.client.referral_source && (
+            <ReferralSourceModal />
+          )}
           <CobrowseOverlay />
           <MobileHeader />
           <Sidebar />

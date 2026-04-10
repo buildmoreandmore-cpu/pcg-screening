@@ -7,13 +7,21 @@ import {
   FCRA_CONSENT_CHECKBOX_1,
   FCRA_CONSENT_CHECKBOX_2,
 } from '@/lib/fcra-disclosure'
+import { SCREENING_COMPONENTS } from '@/lib/screening-components'
 
 type ClientData = {
   id: string
   slug: string
   name: string
   logo_url: string | null
-  packages: Array<{ name: string; price: number; description?: string; features?: string[] }>
+  packages: Array<{
+    name: string
+    price: number
+    description?: string
+    features?: string[]
+    components?: Record<string, boolean>
+    customNotes?: string
+  }>
 }
 
 const US_STATES = [
@@ -504,6 +512,52 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
               <h2 className="font-heading text-xl text-navy">Authorization & Consent</h2>
               <p className="text-sm text-gray-500 mt-1">Please review and sign to authorize the screening.</p>
             </div>
+
+            {/* Package scope — only shown for employer-invited candidates so
+                they can see exactly what's being checked (no pricing). */}
+            {inviteCode && (() => {
+              const pkg = packages.find((p) => p.name === selectedPackage)
+              const activeKeys = pkg?.components
+                ? Object.entries(pkg.components).filter(([, v]) => v).map(([k]) => k)
+                : []
+              const items = SCREENING_COMPONENTS.filter((c) => activeKeys.includes(c.key))
+              if (items.length === 0 && !pkg?.customNotes) return null
+              return (
+                <div className="bg-white rounded-xl shadow-sm p-5">
+                  <p className="text-sm font-medium text-navy">Your screening will include</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {client.name} has authorized the following checks:
+                  </p>
+                  {items.length > 0 && (
+                    <ul className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {items.map((c) => (
+                        <li
+                          key={c.key}
+                          className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className="w-4 h-4 text-navy flex-shrink-0"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.704 5.29a1 1 0 010 1.42l-7.5 7.5a1 1 0 01-1.42 0l-3.5-3.5a1 1 0 011.42-1.42l2.79 2.79 6.79-6.79a1 1 0 011.42 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <span>{c.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {pkg?.customNotes && (
+                    <p className="mt-3 text-xs text-gray-500 italic">{pkg.customNotes}</p>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* FCRA Disclosure */}
             <div className="bg-white rounded-xl shadow-sm p-5">

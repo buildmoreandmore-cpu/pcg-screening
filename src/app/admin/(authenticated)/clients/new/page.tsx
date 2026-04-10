@@ -48,6 +48,10 @@ export default function NewClientPage() {
   // Billing terms
   const [billingType, setBillingType] = useState('net_30')
 
+  // How did this employer find PCG?
+  const [referralSource, setReferralSource] = useState('')
+  const [referralSourceOther, setReferralSourceOther] = useState('')
+
   // Packages
   const [packages, setPackages] = useState<Package[]>(defaultPackages)
   const [editingComponentsIndex, setEditingComponentsIndex] = useState<number | null>(null)
@@ -109,6 +113,8 @@ export default function NewClientPage() {
         customNotes: p.customNotes,
       })),
       inviteUser,
+      referralSource: referralSource || undefined,
+      referralSourceOther: referralSource === 'other' ? referralSourceOther : undefined,
     })
 
     setLoading(false)
@@ -231,6 +237,41 @@ export default function NewClientPage() {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Referral Source */}
+        <div className="bg-white rounded-xl shadow-sm p-5 space-y-3">
+          <h2 className="text-sm font-medium text-gray-700">How did they find PCG?</h2>
+          <p className="text-xs text-gray-400">
+            Optional — if you don&apos;t know, leave blank and the employer will be asked the first
+            time they log into their portal.
+          </p>
+          <select
+            value={referralSource}
+            onChange={(e) => {
+              setReferralSource(e.target.value)
+              if (e.target.value !== 'other') setReferralSourceOther('')
+            }}
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
+          >
+            <option value="">— Skip / unknown —</option>
+            <option value="referral">Referral from another business</option>
+            <option value="google">Google search</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="event">Event or conference</option>
+            <option value="partner">Channel partner</option>
+            <option value="cold_outreach">PCG outreach</option>
+            <option value="other">Other</option>
+          </select>
+          {referralSource === 'other' && (
+            <input
+              type="text"
+              value={referralSourceOther}
+              onChange={(e) => setReferralSourceOther(e.target.value)}
+              placeholder="Tell us how they found us"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
+            />
+          )}
         </div>
 
         {/* Packages */}

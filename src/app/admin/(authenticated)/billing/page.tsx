@@ -1,6 +1,10 @@
 import { requireAdmin } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
 import Link from 'next/link'
+import EmployerBillingActions from './EmployerBillingActions'
+
+const PAID_STATUSES = new Set(['paid', 'employer_paid'])
+const OUTSTANDING_STATUSES = new Set(['employer_billed', 'employer_invoiced'])
 
 function getMonthRange(offset: number) {
   const now = new Date()
@@ -41,7 +45,15 @@ export default async function BillingPage({
     .order('name')
 
   // Group by client
-  const byClient: Record<string, { client: any; candidates: any[]; total: number; paid: number; pending: number }> = {}
+  const byClient: Record<string, {
+    client: any
+    candidates: any[]
+    total: number
+    paid: number
+    pending: number
+    billedIds: string[]
+    invoicedIds: string[]
+  }> = {}
 
   for (const c of candidates ?? []) {
     const clientId = c.client_id
@@ -52,16 +64,20 @@ export default async function BillingPage({
         total: 0,
         paid: 0,
         pending: 0,
+        billedIds: [],
+        invoicedIds: [],
       }
     }
     byClient[clientId].candidates.push(c)
     const price = Number(c.package_price || 0)
     byClient[clientId].total += price
-    if (c.payment_status === 'paid') {
+    if (PAID_STATUSES.has(c.payment_status)) {
       byClient[clientId].paid += price
     } else {
       byClient[clientId].pending += price
     }
+    if (c.payment_status === 'employer_billed') byClient[clientId].billedIds.push(c.id)
+    if (c.payment_status === 'employer_invoiced') byClient[clientId].invoicedIds.push(c.id)
   }
 
   const clientEntries = Object.values(byClient).sort((a, b) => b.total - a.total)
@@ -132,6 +148,11 @@ export default async function BillingPage({
                   <span className="text-amber-600 font-medium">${entry.pending.toLocaleString()} pending</span>
                 )}
                 <span className="font-heading text-navy">${entry.total.toLocaleString()}</span>
+                <EmployerBillingActions
+                  billedIds={entry.billedIds}
+                  invoicedIds={entry.invoicedIds}
+                  clientName={entry.client.name}
+                />
               </div>
             </div>
 
@@ -168,11 +189,16 @@ export default async function BillingPage({
                     </td>
                     <td className="px-4 py-2.5">
                       <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-medium ${
-                        c.payment_status === 'paid' ? 'bg-green-50 text-green-700' :
+                        c.payment_status === 'paid' || c.payment_status === 'employer_paid' ? 'bg-green-50 text-green-700' :
                         c.payment_status === 'refunded' ? 'bg-red-50 text-red-700' :
+                        c.payment_status === 'employer_invoiced' ? 'bg-blue-50 text-blue-700' :
+                        c.payment_status === 'employer_billed' ? 'bg-purple-50 text-purple-700' :
                         'bg-amber-50 text-amber-700'
                       }`}>
-                        {c.payment_status}
+                        {c.payment_status === 'employer_billed' ? 'employer (unbilled)' :
+                         c.payment_status === 'employer_invoiced' ? 'employer invoiced' :
+                         c.payment_status === 'employer_paid' ? 'employer paid' :
+                         c.payment_status}
                       </span>
                     </td>
                     <td className="px-5 py-2.5 text-sm text-right font-medium text-gray-900">${Number(c.package_price || 0).toFixed(2)}</td>

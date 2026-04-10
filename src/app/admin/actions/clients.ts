@@ -22,6 +22,8 @@ export async function createNewClient({
   billingType,
   packages,
   inviteUser,
+  referralSource,
+  referralSourceOther,
 }: {
   name: string
   slug: string
@@ -36,6 +38,8 @@ export async function createNewClient({
   billingType?: string
   packages: Array<{ name: string; price: number; description: string; features: string[]; components?: Record<string, boolean>; customNotes?: string }>
   inviteUser: boolean
+  referralSource?: string
+  referralSourceOther?: string
 }) {
   await requireAdmin()
   const supabase = createAdminClient()
@@ -57,6 +61,10 @@ export async function createNewClient({
       packages,
       billing_type: billingType || 'net_30',
       notification_email: contactEmail || 'accounts@pcgscreening.com',
+      referral_source: referralSource || null,
+      referral_source_other: referralSourceOther || null,
+      referral_source_captured_at: referralSource ? new Date().toISOString() : null,
+      referral_source_captured_by: referralSource ? 'admin' : null,
     })
     .select('id')
     .single()

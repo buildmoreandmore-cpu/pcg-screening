@@ -21,6 +21,37 @@ export async function updatePreferences({ name }: { name: string }) {
   return { error: error?.message }
 }
 
+/**
+ * Self-capture for the one-time "How did you find PCG?" portal modal.
+ * Only writes if the field is currently empty (admin's value wins if they
+ * already entered one on the create-client form).
+ */
+export async function saveClientReferralSource({
+  referralSource,
+  referralSourceOther,
+}: {
+  referralSource: string
+  referralSourceOther?: string
+}) {
+  const clientUser = await requireAuth()
+  if (!referralSource) return { error: 'Please pick an option.' }
+
+  const supabase = getServiceClient()
+  const { error } = await supabase
+    .from('clients')
+    .update({
+      referral_source: referralSource,
+      referral_source_other: referralSource === 'other' ? referralSourceOther || null : null,
+      referral_source_captured_at: new Date().toISOString(),
+      referral_source_captured_by: 'employer_self',
+    })
+    .eq('id', clientUser.client_id)
+    .is('referral_source', null)
+
+  if (error) return { error: error.message }
+  return { ok: true }
+}
+
 export async function changePasswordAction({
   currentPassword,
   newPassword,
