@@ -101,7 +101,7 @@ export async function createNewClient({
       const invite = await issuePortalInvite({
         email: contactEmail,
         clientUserId: newClientUserId,
-        next: '/portal/dashboard',
+        next: '/portal/setup-password',
       })
 
       const resend = new Resend(process.env.RESEND_API_KEY)
@@ -160,7 +160,7 @@ export async function addClientUser({
     const invite = await issuePortalInvite({
       email,
       clientUserId: inserted!.id,
-      next: '/portal/dashboard',
+      next: '/portal/setup-password',
     })
 
     const resend = new Resend(process.env.RESEND_API_KEY)

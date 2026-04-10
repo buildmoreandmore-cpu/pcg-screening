@@ -25,7 +25,7 @@ export interface PortalInviteResult {
 export async function issuePortalInvite({
   email,
   clientUserId,
-  next = '/portal/dashboard',
+  next = '/portal/setup-password',
 }: {
   email: string
   clientUserId: string
