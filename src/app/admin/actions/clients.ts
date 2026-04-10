@@ -6,6 +6,7 @@ import { requireAdmin } from '@/lib/admin-auth'
 import { Resend } from 'resend'
 import { buildWelcomeEmail, buildTeamInviteEmail } from '@/lib/email-templates'
 import { dispatchAgentEvent } from '@/lib/agent-webhook'
+import { issuePortalInvite } from '@/lib/portal-invite'
 
 export async function createNewClient({
   name,
@@ -78,33 +79,44 @@ export async function createNewClient({
     }
   )
 
-  // Create first admin user for this client
+  // Create first admin user for this client (and generate a one-time sign-in link)
+  let newClientUserId: string | null = null
   if (contactEmail) {
-    await supabase.from('client_users').insert({
-      client_id: client.id,
-      email: contactEmail,
-      name: contactName || name,
-      role: 'admin',
-    })
+    const { data: inserted } = await supabase
+      .from('client_users')
+      .insert({
+        client_id: client.id,
+        email: contactEmail,
+        name: contactName || name,
+        role: 'admin',
+      })
+      .select('id')
+      .single()
+    newClientUserId = inserted?.id ?? null
   }
 
-  // Send welcome email
-  if (inviteUser && contactEmail) {
+  // Send welcome email with magic-link sign-in URL
+  if (inviteUser && contactEmail && newClientUserId) {
     try {
-      const resend = new Resend(process.env.RESEND_API_KEY)
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+      const invite = await issuePortalInvite({
+        email: contactEmail,
+        clientUserId: newClientUserId,
+        next: '/portal/dashboard',
+      })
 
+      const resend = new Resend(process.env.RESEND_API_KEY)
       await resend.emails.send({
         from: process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>',
         to: contactEmail,
         subject: 'Welcome to PCG Screening Services',
         html: buildWelcomeEmail({
           contactName: contactName || name,
-          portalUrl: `${siteUrl}/portal/login`,
+          portalUrl: invite.magicLinkUrl,
         }),
       })
-    } catch {
-      // Email failure shouldn't block client creation
+    } catch (err) {
+      // Email/invite failure shouldn't block client creation, but log it.
+      console.error('[createNewClient] invite failed:', err)
     }
   }
 
@@ -125,25 +137,33 @@ export async function addClientUser({
   await requireAdmin()
   const supabase = createAdminClient()
 
-  const { error } = await supabase.from('client_users').insert({
-    client_id: clientId,
-    email,
-    name,
-    role: role === 'admin' ? 'admin' : 'user',
-  })
+  const { data: inserted, error } = await supabase
+    .from('client_users')
+    .insert({
+      client_id: clientId,
+      email,
+      name,
+      role: role === 'admin' ? 'admin' : 'user',
+    })
+    .select('id')
+    .single()
 
   if (error) {
     if (error.code === '23505') return { error: 'This email already exists' }
     return { error: 'Failed to add user' }
   }
 
-  // Send invite email
+  // Send invite email with magic-link sign-in URL
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
-
     const { data: client } = await supabase.from('clients').select('name').eq('id', clientId).single()
 
+    const invite = await issuePortalInvite({
+      email,
+      clientUserId: inserted!.id,
+      next: '/portal/dashboard',
+    })
+
+    const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
       from: process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>',
       to: email,
@@ -151,11 +171,11 @@ export async function addClientUser({
       html: buildTeamInviteEmail({
         memberName: name,
         companyName: client?.name || 'your company',
-        portalUrl: `${siteUrl}/portal/login`,
+        portalUrl: invite.magicLinkUrl,
       }),
     })
-  } catch {
-    // Non-critical
+  } catch (err) {
+    console.error('[addClientUser] invite failed:', err)
   }
 
   return {}
