@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
       clientSlug, firstName, lastName, email, phone,
       dob, ssn4, address, city, state, zip,
       packageName, packagePrice, signatureData,
+      referralSource,
     } = body
 
     // Validate required fields
@@ -85,8 +86,10 @@ export async function POST(req: NextRequest) {
         package_price: packagePrice || 0,
         status: 'submitted',
         consent_status: signatureData ? 'signed' : 'pending',
+        consent_signed_at: signatureData ? new Date().toISOString() : null,
         payment_status: 'pending',
         source: 'candidate_portal',
+        referral_source: referralSource || null,
       })
       .select('id, tracking_code')
       .single()
@@ -117,7 +120,7 @@ export async function POST(req: NextRequest) {
 
     // Create Stripe Checkout Session
     const stripe = new Stripe(secretKey)
-    const portalUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.PORTAL_URL || 'https://pcg-screening.vercel.app'
+    const portalUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PORTAL_URL || 'https://www.pcgscreening.net').trim().replace(/\/+$/, '')
 
     const priceInCents = Math.round((packagePrice || 0) * 100)
 

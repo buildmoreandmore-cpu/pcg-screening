@@ -159,7 +159,7 @@ function buildCandidateEmail({ firstName, packageName, packagePrice, confirmatio
           </table>
 
           <!-- FCRA Notice -->
-          <p style="margin:0;font-size:11px;color:#c8c5be;line-height:1.6;">Under the Fair Credit Reporting Act (FCRA), you have the right to request a copy of your screening report and to dispute any inaccurate information. For questions or disputes, please visit pcgscreening.com or contact us directly.</p>
+          <p style="margin:0;font-size:11px;color:#c8c5be;line-height:1.6;">Under the Fair Credit Reporting Act (FCRA), you have the right to request a copy of your screening report and to dispute any inaccurate information. For questions or disputes, please visit www.pcgscreening.net or contact us directly.</p>
         </td></tr>
 
         <!-- Footer -->

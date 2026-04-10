@@ -72,7 +72,10 @@ export default function ClientSettingsForm({ client }: { client: any }) {
 
   // Company info
   const [name, setName] = useState(client.name || '')
-  const [contactName, setContactName] = useState(client.contact_name || '')
+  const initialFirst = (client.contact_name || '').split(' ')[0] || ''
+  const initialLast = (client.contact_name || '').split(' ').slice(1).join(' ') || ''
+  const [contactFirstName, setContactFirstName] = useState(initialFirst)
+  const [contactLastName, setContactLastName] = useState(initialLast)
   const [contactEmail, setContactEmail] = useState(client.contact_email || '')
   const [contactPhone, setContactPhone] = useState(client.contact_phone || '')
   const [website, setWebsite] = useState(client.website || '')
@@ -138,7 +141,7 @@ export default function ClientSettingsForm({ client }: { client: any }) {
     const result = await updateClientSettings({
       clientId: client.id,
       name,
-      contactName,
+      contactName: `${contactFirstName} ${contactLastName}`.trim(),
       contactEmail,
       contactPhone,
       website,
@@ -176,8 +179,13 @@ export default function ClientSettingsForm({ client }: { client: any }) {
               className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Contact Person</label>
-            <input type="text" value={contactName} onChange={e => setContactName(e.target.value)}
+            <label className="block text-xs text-gray-500 mb-1">Contact First Name</label>
+            <input type="text" value={contactFirstName} onChange={e => setContactFirstName(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Contact Last Name</label>
+            <input type="text" value={contactLastName} onChange={e => setContactLastName(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
           </div>
           <div>

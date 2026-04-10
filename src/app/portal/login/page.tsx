@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 
@@ -141,6 +142,15 @@ export default function LoginPage() {
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
+
+              <div className="text-right mt-3">
+                <Link
+                  href="/portal/forgot-password"
+                  className="text-xs text-gray-500 hover:text-gold transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </form>
           ) : (
             <form onSubmit={handleMagicLink}>

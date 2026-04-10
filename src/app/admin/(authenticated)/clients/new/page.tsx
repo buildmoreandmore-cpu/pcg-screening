@@ -26,7 +26,8 @@ export default function NewClientPage() {
   // Company info
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
-  const [contactName, setContactName] = useState('')
+  const [contactFirstName, setContactFirstName] = useState('')
+  const [contactLastName, setContactLastName] = useState('')
   const [contactEmail, setContactEmail] = useState('')
   const [contactPhone, setContactPhone] = useState('')
   const [website, setWebsite] = useState('')
@@ -66,7 +67,7 @@ export default function NewClientPage() {
     const result = await createNewClient({
       name,
       slug: slug || slugify(name),
-      contactName,
+      contactName: `${contactFirstName} ${contactLastName}`.trim(),
       contactEmail,
       contactPhone,
       website,
@@ -118,7 +119,7 @@ export default function NewClientPage() {
               <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)}
                 placeholder="acme-corp"
                 className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent font-mono" />
-              <p className="text-[11px] text-gray-400 mt-1 truncate">apply.pcgscreening.com/{slug || 'your-slug'}</p>
+              <p className="text-[11px] text-gray-400 mt-1 truncate">www.pcgscreening.net/apply/{slug || 'your-slug'}</p>
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">Website</label>
@@ -126,8 +127,13 @@ export default function NewClientPage() {
                 className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Contact Name</label>
-              <input type="text" value={contactName} onChange={(e) => setContactName(e.target.value)}
+              <label className="block text-xs text-gray-500 mb-1">Contact First Name</label>
+              <input type="text" value={contactFirstName} onChange={(e) => setContactFirstName(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Contact Last Name</label>
+              <input type="text" value={contactLastName} onChange={(e) => setContactLastName(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
             </div>
             <div>

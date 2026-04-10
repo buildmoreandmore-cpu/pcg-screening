@@ -81,6 +81,42 @@ export function buildTeamInviteEmail({
   `)
 }
 
+export function buildAdminInviteEmail({
+  adminName,
+  portalUrl,
+}: {
+  adminName: string
+  portalUrl: string
+}) {
+  return emailWrapper(`
+    <h1>Welcome to the PCG Admin Dashboard</h1>
+    <p>Hi ${adminName},</p>
+    <p>You've been added as a PCG Screening Services admin. Click below to set your password and access the admin dashboard.</p>
+    <p style="text-align: center;">
+      <a href="${portalUrl}" class="btn">Set Password & Sign In</a>
+    </p>
+    <p style="font-size: 13px; color: #8a8680;">This link expires in 24 hours. If you didn't expect this invitation, you can safely ignore this email.</p>
+  `)
+}
+
+export function buildPasswordResetEmail({
+  name,
+  resetUrl,
+}: {
+  name: string
+  resetUrl: string
+}) {
+  return emailWrapper(`
+    <h1>Reset Your PCG Password</h1>
+    <p>Hi ${name},</p>
+    <p>We received a request to reset the password for your PCG Screening Services account. Click below to choose a new one.</p>
+    <p style="text-align: center;">
+      <a href="${resetUrl}" class="btn">Reset Password</a>
+    </p>
+    <p style="font-size: 13px; color: #8a8680;">This link expires in 24 hours. If you didn't request a password reset, you can safely ignore this email — your account is still secure.</p>
+  `)
+}
+
 export function buildCandidateInviteEmail({
   candidateName,
   companyName,

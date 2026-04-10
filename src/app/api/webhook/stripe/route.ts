@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase'
 import { Resend } from 'resend'
 import { dispatchAgentEvent } from '@/lib/agent-webhook'
+import { getPortalSiteUrl } from '@/lib/portal-invite'
 
 export const dynamic = 'force-dynamic'
 
@@ -123,6 +124,7 @@ export async function POST(req: NextRequest) {
       if (process.env.RESEND_API_KEY) {
         try {
           const resend = new Resend(process.env.RESEND_API_KEY)
+          const adminUrl = `${getPortalSiteUrl()}/admin/candidates/${candidateId}`
           await resend.emails.send({
             from: 'PCG Screening Services <accounts@pcgscreening.com>',
             to: 'accounts@pcgscreening.com',
@@ -132,7 +134,7 @@ export async function POST(req: NextRequest) {
 <p><strong>Package:</strong> ${session.metadata?.packageName}</p>
 <p><strong>Tracking:</strong> ${trackingCode}</p>
 <p><strong>Client:</strong> ${session.metadata?.clientSlug}</p>
-<p><a href="https://pcg-screening.vercel.app/admin/candidates/${candidateId}">View in Admin</a></p>`,
+<p><a href="${adminUrl}">View in Admin</a></p>`,
           })
         } catch (emailErr) {
           console.error('Admin notification error:', emailErr)
@@ -167,6 +169,7 @@ export async function POST(req: NextRequest) {
 }
 
 function buildConfirmationEmail(firstName: string, trackingCode: string, packageName: string) {
+  const siteUrl = getPortalSiteUrl()
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -189,7 +192,7 @@ function buildConfirmationEmail(firstName: string, trackingCode: string, package
   <div class="container">
     <div class="card">
       <div class="header">
-        <img src="https://pcgscreening.com/Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG Screening Services">
+        <img src="${siteUrl}/Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG Screening Services">
       </div>
       <hr class="divider">
       <h1>Payment Confirmed</h1>
@@ -201,7 +204,7 @@ function buildConfirmationEmail(firstName: string, trackingCode: string, package
       </div>
       <p>You can check your screening status at any time:</p>
       <p style="text-align:center;">
-        <a href="https://pcg-screening.vercel.app/track?code=${trackingCode}" class="btn">Track My Screening</a>
+        <a href="${siteUrl}/track?code=${trackingCode}" class="btn">Track My Screening</a>
       </p>
       <p style="font-size:13px;color:#8a8680;">Most screenings complete within 1–3 business days. We'll email you when your results are ready.</p>
     </div>
