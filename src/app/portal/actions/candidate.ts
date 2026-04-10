@@ -51,7 +51,6 @@ export async function updateCandidate({
     .maybeSingle()
 
   if (!existing) return { error: 'Candidate not found.' }
-  if (existing.status === 'cancelled') return { error: 'This candidate has been cancelled.' }
   if (isLocked(existing)) {
     return {
       error:
@@ -117,6 +116,69 @@ export async function cancelCandidate({ candidateId }: { candidateId: string }) 
   revalidatePath(`/portal/candidates/${candidateId}`)
   revalidatePath('/portal/candidates')
   return { ok: true }
+}
+
+export async function reactivateCandidate({ candidateId }: { candidateId: string }) {
+  const clientUser = await requireAuth()
+  const supabase = createAdminClient()
+  const client = clientUser.client
+
+  const { data: existing } = await supabase
+    .from('candidates')
+    .select('id, status')
+    .eq('id', candidateId)
+    .eq('client_id', client.id)
+    .maybeSingle()
+
+  if (!existing) return { error: 'Candidate not found.' }
+  if (existing.status !== 'cancelled') return { error: 'Only cancelled candidates can be reactivated.' }
+
+  const { error: updateError } = await supabase
+    .from('candidates')
+    .update({ status: 'submitted' })
+    .eq('id', candidateId)
+    .eq('client_id', client.id)
+
+  if (updateError) {
+    console.error('[reactivateCandidate]', updateError)
+    return { error: 'Failed to reactivate candidate.' }
+  }
+
+  revalidatePath(`/portal/candidates/${candidateId}`)
+  revalidatePath('/portal/candidates')
+  return { ok: true }
+}
+
+export async function deleteCandidate({ candidateId }: { candidateId: string }) {
+  const clientUser = await requireAuth()
+  const supabase = createAdminClient()
+  const client = clientUser.client
+
+  const { data: existing } = await supabase
+    .from('candidates')
+    .select('id, payment_status, consent_status')
+    .eq('id', candidateId)
+    .eq('client_id', client.id)
+    .maybeSingle()
+
+  if (!existing) return { error: 'Candidate not found.' }
+  if (isLocked(existing)) {
+    return { error: 'Cannot delete a candidate who has paid or signed consent. Contact PCG support.' }
+  }
+
+  const { error: deleteError } = await supabase
+    .from('candidates')
+    .delete()
+    .eq('id', candidateId)
+    .eq('client_id', client.id)
+
+  if (deleteError) {
+    console.error('[deleteCandidate]', deleteError)
+    return { error: 'Failed to delete candidate.' }
+  }
+
+  revalidatePath('/portal/candidates')
+  return { ok: true, deleted: true }
 }
 
 export async function resendCandidateInvite({ candidateId }: { candidateId: string }) {

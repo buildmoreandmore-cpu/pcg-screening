@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateCandidate, cancelCandidate, resendCandidateInvite } from '@/app/portal/actions/candidate'
+import { updateCandidate, cancelCandidate, reactivateCandidate, deleteCandidate, resendCandidateInvite } from '@/app/portal/actions/candidate'
 
 interface Package {
   name: string
@@ -38,8 +38,7 @@ export default function CandidateActions({ candidate, packages }: Props) {
 
   const locked =
     candidate.payment_status === 'paid' ||
-    candidate.consent_status === 'signed' ||
-    candidate.status === 'cancelled'
+    candidate.consent_status === 'signed'
 
   const isCancelled = candidate.status === 'cancelled'
 
@@ -92,6 +91,34 @@ export default function CandidateActions({ candidate, packages }: Props) {
         return
       }
       setFeedback({ kind: 'ok', msg: 'Candidate cancelled.' })
+      router.refresh()
+    })
+  }
+
+  function handleReactivate() {
+    setFeedback(null)
+    if (!confirm('Reactivate this candidate so they can complete their screening?')) return
+    startTransition(async () => {
+      const res = await reactivateCandidate({ candidateId: candidate.id })
+      if (res.error) {
+        setFeedback({ kind: 'error', msg: res.error })
+        return
+      }
+      setFeedback({ kind: 'ok', msg: 'Candidate reactivated.' })
+      router.refresh()
+    })
+  }
+
+  function handleDelete() {
+    setFeedback(null)
+    if (!confirm('Permanently delete this candidate? This cannot be undone.')) return
+    startTransition(async () => {
+      const res = await deleteCandidate({ candidateId: candidate.id })
+      if (res.error) {
+        setFeedback({ kind: 'error', msg: res.error })
+        return
+      }
+      router.push('/portal/candidates')
       router.refresh()
     })
   }
@@ -251,36 +278,55 @@ export default function CandidateActions({ candidate, packages }: Props) {
 
       {!editing && !locked && (
         <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-2">
+          {isCancelled ? (
+            <>
+              <button
+                onClick={handleReactivate}
+                disabled={pending}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-navy hover:text-navy-light transition-colors disabled:opacity-50"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Reactivate
+              </button>
+              <span className="text-gray-300">·</span>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleResend}
+                disabled={pending}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-navy hover:text-navy-light transition-colors disabled:opacity-50"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Resend invite email
+              </button>
+              <span className="text-gray-300">·</span>
+              <button
+                onClick={handleCancel}
+                disabled={pending}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-600 hover:text-amber-700 transition-colors disabled:opacity-50"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+                Cancel
+              </button>
+              <span className="text-gray-300">·</span>
+            </>
+          )}
           <button
-            onClick={handleResend}
-            disabled={pending}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-navy hover:text-navy-light transition-colors disabled:opacity-50"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.8}
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
-            Resend invite email
-          </button>
-          <span className="text-gray-300">·</span>
-          <button
-            onClick={handleCancel}
+            onClick={handleDelete}
             disabled={pending}
             className="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 hover:text-red-700 transition-colors disabled:opacity-50"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.8}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 7V4a2 2 0 012-2h0a2 2 0 012 2v3"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 7V4a2 2 0 012-2h0a2 2 0 012 2v3" />
             </svg>
-            Cancel candidate
+            Delete
           </button>
         </div>
       )}
