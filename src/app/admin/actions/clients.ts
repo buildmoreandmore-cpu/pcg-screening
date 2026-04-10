@@ -34,7 +34,7 @@ export async function createNewClient({
   state: string
   zip: string
   billingType?: string
-  packages: Array<{ name: string; price: number; description: string; features: string[] }>
+  packages: Array<{ name: string; price: number; description: string; features: string[]; components?: Record<string, boolean>; customNotes?: string }>
   inviteUser: boolean
 }) {
   await requireAdmin()
@@ -64,6 +64,22 @@ export async function createNewClient({
   if (clientError) {
     if (clientError.code === '23505') return { error: 'A client with this slug already exists' }
     return { error: 'Failed to create client' }
+  }
+
+  // Insert per-package rows into the new first-class client_packages table.
+  // The legacy clients.packages JSONB above is kept for safety during rollout.
+  if (packages.length > 0) {
+    const rows = packages.map((p, i) => ({
+      client_id: client.id,
+      name: p.name,
+      price_cents: Math.round(Number(p.price || 0) * 100),
+      description: p.description || null,
+      components: p.components || {},
+      custom_notes: p.customNotes || null,
+      sort_order: i,
+    }))
+    const { error: pkgErr } = await supabase.from('client_packages').insert(rows)
+    if (pkgErr) console.error('[createNewClient] client_packages insert failed:', pkgErr)
   }
 
   dispatchAgentEvent(

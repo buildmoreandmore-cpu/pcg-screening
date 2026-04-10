@@ -10,10 +10,11 @@ export default async function AdminClientDetailPage({ params }: { params: Promis
   await requireAdmin()
   const supabase = createAdminClient()
 
-  const [clientRes, candidatesRes, usersRes] = await Promise.all([
+  const [clientRes, candidatesRes, usersRes, packagesRes] = await Promise.all([
     supabase.from('clients').select('*').eq('id', id).single(),
     supabase.from('candidates').select('id, first_name, last_name, email, package_name, status, payment_status, tracking_code, created_at').eq('client_id', id).order('created_at', { ascending: false }),
     supabase.from('client_users').select('id, name, email, role, active, created_at').eq('client_id', id).order('created_at'),
+    supabase.from('client_packages').select('id, name, price_cents, description, components, custom_notes, sort_order, active').eq('client_id', id).eq('active', true).order('sort_order'),
   ])
 
   if (!clientRes.data) notFound()
@@ -21,6 +22,7 @@ export default async function AdminClientDetailPage({ params }: { params: Promis
   const client = clientRes.data
   const candidates = candidatesRes.data ?? []
   const users = usersRes.data ?? []
+  const packages = packagesRes.data ?? []
 
   const stats = {
     total: candidates.length,
@@ -35,6 +37,7 @@ export default async function AdminClientDetailPage({ params }: { params: Promis
       candidates={candidates}
       users={users}
       stats={stats}
+      packages={packages}
     />
   )
 }

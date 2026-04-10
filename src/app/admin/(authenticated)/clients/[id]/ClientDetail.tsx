@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import StatusBadge from '@/components/portal/StatusBadge'
 import ClientSettingsForm from '@/components/admin/ClientSettingsForm'
+import ClientPackagesManager from '@/components/admin/ClientPackagesManager'
 import { addClientUser, toggleClientUser } from '@/app/admin/actions/clients'
 
 function timeAgo(date: string) {
@@ -24,14 +25,16 @@ export default function ClientDetail({
   candidates,
   users,
   stats,
+  packages,
 }: {
   client: any
   candidates: any[]
   users: any[]
   stats: { total: number; active: number; completed: number; revenue: number }
+  packages: any[]
 }) {
   const router = useRouter()
-  const [tab, setTab] = useState<'candidates' | 'users' | 'settings'>('candidates')
+  const [tab, setTab] = useState<'candidates' | 'packages' | 'users' | 'settings'>('candidates')
   const [showAddUser, setShowAddUser] = useState(false)
   const [userName, setUserName] = useState('')
   const [userEmail, setUserEmail] = useState('')
@@ -58,6 +61,7 @@ export default function ClientDetail({
 
   const tabs = [
     { key: 'candidates', label: `Candidates (${candidates.length})` },
+    { key: 'packages', label: `Packages (${packages.length})` },
     { key: 'users', label: `Users (${users.length})` },
     { key: 'settings', label: 'Settings' },
   ] as const
@@ -156,6 +160,11 @@ export default function ClientDetail({
           </table>
           {candidates.length === 0 && <div className="text-center py-8 text-sm text-gray-400">No candidates for this client yet.</div>}
         </div>
+      )}
+
+      {/* Packages Tab */}
+      {tab === 'packages' && (
+        <ClientPackagesManager clientId={client.id} initialPackages={packages} />
       )}
 
       {/* Users Tab */}
