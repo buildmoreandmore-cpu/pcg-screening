@@ -43,7 +43,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
               Sign In
             </Link>
             <Link
-              href="/apply/pcg-demo"
+              href="/get-started"
               className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-navy text-white hover:bg-navy-light transition-colors"
             >
               Get Started

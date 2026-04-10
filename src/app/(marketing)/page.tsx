@@ -28,8 +28,6 @@ const industries = [
   },
 ]
 
-const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_URL || '/portal/login'
-
 export default function MarketingHome() {
   return (
     <>
@@ -48,7 +46,7 @@ export default function MarketingHome() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/apply/pcg-demo"
+              href="/get-started?type=screen"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-navy text-white font-medium hover:bg-navy-light transition-colors shadow-md"
             >
               Run Your First Screen
@@ -60,15 +58,22 @@ export default function MarketingHome() {
             >
               Build Your Package
             </Link>
-            <a
-              href={calendlyUrl}
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              href="/get-started?type=call"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-navy font-medium hover:bg-navy/5 transition-colors"
             >
               Schedule a Setup Call
-            </a>
+            </Link>
           </div>
+          <p className="text-sm text-gray-600 mt-5">
+            Screening yourself, not hiring?{' '}
+            <Link
+              href="/apply/pcg-demo"
+              className="text-gold hover:text-navy font-medium underline-offset-2 hover:underline transition-colors"
+            >
+              Start an individual screening →
+            </Link>
+          </p>
         </div>
       </section>
 
@@ -169,19 +174,17 @@ export default function MarketingHome() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/apply/pcg-demo"
+              href="/get-started?type=screen"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gold text-navy font-medium hover:bg-gold-light transition-colors"
             >
               Run Your First Screen
             </Link>
-            <a
-              href={calendlyUrl}
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              href="/get-started?type=call"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/20 text-white hover:bg-white/10 transition-colors"
             >
               Schedule a Setup Call
-            </a>
+            </Link>
           </div>
         </div>
       </section>

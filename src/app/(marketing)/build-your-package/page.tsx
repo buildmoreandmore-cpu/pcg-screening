@@ -1,7 +1,5 @@
 import Link from 'next/link'
 
-const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_URL || '/portal/login'
-
 type Industry = {
   title: string
   tagline: string
@@ -258,7 +256,7 @@ export default function BuildYourPackagePage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/apply/pcg-demo"
+              href="/get-started?type=screen"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gold text-navy font-medium hover:bg-gold-light transition-colors"
             >
               Run Your First Screen
@@ -272,19 +270,17 @@ export default function BuildYourPackagePage() {
               </svg>
             </Link>
             <Link
-              href="/portal/login"
+              href="/get-started?type=package"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/20 text-white hover:bg-white/10 transition-colors"
             >
-              Build Your Package
+              Build a Custom Package
             </Link>
-            <a
-              href={calendlyUrl}
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              href="/get-started?type=call"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/20 text-white hover:bg-white/10 transition-colors"
             >
               Schedule a Setup Call
-            </a>
+            </Link>
           </div>
         </div>
       </section>
