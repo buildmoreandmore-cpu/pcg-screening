@@ -66,12 +66,12 @@ export default function MarketingHome() {
             </Link>
           </div>
           <p className="text-sm text-gray-600 mt-5">
-            Screening yourself, not hiring?{' '}
+            Need a background check on yourself?{' '}
             <Link
-              href="/apply/pcg-demo"
+              href="/apply/individuals"
               className="text-gold hover:text-navy font-medium underline-offset-2 hover:underline transition-colors"
             >
-              Start an individual screening →
+              Run your own report →
             </Link>
           </p>
         </div>

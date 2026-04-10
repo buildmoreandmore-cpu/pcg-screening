@@ -90,6 +90,16 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
   // Errors
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // Live date/time stamp shown under the signature (FCRA requires the
+  // candidate be able to see when they're signing). The server captures
+  // the authoritative consent_signed_at when the row is written.
+  const [now, setNow] = useState<Date | null>(null)
+  useEffect(() => {
+    setNow(new Date())
+    const t = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(t)
+  }, [])
+
   useEffect(() => {
     if (!inviteCode) return
     fetch(`/api/invite-lookup?code=${encodeURIComponent(inviteCode)}&slug=${encodeURIComponent(client.slug)}`)
@@ -684,6 +694,25 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                   </p>
                 </>
               )}
+
+              {/* FCRA-required date/time stamp */}
+              <div className="mt-3 pt-3 border-t border-gray-100 text-center">
+                <p className="text-[11px] uppercase tracking-wider text-gray-400">Signed on</p>
+                <p className="text-xs text-gray-700 font-medium mt-0.5">
+                  {now
+                    ? now.toLocaleString('en-US', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        timeZoneName: 'short',
+                      })
+                    : '—'}
+                </p>
+              </div>
             </div>
 
             <div className="flex gap-3">

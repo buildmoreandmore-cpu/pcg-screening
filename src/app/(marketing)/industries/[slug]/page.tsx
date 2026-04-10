@@ -156,7 +156,7 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
           <p className="text-base md:text-lg text-gray-700 max-w-3xl leading-relaxed mb-8">{data.hero}</p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
-              href="/apply/pcg-demo"
+              href="/apply/individuals"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-navy text-white font-medium hover:bg-navy-light transition-colors shadow-md"
             >
               Run Your First Screen
@@ -211,7 +211,7 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
               </div>
             </div>
             <Link
-              href="/apply/pcg-demo"
+              href="/apply/individuals"
               className="block w-full text-center px-4 py-3 rounded-xl bg-navy text-white font-medium hover:bg-navy-light transition-colors"
             >
               Start Screening

@@ -124,7 +124,7 @@ export default function FaqPage() {
               Schedule a Setup Call
             </a>
             <Link
-              href="/apply/pcg-demo"
+              href="/apply/individuals"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/20 text-white hover:bg-white/10 transition-colors"
             >
               Run Your First Screen

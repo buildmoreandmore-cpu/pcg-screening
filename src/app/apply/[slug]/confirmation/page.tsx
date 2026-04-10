@@ -30,6 +30,9 @@ function ConfirmationPageInner() {
   const [firstName, setFirstName] = useState('')
   const [packageName, setPackageName] = useState('')
   const [copied, setCopied] = useState(false)
+  // Captured at first render so the candidate sees the same FCRA-compliant
+  // timestamp on this confirmation that they saw on the consent step.
+  const [consentTimestamp] = useState(() => new Date())
 
   useEffect(() => {
     if (employerPaid) return
@@ -132,6 +135,23 @@ function ConfirmationPageInner() {
             </button>
           </div>
           <p className="text-xs text-gray-400 text-center mt-2">Save this code — you&apos;ll need it to check your status.</p>
+        </div>
+
+        {/* Consent timestamp */}
+        <div className="bg-white rounded-xl shadow-sm p-5 mb-4">
+          <p className="text-[11px] uppercase tracking-wider text-gray-400 text-center">
+            Authorization signed
+          </p>
+          <p className="text-sm text-navy font-medium text-center mt-1">
+            {consentTimestamp.toLocaleString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              timeZoneName: 'short',
+            })}
+          </p>
         </div>
 
         {/* What Happens Next */}

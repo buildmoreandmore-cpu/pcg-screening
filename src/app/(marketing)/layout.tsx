@@ -85,7 +85,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
               <li><Link href="/add-ons" className="hover:text-gold transition-colors">Add-On Catalog</Link></li>
               <li><Link href="/faq" className="hover:text-gold transition-colors">FAQ</Link></li>
               <li><Link href="/portal/login" className="hover:text-gold transition-colors">Employer Login</Link></li>
-              <li><Link href="/apply/pcg-demo" className="hover:text-gold transition-colors">Run a Screen</Link></li>
+              <li><Link href="/apply/individuals" className="hover:text-gold transition-colors">Run a Screen</Link></li>
             </ul>
           </div>
           <div>
