@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const {
       clientSlug, inviteCode, firstName, lastName, email, phone,
       dob, ssn4, address, city, state, zip,
-      packageName, packagePrice, signatureData,
+      packageName, packagePrice, signatureData, signatureMethod,
       referralSource,
     } = body
 
@@ -71,12 +71,17 @@ export async function POST(req: NextRequest) {
     let trackingCode: string = ''
 
     const consentSignedAt = signatureData ? new Date().toISOString() : null
+    const resolvedConsentMethod = signatureData
+      ? signatureMethod === 'typed'
+        ? 'typed'
+        : 'canvas'
+      : null
     const consentColumns = {
       consent_status: signatureData ? 'signed' : 'pending',
       consent_signed_at: consentSignedAt,
       consent_ip: signatureData ? consentIp : null,
       consent_user_agent: signatureData ? consentUserAgent : null,
-      consent_method: signatureData ? 'canvas' : null,
+      consent_method: resolvedConsentMethod,
       consent_signature_data_url: signatureData || null,
       consent_disclosure_version: signatureData ? FCRA_DISCLOSURE_VERSION : null,
     }
@@ -180,16 +185,30 @@ export async function POST(req: NextRequest) {
       package_price: packagePrice || 0,
       client_name: client.slug,
       consent_status: signatureData ? 'signed' : 'pending',
-      payment_status: 'pending',
-      signature_type: signatureData ? 'canvas' : null,
+      payment_status: inviteCode ? 'employer_billed' : 'pending',
+      signature_type: resolvedConsentMethod,
       signature_value: signatureData || null,
       confirmation_code: trackingCode,
     })
 
-    // Create Stripe Checkout Session
-    const stripe = new Stripe(secretKey)
     const portalUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PORTAL_URL || 'https://www.pcgscreening.net').trim().replace(/\/+$/, '')
 
+    // Employer-paid path: candidate arrived via an invite link, the employer
+    // is billed via the client's billing terms (immediate / net_30 / etc).
+    // Skip Stripe entirely and route the candidate straight to confirmation.
+    if (inviteCode) {
+      await supabase
+        .from('candidates')
+        .update({ payment_status: 'employer_billed' })
+        .eq('id', candidate.id)
+
+      return NextResponse.json({
+        url: `${portalUrl}/apply/${client.slug}/confirmation?tracking=${trackingCode}&billed=employer`,
+      })
+    }
+
+    // Otherwise: self-pay. Create a Stripe Checkout Session.
+    const stripe = new Stripe(secretKey)
     const priceInCents = Math.round((packagePrice || 0) * 100)
 
     const session = await stripe.checkout.sessions.create({

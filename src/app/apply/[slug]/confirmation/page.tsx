@@ -20,14 +20,19 @@ function ConfirmationPageInner() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
   const trackingCode = searchParams.get('tracking')
+  // 'employer' = the employer is being billed; the candidate didn't pay,
+  // and there's no Stripe session to verify. We treat this as verified.
+  const billed = searchParams.get('billed')
+  const employerPaid = billed === 'employer'
 
-  const [verified, setVerified] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [verified, setVerified] = useState(employerPaid)
+  const [loading, setLoading] = useState(!employerPaid)
   const [firstName, setFirstName] = useState('')
   const [packageName, setPackageName] = useState('')
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
+    if (employerPaid) return
     if (!sessionId) {
       setLoading(false)
       return
@@ -44,7 +49,7 @@ function ConfirmationPageInner() {
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [sessionId])
+  }, [sessionId, employerPaid])
 
   function copyCode() {
     if (trackingCode) {
@@ -59,7 +64,7 @@ function ConfirmationPageInner() {
       <div className="min-h-dvh bg-off-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-gray-500 mt-3">Verifying your payment...</p>
+          <p className="text-sm text-gray-500 mt-3">{employerPaid ? 'Submitting…' : 'Verifying your payment...'}</p>
         </div>
       </div>
     )
@@ -97,7 +102,11 @@ function ConfirmationPageInner() {
             </svg>
           </div>
           <h1 className="font-heading text-2xl text-navy">You&apos;re All Set{firstName ? `, ${firstName}` : ''}!</h1>
-          <p className="text-sm text-gray-500 mt-2">Your payment was successful and your screening is now in progress.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            {employerPaid
+              ? 'Your information has been submitted and your screening is now in progress.'
+              : 'Your payment was successful and your screening is now in progress.'}
+          </p>
         </div>
 
         {/* Tracking Code Card */}

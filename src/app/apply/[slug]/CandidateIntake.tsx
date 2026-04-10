@@ -71,7 +71,12 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
   const [consent1, setConsent1] = useState(false)
   const [consent2, setConsent2] = useState(false)
   const [signatureData, setSignatureData] = useState('')
+  // 'canvas' = drawn signature, 'typed' = name typed in. Both produce the
+  // same Base64 PNG payload via the canvas, so audit display is unchanged.
+  const [signatureMode, setSignatureMode] = useState<'canvas' | 'typed'>('canvas')
+  const [typedSignature, setTypedSignature] = useState('')
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const typedCanvasRef = useRef<HTMLCanvasElement>(null)
   const drawingRef = useRef(false)
 
   // Errors
@@ -95,7 +100,11 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inviteCode, client.slug])
 
-  const totalSteps = skipPackageStep ? 3 : 4
+  // Employer-invited candidates collapse to a 2-step flow:
+  //   1) Personal info
+  //   2) Authorization & Consent (submits directly, no review/payment)
+  const skipReviewStep = !!inviteCodeParam
+  const totalSteps = skipReviewStep ? 2 : skipPackageStep ? 3 : 4
   const effectiveStep = skipPackageStep && step >= 2 ? step + 1 : step
 
   function showToast(msg: string) {
@@ -141,6 +150,11 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
     if (step === consentStep) {
       if (!consent1 || !consent2) { showToast('Please check both consent boxes'); return }
       if (!signatureData) { showToast('Please provide your signature'); return }
+      // Employer-invited candidates submit directly from the consent step.
+      if (skipReviewStep) {
+        handleSubmit()
+        return
+      }
     }
     setStep(step + 1)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -168,6 +182,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
           packageName: selectedPackage,
           packagePrice: pkg?.price || 0,
           signatureData,
+          signatureMethod: signatureMode === 'typed' ? 'typed' : 'canvas',
           referralSource: referralSource === 'other' ? (referralOther.trim() || 'other') : referralSource,
         }),
       })
@@ -242,9 +257,11 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
   const consentStep = skipPackageStep ? 2 : 3
   const reviewStep = skipPackageStep ? 3 : 4
 
-  const stepLabels = skipPackageStep
-    ? ['Info', 'Consent', 'Review']
-    : ['Info', 'Package', 'Consent', 'Review']
+  const stepLabels = skipReviewStep
+    ? ['Info', 'Consent']
+    : skipPackageStep
+      ? ['Info', 'Consent', 'Review']
+      : ['Info', 'Package', 'Consent', 'Review']
 
   return (
     <div className="min-h-dvh bg-off-white">
@@ -257,22 +274,27 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
 
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG" className="h-8" />
-            <div className="hidden sm:block">
+        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/Copy_of_PCG_Logo_with_Soft_Typography.png"
+              alt="PCG Screening Services"
+              className="h-16 sm:h-20 w-auto shrink-0"
+            />
+            <div className="min-w-0">
               <p className="text-xs text-gray-500">Screening for</p>
-              <p className="text-sm font-medium text-navy">{client.name}</p>
+              <p className="text-base font-medium text-navy truncate">{client.name}</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+          <div className="flex items-center gap-1.5 text-xs text-green-700 bg-green-50 px-2.5 py-1 rounded-full shrink-0">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
             Secure
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="max-w-lg mx-auto px-4 pb-3">
+        <div className="max-w-2xl mx-auto px-4 pb-3">
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-gold to-gold-light rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
           </div>
@@ -282,7 +304,13 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
                   i + 1 < step ? 'bg-gold text-white' : i + 1 === step ? 'bg-navy text-white' : 'bg-gray-200 text-gray-400'
                 }`}>
-                  {i + 1 < step ? '✓' : i + 1}
+                  {i + 1 < step ? (
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    i + 1
+                  )}
                 </div>
                 <span className="hidden xs:inline">{label}</span>
               </div>
@@ -499,33 +527,120 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
               </div>
             </div>
 
-            {/* Signature Pad */}
+            {/* Signature: Draw or Type */}
             <div className="bg-white rounded-xl shadow-sm p-5">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-medium text-gray-700">Electronic Signature</p>
                 {signatureData && (
-                  <button onClick={clearSignature} className="text-xs text-gray-400 hover:text-red-500 transition-colors">Clear</button>
+                  <button
+                    onClick={() => {
+                      clearSignature()
+                      setTypedSignature('')
+                    }}
+                    className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    Clear
+                  </button>
                 )}
               </div>
-              <canvas
-                ref={canvasRef}
-                width={400}
-                height={120}
-                className="w-full border-2 border-dashed border-gray-200 rounded-lg cursor-crosshair touch-none bg-white"
-                onMouseDown={startDraw}
-                onMouseMove={draw}
-                onMouseUp={endDraw}
-                onMouseLeave={endDraw}
-                onTouchStart={startDraw}
-                onTouchMove={draw}
-                onTouchEnd={endDraw}
-              />
-              {!signatureData && <p className="text-xs text-gray-400 text-center mt-1">Sign here with your finger or mouse</p>}
+
+              {/* Mode toggle */}
+              <div className="grid grid-cols-2 gap-2 mb-3 p-1 bg-gray-100 rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSignatureMode('canvas')
+                    setSignatureData('')
+                    setTypedSignature('')
+                  }}
+                  className={`text-xs font-medium py-2 rounded-md transition-colors ${
+                    signatureMode === 'canvas' ? 'bg-white text-navy shadow-sm' : 'text-gray-500'
+                  }`}
+                >
+                  Draw signature
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSignatureMode('typed')
+                    setSignatureData('')
+                    if (firstName || lastName) setTypedSignature(`${firstName} ${lastName}`.trim())
+                  }}
+                  className={`text-xs font-medium py-2 rounded-md transition-colors ${
+                    signatureMode === 'typed' ? 'bg-white text-navy shadow-sm' : 'text-gray-500'
+                  }`}
+                >
+                  Type signature
+                </button>
+              </div>
+
+              {signatureMode === 'canvas' ? (
+                <>
+                  <canvas
+                    ref={canvasRef}
+                    width={400}
+                    height={120}
+                    className="w-full border-2 border-dashed border-gray-200 rounded-lg cursor-crosshair touch-none bg-white"
+                    onMouseDown={startDraw}
+                    onMouseMove={draw}
+                    onMouseUp={endDraw}
+                    onMouseLeave={endDraw}
+                    onTouchStart={startDraw}
+                    onTouchMove={draw}
+                    onTouchEnd={endDraw}
+                  />
+                  {!signatureData && (
+                    <p className="text-xs text-gray-400 text-center mt-1">Sign here with your finger or mouse</p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={typedSignature}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setTypedSignature(value)
+                      // Render to off-screen canvas → Base64 PNG so the
+                      // existing storage column / consent record renderer
+                      // works without changes.
+                      const canvas = typedCanvasRef.current
+                      if (!canvas) return
+                      const ctx = canvas.getContext('2d')
+                      if (!ctx) return
+                      ctx.clearRect(0, 0, canvas.width, canvas.height)
+                      if (!value.trim()) {
+                        setSignatureData('')
+                        return
+                      }
+                      ctx.fillStyle = '#1f2f4a'
+                      ctx.font = '48px "Snell Roundhand", "Lucida Handwriting", "Apple Chancery", cursive'
+                      ctx.textBaseline = 'middle'
+                      ctx.textAlign = 'center'
+                      ctx.fillText(value, canvas.width / 2, canvas.height / 2)
+                      setSignatureData(canvas.toDataURL())
+                    }}
+                    placeholder="Type your full legal name"
+                    className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-gray-200 text-2xl text-navy bg-white text-center focus:outline-none focus:border-gold"
+                    style={{ fontFamily: '"Snell Roundhand", "Lucida Handwriting", "Apple Chancery", cursive' }}
+                  />
+                  <canvas ref={typedCanvasRef} width={400} height={120} className="hidden" />
+                  <p className="text-[11px] text-gray-400 text-center mt-2">
+                    By typing your name above, you are providing your legal electronic signature.
+                  </p>
+                </>
+              )}
             </div>
 
             <div className="flex gap-3">
               <button onClick={goBack} className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-medium text-sm hover:bg-gray-200 transition-colors">Back</button>
-              <button onClick={goNext} disabled={!consent1 || !consent2 || !signatureData} className="flex-1 bg-navy text-white py-3 rounded-xl font-medium text-sm hover:bg-navy-light transition-colors disabled:opacity-40">Continue to Review</button>
+              <button
+                onClick={goNext}
+                disabled={!consent1 || !consent2 || !signatureData || loading}
+                className="flex-1 bg-navy text-white py-3 rounded-xl font-medium text-sm hover:bg-navy-light transition-colors disabled:opacity-40"
+              >
+                {loading ? 'Submitting…' : skipReviewStep ? 'Submit' : 'Continue to Review'}
+              </button>
             </div>
           </div>
         )}
@@ -535,7 +650,11 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
           <div className="space-y-5 animate-[fadeIn_0.3s_ease]">
             <div className="text-center">
               <h2 className="font-heading text-xl text-navy">Review & Submit</h2>
-              <p className="text-sm text-gray-500 mt-1">Confirm your details are correct before payment.</p>
+              <p className="text-sm text-gray-500 mt-1">
+                {inviteCode
+                  ? 'Confirm your details are correct before submitting.'
+                  : 'Confirm your details are correct before payment.'}
+              </p>
             </div>
 
             {/* Review Card */}
@@ -558,17 +677,27 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
               </dl>
             </div>
 
-            {/* Total */}
-            <div className="bg-navy rounded-xl p-5 text-center">
-              <p className="text-white/70 text-xs uppercase tracking-wider">Total Due</p>
-              <p className="font-heading text-3xl text-gold mt-1">${pkg?.price || 0}</p>
-            </div>
-
-            {/* Stripe note */}
-            <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              Payment securely processed by Stripe
-            </div>
+            {inviteCode ? (
+              /* Employer-paid: hide price entirely. The candidate doesn't need
+                 to know the cost — the employer is being billed via the client's
+                 billing terms (immediate / net_30 / net_60 / net_90). */
+              <div className="bg-navy rounded-xl p-5 text-center">
+                <p className="text-white/70 text-xs uppercase tracking-wider">Billed to</p>
+                <p className="font-heading text-xl text-gold mt-1">{client.name}</p>
+                <p className="text-white/60 text-[11px] mt-1">No payment required from you.</p>
+              </div>
+            ) : (
+              <>
+                <div className="bg-navy rounded-xl p-5 text-center">
+                  <p className="text-white/70 text-xs uppercase tracking-wider">Total Due</p>
+                  <p className="font-heading text-3xl text-gold mt-1">${pkg?.price || 0}</p>
+                </div>
+                <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                  Payment securely processed by Stripe
+                </div>
+              </>
+            )}
 
             <div className="flex gap-3">
               <button onClick={goBack} className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-medium text-sm hover:bg-gray-200 transition-colors">Back</button>
@@ -579,6 +708,11 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
               >
                 {loading ? (
                   <span>Processing...</span>
+                ) : inviteCode ? (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    Submit
+                  </>
                 ) : (
                   <>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
