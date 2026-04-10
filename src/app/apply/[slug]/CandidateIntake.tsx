@@ -376,31 +376,33 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                 <div className="col-span-2"><Field label="Zip Code" value={zip} onChange={(v) => setZip(v.replace(/\D/g, '').slice(0, 5))} error={errors.zip} inputMode="numeric" maxLength={5} /></div>
               </div>
 
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">How did you hear about us?</label>
-                <select
-                  value={referralSource}
-                  onChange={(e) => { setReferralSource(e.target.value); if (e.target.value !== 'other') setReferralOther('') }}
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-                >
-                  <option value="">— Select one —</option>
-                  <option value="google">Google search</option>
-                  <option value="referral">Referral from a friend or colleague</option>
-                  <option value="linkedin">LinkedIn</option>
-                  <option value="event">Event or conference</option>
-                  <option value="employer">My employer told me</option>
-                  <option value="other">Other</option>
-                </select>
-                {referralSource === 'other' && (
-                  <input
-                    type="text"
-                    value={referralOther}
-                    onChange={(e) => setReferralOther(e.target.value)}
-                    placeholder="Tell us how you found us"
-                    className="w-full mt-2 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-                  />
-                )}
-              </div>
+              {!inviteCode && (
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">How did you hear about us?</label>
+                  <select
+                    value={referralSource}
+                    onChange={(e) => { setReferralSource(e.target.value); if (e.target.value !== 'other') setReferralOther('') }}
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
+                  >
+                    <option value="">— Select one —</option>
+                    <option value="google">Google search</option>
+                    <option value="referral">Referral from a friend or colleague</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="event">Event or conference</option>
+                    <option value="employer">My employer told me</option>
+                    <option value="other">Other</option>
+                  </select>
+                  {referralSource === 'other' && (
+                    <input
+                      type="text"
+                      value={referralOther}
+                      onChange={(e) => setReferralOther(e.target.value)}
+                      placeholder="Tell us how you found us"
+                      className="w-full mt-2 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
             <button onClick={goNext} className="w-full bg-navy text-white py-3 rounded-xl font-medium text-sm flex items-center justify-center gap-2 hover:bg-navy-light transition-colors">
