@@ -18,14 +18,44 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabase()
 
-    if (eventType === 'signature_request_signed' && signatureRequest && supabase) {
+    if (
+      (eventType === 'signature_request_signed' || eventType === 'signature_request_all_signed') &&
+      signatureRequest &&
+      supabase
+    ) {
       const signatureRequestId = signatureRequest.signature_request_id
 
       // Update candidates table
       if (signatureRequestId) {
+        // Try to fetch signed PDF download URL (best-effort)
+        let signedDocUrl: string | null = null
+        try {
+          const apiKey = process.env.DROPBOX_SIGN_API_KEY
+          if (apiKey) {
+            const fileRes = await fetch(
+              `https://api.hellosign.com/v3/signature_request/files/${signatureRequestId}?file_type=pdf&get_url=1`,
+              {
+                headers: {
+                  Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`,
+                },
+              }
+            )
+            if (fileRes.ok) {
+              const fileJson = await fileRes.json()
+              signedDocUrl = fileJson?.file_url ?? null
+            }
+          }
+        } catch (err) {
+          console.warn('[dropbox-sign webhook] failed to fetch file_url:', err)
+        }
+
         await supabase
           .from('candidates')
-          .update({ consent_status: 'signed', dropbox_sign_request_id: signatureRequestId })
+          .update({
+            consent_status: 'signed',
+            consent_signed_at: new Date().toISOString(),
+            consent_document_url: signedDocUrl,
+          })
           .eq('dropbox_sign_request_id', signatureRequestId)
 
         // Also update submissions table for backwards compatibility

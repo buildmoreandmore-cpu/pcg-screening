@@ -320,7 +320,7 @@ export default function ScreeningSelector({ mode: initialMode, initialSelections
           )}
 
           {activeTab === 'professional_license' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
               <div>
                 <label className="block text-xs text-gray-600 mb-1">State</label>
                 <StatePicker
@@ -331,13 +331,22 @@ export default function ScreeningSelector({ mode: initialMode, initialSelections
                   placeholder="Select state..."
                 />
               </div>
-              <ScreeningInput
-                label="License Type"
-                value={selections.professional_license.license_type || ''}
-                onChange={v => updateSection('professional_license', { license_type: v })}
-                placeholder="e.g. RN, CPA, PE"
-                disabled={isView}
-              />
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">License Type</label>
+                {isView ? (
+                  <p className="text-sm text-gray-900">
+                    {selections.professional_license.license_type || <span className="text-gray-400">Not provided</span>}
+                  </p>
+                ) : (
+                  <input
+                    type="text"
+                    value={selections.professional_license.license_type || ''}
+                    onChange={e => updateSection('professional_license', { license_type: e.target.value })}
+                    placeholder="e.g. RN, CPA, PE"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold"
+                  />
+                )}
+              </div>
             </div>
           )}
 

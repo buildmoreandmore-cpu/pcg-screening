@@ -8,6 +8,8 @@ import JurisdictionManager from './JurisdictionManager'
 import ReportUpload from './ReportUpload'
 import InternalNotes from './InternalNotes'
 import ScreeningComponentsView from './ScreeningComponentsView'
+import DropboxSignButton from '@/components/admin/DropboxSignButton'
+import { isDropboxSignConfigured } from '@/lib/dropbox-sign'
 
 function formatDate(date: string | null) {
   if (!date) return '—'
@@ -67,6 +69,7 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
               ['SSN', c.ssn_last4 ? `••••${c.ssn_last4}` : '—'],
               ['Address', c.address || '—'],
               ['Source', c.source || 'portal'],
+              ['Heard about us', c.referral_source || '—'],
               ['Submitted', formatDate(c.created_at)],
             ].map(([label, value]) => (
               <div key={label} className="flex justify-between">
@@ -110,6 +113,10 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
                 <dt className="text-xs text-gray-500">Status</dt>
                 <dd><StatusBadge status={c.consent_status} /></dd>
               </div>
+              <div className="flex justify-between">
+                <dt className="text-xs text-gray-500">Signed at</dt>
+                <dd className="text-sm text-gray-900">{formatDate(c.consent_signed_at)}</dd>
+              </div>
               {c.dropbox_sign_request_id && (
                 <div className="flex justify-between">
                   <dt className="text-xs text-gray-500">Dropbox Sign ID</dt>
@@ -117,6 +124,15 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
                 </div>
               )}
             </dl>
+            {isDropboxSignConfigured() && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <DropboxSignButton
+                  candidateId={c.id}
+                  alreadySent={!!c.dropbox_sign_request_id}
+                  signedDocUrl={c.consent_document_url ?? null}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
