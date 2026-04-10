@@ -251,6 +251,80 @@ export async function deleteClient({ clientId }: { clientId: string }) {
   return {}
 }
 
+/**
+ * Hard-delete a client. Removes:
+ *   - the clients row
+ *   - every client_users row scoped to this client
+ *   - the corresponding auth.users row for any client_user whose auth_user_id
+ *     is not referenced by another client_users row in any other client
+ *
+ * Refuses to run if the client still has candidates so we never orphan
+ * screening history. Caller should soft-delete (deactivate) for that case.
+ */
+export async function permanentlyDeleteClient({ clientId }: { clientId: string }) {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  // Block if there are any candidates linked to this client.
+  const { count: candidateCount, error: countErr } = await supabase
+    .from('candidates')
+    .select('id', { count: 'exact', head: true })
+    .eq('client_id', clientId)
+
+  if (countErr) return { error: `Failed to check candidates: ${countErr.message}` }
+  if ((candidateCount ?? 0) > 0) {
+    return {
+      error: `Cannot permanently delete: ${candidateCount} candidate record(s) still linked. Deactivate instead.`,
+    }
+  }
+
+  // Pull all client_users rows so we know which auth users to potentially delete.
+  const { data: users, error: usersErr } = await supabase
+    .from('client_users')
+    .select('id, auth_user_id')
+    .eq('client_id', clientId)
+
+  if (usersErr) return { error: `Failed to load client users: ${usersErr.message}` }
+
+  // Delete the client_users rows for this client first so the
+  // "is this auth user referenced anywhere else" check below is accurate.
+  const { error: deleteUsersErr } = await supabase
+    .from('client_users')
+    .delete()
+    .eq('client_id', clientId)
+
+  if (deleteUsersErr) return { error: `Failed to delete client users: ${deleteUsersErr.message}` }
+
+  // For each auth_user_id we just unlinked, delete the auth.users row IF
+  // no other client_users row in any other client still references it.
+  const authUserIds = (users ?? [])
+    .map((u) => u.auth_user_id)
+    .filter((id): id is string => !!id)
+
+  for (const authUserId of authUserIds) {
+    const { count: stillLinked } = await supabase
+      .from('client_users')
+      .select('id', { count: 'exact', head: true })
+      .eq('auth_user_id', authUserId)
+
+    if ((stillLinked ?? 0) === 0) {
+      // Best-effort delete; ignore errors (e.g., auth user already gone)
+      await supabase.auth.admin.deleteUser(authUserId).catch(() => {})
+    }
+  }
+
+  // Finally delete the client row.
+  const { error: deleteClientErr } = await supabase
+    .from('clients')
+    .delete()
+    .eq('id', clientId)
+
+  if (deleteClientErr) return { error: `Failed to delete client: ${deleteClientErr.message}` }
+
+  revalidatePath('/admin/clients')
+  return {}
+}
+
 export async function toggleClientUser({
   userId,
   active,

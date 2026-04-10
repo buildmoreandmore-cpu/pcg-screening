@@ -53,7 +53,7 @@ export default async function AdminClientsPage() {
                 }`}>
                   {c.active ? 'Active' : 'Inactive'}
                 </span>
-                <ClientDeleteButton clientId={c.id} clientName={c.name} />
+                <ClientDeleteButton clientId={c.id} clientName={c.name} active={!!c.active} />
               </div>
             </div>
             <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
@@ -109,7 +109,7 @@ export default async function AdminClientsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <ClientDeleteButton clientId={c.id} clientName={c.name} />
+                    <ClientDeleteButton clientId={c.id} clientName={c.name} active={!!c.active} />
                   </td>
                 </tr>
               ))}
