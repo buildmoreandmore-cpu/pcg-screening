@@ -1,7 +1,12 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
+import {
+  FCRA_DISCLOSURE_PARAGRAPHS,
+  FCRA_CONSENT_CHECKBOX_1,
+  FCRA_CONSENT_CHECKBOX_2,
+} from '@/lib/fcra-disclosure'
 
 type ClientData = {
   id: string
@@ -32,6 +37,14 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
   const [toast, setToast] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // Invite-link prefill: when the candidate arrives via
+  // /apply/<slug>?invite=PCG-XXXXXXXX (sent by the employer's "Send Link"
+  // flow), look up the pre-seeded candidate row and prefill the contact
+  // fields. The invite code is also forwarded on submit so the API route
+  // can UPDATE the existing row instead of creating a duplicate.
+  const inviteCode = searchParams.get('invite') || ''
+  const [invitePrefilled, setInvitePrefilled] = useState(false)
+
   // Step 1 — Personal Info
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -60,6 +73,24 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
 
   // Errors
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    if (!inviteCode) return
+    fetch(`/api/invite-lookup?code=${encodeURIComponent(inviteCode)}&slug=${encodeURIComponent(client.slug)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) return
+        if (data.firstName) setFirstName(data.firstName)
+        if (data.lastName) setLastName(data.lastName)
+        if (data.email) setEmail(data.email)
+        if (data.packageName && packages.find((p) => p.name === data.packageName)) {
+          setSelectedPackage(data.packageName)
+        }
+        setInvitePrefilled(true)
+      })
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inviteCode, client.slug])
 
   const totalSteps = skipPackageStep ? 3 : 4
   const effectiveStep = skipPackageStep && step >= 2 ? step + 1 : step
@@ -127,6 +158,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clientSlug: client.slug,
+          inviteCode,
           firstName, lastName, email,
           phone: phone.replace(/\D/g, ''),
           dob, ssn4, address, city, state, zip,
@@ -274,6 +306,14 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
               <p className="text-sm text-gray-500 mt-1">Complete the steps below. Takes about 3 minutes.</p>
             </div>
 
+            {invitePrefilled && (
+              <div className="bg-gold-pale/40 border border-gold/30 rounded-xl px-4 py-3 text-center">
+                <p className="text-xs text-navy">
+                  Welcome — we&apos;ve pre-filled your invitation from <strong>{client.name}</strong>.
+                </p>
+              </div>
+            )}
+
             {/* Trust signals */}
             <div className="grid grid-cols-3 gap-2">
               {[
@@ -411,19 +451,21 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
             {/* FCRA Disclosure */}
             <div className="bg-white rounded-xl shadow-sm p-5">
               <div className="bg-gray-50 rounded-lg p-4 max-h-48 overflow-y-auto text-xs text-gray-600 leading-relaxed">
-                <p className="mb-3">In connection with my application for employment or continued employment, I understand that a consumer report and/or investigative consumer report may be requested by the prospective employer or current employer listed above. These reports may include, but are not limited to: criminal history records, court records, driving records, education verification, employment verification, professional references, credit reports, and drug testing results.</p>
-                <p className="mb-3">I hereby authorize PCG Screening Services and its designated agents to conduct such investigations and to request any and all information deemed necessary. I understand that I have the right to request a complete and accurate disclosure of the nature and scope of the investigation and that I may request a summary of my rights under the Fair Credit Reporting Act (FCRA).</p>
-                <p>I acknowledge that a telephonic facsimile (fax) or photographic copy of this authorization shall be as valid as the original. This authorization is valid for the duration of my employment or application process.</p>
+                {FCRA_DISCLOSURE_PARAGRAPHS.map((p, i) => (
+                  <p key={i} className={i < FCRA_DISCLOSURE_PARAGRAPHS.length - 1 ? 'mb-3' : ''}>
+                    {p}
+                  </p>
+                ))}
               </div>
 
               <div className="mt-4 space-y-3">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input type="checkbox" checked={consent1} onChange={() => setConsent1(!consent1)} className="mt-0.5 w-4 h-4 rounded border-gray-300 text-navy focus:ring-gold" />
-                  <span className="text-sm text-gray-700">I have read and understand the above disclosure and authorization statement.</span>
+                  <span className="text-sm text-gray-700">{FCRA_CONSENT_CHECKBOX_1}</span>
                 </label>
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input type="checkbox" checked={consent2} onChange={() => setConsent2(!consent2)} className="mt-0.5 w-4 h-4 rounded border-gray-300 text-navy focus:ring-gold" />
-                  <span className="text-sm text-gray-700">I authorize PCG Screening Services to conduct the background screening described above.</span>
+                  <span className="text-sm text-gray-700">{FCRA_CONSENT_CHECKBOX_2}</span>
                 </label>
               </div>
             </div>

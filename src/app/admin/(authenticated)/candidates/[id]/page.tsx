@@ -124,15 +124,28 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
                 </div>
               )}
             </dl>
-            {isDropboxSignConfigured() && (
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <DropboxSignButton
-                  candidateId={c.id}
-                  alreadySent={!!c.dropbox_sign_request_id}
-                  signedDocUrl={c.consent_document_url ?? null}
-                />
-              </div>
-            )}
+            <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+              <Link
+                href={`/admin/candidates/${c.id}/consent`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-medium text-navy hover:text-navy-light transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download Consent Record
+              </Link>
+              {isDropboxSignConfigured() && (
+                <div className="pt-2">
+                  <DropboxSignButton
+                    candidateId={c.id}
+                    alreadySent={!!c.dropbox_sign_request_id}
+                    signedDocUrl={c.consent_document_url ?? null}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

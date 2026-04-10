@@ -1,6 +1,7 @@
 import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase'
+import { FCRA_DISCLOSURE_VERSION } from '@/lib/fcra-disclosure'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,11 +23,18 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     const {
-      clientSlug, firstName, lastName, email, phone,
+      clientSlug, inviteCode, firstName, lastName, email, phone,
       dob, ssn4, address, city, state, zip,
       packageName, packagePrice, signatureData,
       referralSource,
     } = body
+
+    // Audit headers captured at consent time. These get written into the
+    // candidates row alongside consent_signed_at so we can defensibly prove
+    // who signed what, when, and from where.
+    const xff = req.headers.get('x-forwarded-for') || ''
+    const consentIp = xff.split(',')[0].trim() || req.headers.get('x-real-ip') || null
+    const consentUserAgent = req.headers.get('user-agent') || null
 
     // Validate required fields
     if (!clientSlug || !firstName || !lastName || !email || !packageName) {
@@ -54,49 +62,109 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid screening link' }, { status: 400 })
     }
 
-    // Generate unique tracking code
-    let trackingCode = generateTrackingCode()
-    let attempts = 0
-    while (attempts < 5) {
-      const { data: existing } = await supabase
-        .from('candidates')
-        .select('id')
-        .eq('tracking_code', trackingCode)
-        .single()
-      if (!existing) break
-      trackingCode = generateTrackingCode()
-      attempts++
+    // Reconcile-or-insert. If the candidate arrived via an employer-sent
+    // invite link, the row already exists (created by inviteCandidate()).
+    // We update that row in place — same id, same tracking_code — so the
+    // pre-seeded record isn't orphaned. Cross-tenant tampering is blocked
+    // by also matching on client.id (the slug → client lookup above).
+    let candidate: { id: string; tracking_code: string } | null = null
+    let trackingCode: string = ''
+
+    const consentSignedAt = signatureData ? new Date().toISOString() : null
+    const consentColumns = {
+      consent_status: signatureData ? 'signed' : 'pending',
+      consent_signed_at: consentSignedAt,
+      consent_ip: signatureData ? consentIp : null,
+      consent_user_agent: signatureData ? consentUserAgent : null,
+      consent_method: signatureData ? 'canvas' : null,
+      consent_signature_data_url: signatureData || null,
+      consent_disclosure_version: signatureData ? FCRA_DISCLOSURE_VERSION : null,
     }
 
-    // Create candidate record
-    const { data: candidate, error: candidateError } = await supabase
-      .from('candidates')
-      .insert({
-        tracking_code: trackingCode,
-        client_id: client.id,
-        client_slug: client.slug,
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        email: email.trim().toLowerCase(),
-        phone: phone || null,
-        dob: dob || null,
-        ssn_last4: ssn4 || null,
-        address: address ? `${address}, ${city}, ${state} ${zip}` : null,
-        package_name: packageName,
-        package_price: packagePrice || 0,
-        status: 'submitted',
-        consent_status: signatureData ? 'signed' : 'pending',
-        consent_signed_at: signatureData ? new Date().toISOString() : null,
-        payment_status: 'pending',
-        source: 'candidate_portal',
-        referral_source: referralSource || null,
-      })
-      .select('id, tracking_code')
-      .single()
+    if (inviteCode) {
+      const { data: existing } = await supabase
+        .from('candidates')
+        .select('id, tracking_code, payment_status')
+        .eq('tracking_code', inviteCode)
+        .eq('client_id', client.id)
+        .maybeSingle()
 
-    if (candidateError) {
-      console.error('Candidate insert error:', candidateError)
-      return NextResponse.json({ error: 'Failed to create record' }, { status: 500 })
+      if (existing && existing.payment_status !== 'paid') {
+        const { data: updated, error: updErr } = await supabase
+          .from('candidates')
+          .update({
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            email: email.trim().toLowerCase(),
+            phone: phone || null,
+            dob: dob || null,
+            ssn_last4: ssn4 || null,
+            address: address ? `${address}, ${city}, ${state} ${zip}` : null,
+            package_name: packageName,
+            package_price: packagePrice || 0,
+            status: 'submitted',
+            payment_status: 'pending',
+            referral_source: referralSource || null,
+            ...consentColumns,
+          })
+          .eq('id', existing.id)
+          .select('id, tracking_code')
+          .single()
+
+        if (updErr) {
+          console.error('Candidate update (invite reconcile) error:', updErr)
+          return NextResponse.json({ error: 'Failed to update record' }, { status: 500 })
+        }
+        candidate = updated
+        trackingCode = updated.tracking_code
+      }
+    }
+
+    if (!candidate) {
+      // Fallthrough: no invite code, OR invite not found, OR already paid.
+      // Generate a fresh unique tracking code and INSERT a new row.
+      trackingCode = generateTrackingCode()
+      let attempts = 0
+      while (attempts < 5) {
+        const { data: existing } = await supabase
+          .from('candidates')
+          .select('id')
+          .eq('tracking_code', trackingCode)
+          .single()
+        if (!existing) break
+        trackingCode = generateTrackingCode()
+        attempts++
+      }
+
+      const { data: inserted, error: candidateError } = await supabase
+        .from('candidates')
+        .insert({
+          tracking_code: trackingCode,
+          client_id: client.id,
+          client_slug: client.slug,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          email: email.trim().toLowerCase(),
+          phone: phone || null,
+          dob: dob || null,
+          ssn_last4: ssn4 || null,
+          address: address ? `${address}, ${city}, ${state} ${zip}` : null,
+          package_name: packageName,
+          package_price: packagePrice || 0,
+          status: 'submitted',
+          payment_status: 'pending',
+          source: 'candidate_portal',
+          referral_source: referralSource || null,
+          ...consentColumns,
+        })
+        .select('id, tracking_code')
+        .single()
+
+      if (candidateError || !inserted) {
+        console.error('Candidate insert error:', candidateError)
+        return NextResponse.json({ error: 'Failed to create record' }, { status: 500 })
+      }
+      candidate = inserted
     }
 
     // Also insert into submissions table for backwards compatibility

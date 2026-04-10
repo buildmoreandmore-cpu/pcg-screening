@@ -87,7 +87,7 @@ export async function inviteCandidate({
       candidateName: firstName,
       companyName: client.name,
       packageName,
-      applyUrl: `${siteUrl}/?client=${client.slug}`,
+      applyUrl: `${siteUrl}/apply/${client.slug}?invite=${trackingCode}`,
     }),
   })
 
