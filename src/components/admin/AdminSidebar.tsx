@@ -62,9 +62,9 @@ export default function AdminSidebar({ adminName, adminEmail }: { adminName: str
 
   const navContent = (
     <>
-      <div className="p-5 border-b border-white/10">
-        <Link href="/" className="inline-block bg-white/95 rounded-lg px-3 py-2" aria-label="Back to home">
-          <img src="/Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG" className="h-10 object-contain" />
+      <div className="px-4 py-5 border-b border-white/10 flex flex-col items-center">
+        <Link href="/" className="inline-block" aria-label="Back to home">
+          <img src="/Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG" className="h-20 object-contain" />
         </Link>
         <p className="text-[10px] text-gold uppercase tracking-widest mt-2 font-medium">Admin Dashboard</p>
       </div>
