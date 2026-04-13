@@ -364,19 +364,6 @@ export default function UserGuidePage() {
         </section>
       </div>
 
-      {/* Print styles */}
-      <style jsx global>{`
-        @media print {
-          .no-print, .print-btn, nav, header, aside, footer,
-          [class*="BottomNav"], [class*="Sidebar"], [class*="MobileHeader"],
-          [class*="RequestHelp"], [class*="Announcement"] {
-            display: none !important;
-          }
-          main { margin: 0 !important; padding: 0 !important; }
-          .guide-content { box-shadow: none !important; border: none !important; padding: 0 !important; }
-          body { background: white !important; }
-        }
-      `}</style>
     </div>
   )
 }
