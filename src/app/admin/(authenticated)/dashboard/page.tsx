@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
 import StatusBadge from '@/components/portal/StatusBadge'
-// PatrickPopup is now rendered in the admin layout (available on all pages)
+// ParkerPopup is rendered in the admin layout (available on all pages)
 
 function timeAgo(date: string) {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
@@ -160,7 +160,7 @@ export default async function AdminDashboard() {
         </Link>
       </div>
 
-      {/* PatrickPopup moved to admin layout */}
+      {/* ParkerPopup moved to admin layout */}
     </div>
   )
 }

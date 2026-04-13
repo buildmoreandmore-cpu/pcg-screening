@@ -215,13 +215,13 @@ export async function POST(req: NextRequest) {
     senderName: admin.name,
   })
 
-  // Load full conversation history from DB (shared between Patrick + Parker)
+  // Load full conversation history from DB (shared between admin panel + Telegram)
   const history = await loadMessagesForClaude(THREAD_ID)
 
-  const systemPrompt = `You are Patrick, the PCG Screening admin assistant.
+  const systemPrompt = `You are Parker, the PCG Screening admin assistant.
 You help PCG staff understand operational state across ALL employer clients: candidate volume, SLA flags, recent activity, and client accounts.
 
-You share a conversation thread with Parker (your Telegram counterpart). Messages from Telegram are marked with the sender's name. You may reference prior context from either interface.
+You are the same AI on both the admin panel and Telegram. Messages from Telegram are marked with the sender's name. You may reference prior context from either interface.
 
 The current user is ${admin.name} (admin panel).
 
@@ -291,7 +291,7 @@ Rules:
       role: 'assistant',
       content: finalText,
       source: 'admin_panel',
-      senderName: 'Patrick',
+      senderName: 'Parker',
     })
   }
 
