@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getAdminUser } from '@/lib/admin-auth'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import AdminCobrowseButton from '@/components/cobrowse/AdminCobrowseButton'
+import PatrickPopup from '@/components/admin/PatrickPopup'
 
 export default async function AdminAuthLayout({ children }: { children: React.ReactNode }) {
   const admin = await getAdminUser()
@@ -21,6 +22,7 @@ export default async function AdminAuthLayout({ children }: { children: React.Re
           {children}
         </div>
       </main>
+      <PatrickPopup />
     </div>
   )
 }
