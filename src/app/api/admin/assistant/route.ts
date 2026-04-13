@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { requireAdmin } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { loadMessagesForClaude, saveMessage } from '@/lib/agent-messages'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
 const MODEL = 'claude-sonnet-4-5-20250929'
+const THREAD_ID = 'pcg-admin'
 
 type Role = 'user' | 'assistant'
 interface ClientMessage {
@@ -193,13 +195,35 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json().catch(() => ({}))
-  const messages: ClientMessage[] = Array.isArray(body.messages) ? body.messages : []
-  if (messages.length === 0) {
+  const incomingMessages: ClientMessage[] = Array.isArray(body.messages) ? body.messages : []
+  if (incomingMessages.length === 0) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 })
   }
 
-  const systemPrompt = `You are Patrick, the PCG Screening admin assistant for ${admin.name}.
+  // The latest user message is what we need to save + process
+  const latestUserMsg = incomingMessages[incomingMessages.length - 1]
+  if (latestUserMsg?.role !== 'user') {
+    return NextResponse.json({ error: 'last message must be from user' }, { status: 400 })
+  }
+
+  // Save the user message to shared conversation
+  await saveMessage({
+    threadId: THREAD_ID,
+    role: 'user',
+    content: latestUserMsg.content,
+    source: 'admin_panel',
+    senderName: admin.name,
+  })
+
+  // Load full conversation history from DB (shared between Patrick + Parker)
+  const history = await loadMessagesForClaude(THREAD_ID)
+
+  const systemPrompt = `You are Patrick, the PCG Screening admin assistant.
 You help PCG staff understand operational state across ALL employer clients: candidate volume, SLA flags, recent activity, and client accounts.
+
+You share a conversation thread with Parker (your Telegram counterpart). Messages from Telegram are marked with the sender's name. You may reference prior context from either interface.
+
+The current user is ${admin.name} (admin panel).
 
 Rules:
 - Always call a tool to get live data — never invent numbers, names, or statuses.
@@ -209,7 +233,8 @@ Rules:
 
   const anthropic = new Anthropic({ apiKey })
 
-  const conversation: Anthropic.Messages.MessageParam[] = messages.map((m) => ({
+  // Use DB history as conversation context
+  const conversation: Anthropic.Messages.MessageParam[] = history.map((m) => ({
     role: m.role,
     content: m.content,
   }))
@@ -257,6 +282,17 @@ Rules:
       }
     }
     conversation.push({ role: 'user', content: toolResults })
+  }
+
+  // Save assistant reply to shared conversation
+  if (finalText) {
+    await saveMessage({
+      threadId: THREAD_ID,
+      role: 'assistant',
+      content: finalText,
+      source: 'admin_panel',
+      senderName: 'Patrick',
+    })
   }
 
   return NextResponse.json({ reply: finalText })

@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 interface Message {
   role: 'user' | 'assistant'
   content: string
+  source?: string
+  sender_name?: string
 }
 
 const SUGGESTIONS = [
@@ -19,7 +21,22 @@ export default function PatrickPopup() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [historyLoaded, setHistoryLoaded] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Load shared conversation history when panel opens
+  useEffect(() => {
+    if (!open || historyLoaded) return
+    fetch('/api/agent/messages?thread_id=pcg-admin&limit=30')
+      .then((r) => (r.ok ? r.json() : { messages: [] }))
+      .then((data) => {
+        if (data.messages?.length) {
+          setMessages(data.messages)
+        }
+        setHistoryLoaded(true)
+      })
+      .catch(() => setHistoryLoaded(true))
+  }, [open, historyLoaded])
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -31,7 +48,7 @@ export default function PatrickPopup() {
     const trimmed = text.trim()
     if (!trimmed || loading) return
     setError('')
-    const next: Message[] = [...messages, { role: 'user', content: trimmed }]
+    const next: Message[] = [...messages, { role: 'user', content: trimmed, source: 'admin_panel' }]
     setMessages(next)
     setInput('')
     setLoading(true)
@@ -39,14 +56,19 @@ export default function PatrickPopup() {
       const res = await fetch('/api/admin/assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({
+          messages: next.map((m) => ({ role: m.role, content: m.content })),
+        }),
       })
       const data = await res.json()
       if (!res.ok) {
         setError(data.error || 'Patrick failed')
         return
       }
-      setMessages([...next, { role: 'assistant', content: data.reply || '(no reply)' }])
+      setMessages([
+        ...next,
+        { role: 'assistant', content: data.reply || '(no reply)', source: 'admin_panel', sender_name: 'Patrick' },
+      ])
     } catch (err: any) {
       setError(err?.message || 'Network error')
     } finally {
@@ -86,7 +108,7 @@ export default function PatrickPopup() {
               </div>
               <div>
                 <p className="font-heading text-navy text-base leading-tight">Patrick</p>
-                <p className="text-[11px] text-gray-500">PCG admin assistant · BETA</p>
+                <p className="text-[11px] text-gray-500">PCG admin assistant</p>
               </div>
             </div>
             <button
@@ -103,7 +125,7 @@ export default function PatrickPopup() {
 
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-            {messages.length === 0 && (
+            {messages.length === 0 && !loading && (
               <div className="text-center py-6">
                 <p className="text-sm text-gray-600 mb-4">
                   Ask about candidates, SLA flags, recent activity, or client accounts.
@@ -127,21 +149,31 @@ export default function PatrickPopup() {
                 key={i}
                 className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div
-                  className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed ${
-                    m.role === 'user'
-                      ? 'bg-navy text-white rounded-br-sm'
-                      : 'bg-gray-50 text-gray-900 rounded-bl-sm'
-                  }`}
-                >
-                  {m.content}
+                <div className="max-w-[85%]">
+                  {/* Show source label for Telegram messages */}
+                  {m.source === 'telegram' && m.role === 'user' && (
+                    <p className="text-[10px] text-gray-400 mb-0.5 px-1">
+                      via Telegram {m.sender_name ? `(${m.sender_name})` : ''}
+                    </p>
+                  )}
+                  <div
+                    className={`px-3.5 py-2.5 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed ${
+                      m.role === 'user'
+                        ? m.source === 'telegram'
+                          ? 'bg-indigo-600 text-white rounded-br-sm'
+                          : 'bg-navy text-white rounded-br-sm'
+                        : 'bg-gray-50 text-gray-900 rounded-bl-sm'
+                    }`}
+                  >
+                    {m.content}
+                  </div>
                 </div>
               </div>
             ))}
             {loading && (
               <div className="flex justify-start">
                 <div className="bg-gray-50 text-gray-500 px-3.5 py-2.5 rounded-2xl rounded-bl-sm text-sm">
-                  Patrick is thinking…
+                  Patrick is thinking...
                 </div>
               </div>
             )}
@@ -162,7 +194,7 @@ export default function PatrickPopup() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask Patrick…"
+              placeholder="Ask Patrick..."
               className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
               disabled={loading}
             />
