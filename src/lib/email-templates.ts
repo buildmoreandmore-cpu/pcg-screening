@@ -252,3 +252,30 @@ export function buildScreeningCompleteEmail({
     </p>
   `)
 }
+
+export function buildReportDeliveryEmail({
+  candidateName,
+  packageName,
+  trackingCode,
+  attachmentCount,
+}: {
+  candidateName: string
+  packageName: string
+  trackingCode: string
+  attachmentCount: number
+}) {
+  return emailWrapper(`
+    <h1>Background Screening Report</h1>
+    <p>Please find attached the background screening report for <strong>${candidateName}</strong>.</p>
+    <div class="tracking">
+      <p style="margin:0; color: #8a8680; font-size: 12px;">Tracking Code</p>
+      <p class="tracking-code" style="margin:4px 0 0;">${trackingCode}</p>
+    </div>
+    <p><strong>Package:</strong> ${packageName}</p>
+    ${attachmentCount > 0 ? `<p>This report includes <strong>${attachmentCount} supplementary document${attachmentCount > 1 ? 's' : ''}</strong> attached to this email.</p>` : ''}
+    <p style="font-size: 13px; color: #8a8680; margin-top: 20px;">
+      This report is confidential and intended solely for the authorized recipient.
+      If you have questions, contact us at <a href="mailto:accounts@pcgscreening.com" style="color: #c9a44c;">accounts@pcgscreening.com</a> or 770-716-1278.
+    </p>
+  `)
+}
