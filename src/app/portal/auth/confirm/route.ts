@@ -58,16 +58,32 @@ export async function GET(request: NextRequest) {
     },
   })
 
-  const { error } = await supabase.auth.verifyOtp({
+  const { data, error } = await supabase.auth.verifyOtp({
     type,
     token_hash: tokenHash,
   })
 
-  if (error) {
+  if (error || !data.session) {
     return NextResponse.redirect(
       `${origin}/portal/login?error=${encodeURIComponent('link_expired')}`
     )
   }
 
-  return response
+  // Pass session tokens as URL hash fragments so the browser client can
+  // establish the session immediately. This is more reliable than relying
+  // on httpOnly cookies which createBrowserClient can't read via JS.
+  const hashParams = new URLSearchParams({
+    access_token: data.session.access_token,
+    refresh_token: data.session.refresh_token,
+    type: type,
+  })
+  const redirectWithHash = `${origin}${next}#${hashParams.toString()}`
+
+  // Copy the auth cookies onto the hash-redirect response too (belt & suspenders).
+  const hashResponse = NextResponse.redirect(redirectWithHash)
+  response.cookies.getAll().forEach(({ name, value }) => {
+    hashResponse.cookies.set(name, value)
+  })
+
+  return hashResponse
 }

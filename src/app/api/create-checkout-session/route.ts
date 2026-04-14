@@ -26,10 +26,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const {
       clientSlug, inviteCode, firstName, lastName, maidenName, email, phone,
-      dob, ssn, sex, race, driversLicense, dlState,
+      dob, ssn, sex, race, driversLicense, dlState, dlClass, dlExpiration,
       address, city, state, zip,
       packageName, packagePrice, signatureData, signatureMethod,
-      referralSource, referralEmployer,
+      referralSource, referralEmployer, additionalDetails,
     } = body
     // Derive last-4 for legacy column from full SSN
     const ssn4 = ssn ? ssn.slice(-4) : null
@@ -115,12 +115,15 @@ export async function POST(req: NextRequest) {
             race: race || null,
             drivers_license_number: driversLicense?.trim() || null,
             drivers_license_state: dlState || null,
+            drivers_license_class: dlClass || null,
+            drivers_license_expiration: dlExpiration || null,
             address: address ? `${address}, ${city}, ${state} ${zip}` : null,
             package_name: packageName,
             package_price: packagePrice || 0,
             status: 'submitted',
             payment_status: 'pending',
             referral_source: referralSource || null,
+            additional_details: additionalDetails || {},
             ...consentColumns,
           })
           .eq('id', existing.id)
@@ -170,6 +173,8 @@ export async function POST(req: NextRequest) {
           race: race || null,
           drivers_license_number: driversLicense?.trim() || null,
           drivers_license_state: dlState || null,
+          drivers_license_class: dlClass || null,
+          drivers_license_expiration: dlExpiration || null,
           address: address ? `${address}, ${city}, ${state} ${zip}` : null,
           package_name: packageName,
           package_price: packagePrice || 0,
@@ -177,6 +182,7 @@ export async function POST(req: NextRequest) {
           payment_status: 'pending',
           source: 'candidate_portal',
           referral_source: referralSource || null,
+          additional_details: additionalDetails || {},
           ...consentColumns,
         })
         .select('id, tracking_code')

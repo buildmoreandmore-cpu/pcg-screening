@@ -68,6 +68,8 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
   const [race, setRace] = useState('')
   const [driversLicense, setDriversLicense] = useState('')
   const [dlState, setDlState] = useState('')
+  const [dlClass, setDlClass] = useState('')
+  const [dlExpiration, setDlExpiration] = useState('')
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
   const [state, setState] = useState('')
@@ -75,6 +77,29 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
   const [referralSource, setReferralSource] = useState('')
   const [referralOther, setReferralOther] = useState('')
   const [referralEmployer, setReferralEmployer] = useState('')
+
+  // Conditional service-specific fields
+  const [eduSchool, setEduSchool] = useState('')
+  const [eduDegree, setEduDegree] = useState('')
+  const [eduGraduated, setEduGraduated] = useState('')
+  const [eduGradYear, setEduGradYear] = useState('')
+  const [empEmployer, setEmpEmployer] = useState('')
+  const [empTitle, setEmpTitle] = useState('')
+  const [empFrom, setEmpFrom] = useState('')
+  const [empTo, setEmpTo] = useState('')
+  const [empSupervisor, setEmpSupervisor] = useState('')
+  const [empSupervisorPhone, setEmpSupervisorPhone] = useState('')
+  const [licType, setLicType] = useState('')
+  const [licNumber, setLicNumber] = useState('')
+  const [licState, setLicState] = useState('')
+  const [licExpiration, setLicExpiration] = useState('')
+  const [intlCountries, setIntlCountries] = useState('')
+  const [ref1Name, setRef1Name] = useState('')
+  const [ref1Phone, setRef1Phone] = useState('')
+  const [ref1Relationship, setRef1Relationship] = useState('')
+  const [ref2Name, setRef2Name] = useState('')
+  const [ref2Phone, setRef2Phone] = useState('')
+  const [ref2Relationship, setRef2Relationship] = useState('')
 
   // Step 2 — Package
   const [selectedPackage, setSelectedPackage] = useState(
@@ -150,6 +175,13 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
     return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`
   }
 
+  // Determine which screening components are active for the selected package
+  function getActiveComponents(): Set<string> {
+    const pkg = packages.find(p => p.name === selectedPackage)
+    if (!pkg?.components) return new Set()
+    return new Set(Object.entries(pkg.components).filter(([, v]) => v).map(([k]) => k))
+  }
+
   function validateStep1() {
     const e: Record<string, string> = {}
     if (!firstName.trim()) e.firstName = 'Required'
@@ -171,6 +203,32 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
     if (!state) e.state = 'Required'
     if (!/^\d{5}$/.test(zip)) e.zip = '5 digit zip required'
     if (referralSource === 'referral' && !referralEmployer.trim()) e.referralEmployer = 'Please name the employer or contact'
+
+    // Conditional field validation based on active screening components
+    const active = getActiveComponents()
+    if (active.has('education')) {
+      if (!eduSchool.trim()) e.eduSchool = 'Required'
+      if (!eduDegree) e.eduDegree = 'Required'
+      if (!eduGraduated) e.eduGraduated = 'Required'
+      if (eduGraduated === 'yes' && !eduGradYear) e.eduGradYear = 'Required'
+    }
+    if (active.has('employment')) {
+      if (!empEmployer.trim()) e.empEmployer = 'Required'
+      if (!empTitle.trim()) e.empTitle = 'Required'
+    }
+    if (active.has('professional_license')) {
+      if (!licType.trim()) e.licType = 'Required'
+      if (!licNumber.trim()) e.licNumber = 'Required'
+    }
+    if (active.has('international_search')) {
+      if (!intlCountries.trim()) e.intlCountries = 'Required'
+    }
+    if (active.has('references')) {
+      if (!ref1Name.trim()) e.ref1Name = 'Required'
+      if (!ref1Phone.trim()) e.ref1Phone = 'Required'
+      if (!ref1Relationship.trim()) e.ref1Relationship = 'Required'
+    }
+
     setErrors(e)
     if (Object.keys(e).length > 0) showToast('Please complete all required fields')
     return Object.keys(e).length === 0
@@ -206,6 +264,28 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
     const pkg = packages.find(p => p.name === selectedPackage)
 
     try {
+      // Build additional details based on active screening components
+      const additionalDetails: Record<string, unknown> = {}
+      const activeComponents = getActiveComponents()
+      if (activeComponents.has('education')) {
+        additionalDetails.education = { school: eduSchool, degree: eduDegree, graduated: eduGraduated, graduationYear: eduGradYear || null }
+      }
+      if (activeComponents.has('employment')) {
+        additionalDetails.employment = { employer: empEmployer, title: empTitle, from: empFrom || null, to: empTo || null, supervisor: empSupervisor || null, supervisorPhone: empSupervisorPhone.replace(/\D/g, '') || null }
+      }
+      if (activeComponents.has('professional_license')) {
+        additionalDetails.professionalLicense = { type: licType, number: licNumber, state: licState || null, expiration: licExpiration || null }
+      }
+      if (activeComponents.has('international_search')) {
+        additionalDetails.internationalCountries = intlCountries
+      }
+      if (activeComponents.has('references')) {
+        additionalDetails.references = [
+          { name: ref1Name, phone: ref1Phone.replace(/\D/g, ''), relationship: ref1Relationship },
+          ...(ref2Name ? [{ name: ref2Name, phone: ref2Phone.replace(/\D/g, ''), relationship: ref2Relationship }] : []),
+        ]
+      }
+
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -217,7 +297,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
           dob,
           ssn: ssn.replace(/\D/g, ''),
           sex, race,
-          driversLicense, dlState,
+          driversLicense, dlState, dlClass, dlExpiration,
           address, city, state, zip,
           packageName: selectedPackage,
           packagePrice: pkg?.price || 0,
@@ -225,6 +305,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
           signatureMethod: signatureMode === 'typed' ? 'typed' : 'canvas',
           referralSource: referralSource === 'other' ? (referralOther.trim() || 'other') : referralSource,
           referralEmployer: referralSource === 'referral' ? referralEmployer.trim() : undefined,
+          additionalDetails: Object.keys(additionalDetails).length > 0 ? additionalDetails : undefined,
         }),
       })
 
@@ -514,18 +595,36 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                   {errors.race && <p className="text-[11px] text-red-500 mt-0.5">{errors.race}</p>}
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2">
-                  <Field label="Driver's License / ID #" value={driversLicense} onChange={setDriversLicense} error={errors.driversLicense} />
-                </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Driver's License / ID #" value={driversLicense} onChange={setDriversLicense} error={errors.driversLicense} />
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">DL State <span className="text-red-400">*</span></label>
+                  <label className="block text-xs text-gray-500 mb-1">Issuing State <span className="text-red-400">*</span></label>
                   <select value={dlState} onChange={(e) => setDlState(e.target.value)} className={`w-full px-2 py-2.5 rounded-lg border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent ${errors.dlState ? 'border-red-300' : 'border-gray-200'}`}>
                     <option value="">—</option>
                     {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                   {errors.dlState && <p className="text-[11px] text-red-500 mt-0.5">{errors.dlState}</p>}
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">DL Class</label>
+                  <select value={dlClass} onChange={(e) => setDlClass(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent">
+                    <option value="">— Select —</option>
+                    <option value="A">Class A</option>
+                    <option value="B">Class B</option>
+                    <option value="C">Class C</option>
+                    <option value="D">Class D</option>
+                    <option value="M">Class M (Motorcycle)</option>
+                    <option value="CDL-A">CDL-A</option>
+                    <option value="CDL-B">CDL-B</option>
+                    <option value="CDL-C">CDL-C</option>
+                    <option value="Permit">Permit</option>
+                    <option value="Other">Other</option>
+                    <option value="N/A">N/A</option>
+                  </select>
+                </div>
+                <Field label="DL Expiration Date" type="date" value={dlExpiration} onChange={setDlExpiration} />
               </div>
               <Field label="Street Address" value={address} onChange={setAddress} error={errors.address} />
               <div className="grid grid-cols-5 gap-2">
@@ -571,6 +670,126 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                 </div>
               )}
             </div>
+
+            {/* Conditional service-specific fields based on package components */}
+            {(() => {
+              const active = getActiveComponents()
+              if (active.size === 0) return null
+              const hasConditional = active.has('education') || active.has('employment') || active.has('professional_license') || active.has('international_search') || active.has('references')
+              if (!hasConditional) return null
+              return (
+                <div className="bg-white rounded-xl shadow-sm p-5 space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-navy">Additional Details Required</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Based on the screening package, we need a few more details.</p>
+                  </div>
+
+                  {active.has('education') && (
+                    <div className="space-y-3 border-t border-gray-100 pt-4">
+                      <p className="text-xs font-semibold text-navy uppercase tracking-wide">Education Verification</p>
+                      <Field label="School / University Name" value={eduSchool} onChange={setEduSchool} error={errors.eduSchool} />
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Degree / Diploma Type <span className="text-red-400">*</span></label>
+                        <select value={eduDegree} onChange={(e) => setEduDegree(e.target.value)} className={`w-full px-3 py-2.5 rounded-lg border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent ${errors.eduDegree ? 'border-red-300' : 'border-gray-200'}`}>
+                          <option value="">— Select —</option>
+                          <option value="High School Diploma">High School Diploma</option>
+                          <option value="GED">GED</option>
+                          <option value="Associate's">Associate&apos;s Degree</option>
+                          <option value="Bachelor's">Bachelor&apos;s Degree</option>
+                          <option value="Master's">Master&apos;s Degree</option>
+                          <option value="Doctorate">Doctorate</option>
+                          <option value="Certificate">Certificate / Certification</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        {errors.eduDegree && <p className="text-[11px] text-red-500 mt-0.5">{errors.eduDegree}</p>}
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Did you graduate? <span className="text-red-400">*</span></label>
+                          <div className="flex gap-4 mt-1.5">
+                            <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
+                              <input type="radio" name="eduGraduated" value="yes" checked={eduGraduated === 'yes'} onChange={() => setEduGraduated('yes')} className="accent-navy" />
+                              Yes
+                            </label>
+                            <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
+                              <input type="radio" name="eduGraduated" value="no" checked={eduGraduated === 'no'} onChange={() => { setEduGraduated('no'); setEduGradYear('') }} className="accent-navy" />
+                              No
+                            </label>
+                          </div>
+                          {errors.eduGraduated && <p className="text-[11px] text-red-500 mt-0.5">{errors.eduGraduated}</p>}
+                        </div>
+                        {eduGraduated === 'yes' && (
+                          <Field label="Graduation Year" value={eduGradYear} onChange={(v) => setEduGradYear(v.replace(/\D/g, '').slice(0, 4))} error={errors.eduGradYear} inputMode="numeric" maxLength={4} placeholder="e.g. 2020" />
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {active.has('employment') && (
+                    <div className="space-y-3 border-t border-gray-100 pt-4">
+                      <p className="text-xs font-semibold text-navy uppercase tracking-wide">Employment Verification</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="Most Recent Employer" value={empEmployer} onChange={setEmpEmployer} error={errors.empEmployer} />
+                        <Field label="Job Title" value={empTitle} onChange={setEmpTitle} error={errors.empTitle} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="Employment Start Date" type="date" value={empFrom} onChange={setEmpFrom} />
+                        <Field label="Employment End Date" type="date" value={empTo} onChange={setEmpTo} placeholder="Leave blank if current" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="Supervisor Name" value={empSupervisor} onChange={setEmpSupervisor} placeholder="Optional" />
+                        <Field label="Supervisor Phone" type="tel" value={empSupervisorPhone} onChange={(v) => setEmpSupervisorPhone(formatPhone(v))} placeholder="Optional" inputMode="tel" />
+                      </div>
+                    </div>
+                  )}
+
+                  {active.has('professional_license') && (
+                    <div className="space-y-3 border-t border-gray-100 pt-4">
+                      <p className="text-xs font-semibold text-navy uppercase tracking-wide">Professional License</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="License Type" value={licType} onChange={setLicType} error={errors.licType} placeholder="e.g. RN, CPA, CDL" />
+                        <Field label="License Number" value={licNumber} onChange={setLicNumber} error={errors.licNumber} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Issuing State</label>
+                          <select value={licState} onChange={(e) => setLicState(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent">
+                            <option value="">— Select —</option>
+                            {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                        <Field label="Expiration Date" type="date" value={licExpiration} onChange={setLicExpiration} />
+                      </div>
+                    </div>
+                  )}
+
+                  {active.has('international_search') && (
+                    <div className="space-y-3 border-t border-gray-100 pt-4">
+                      <p className="text-xs font-semibold text-navy uppercase tracking-wide">International Criminal Check</p>
+                      <Field label="Country or countries to search" value={intlCountries} onChange={setIntlCountries} error={errors.intlCountries} placeholder="e.g. Canada, United Kingdom, Mexico" />
+                    </div>
+                  )}
+
+                  {active.has('references') && (
+                    <div className="space-y-3 border-t border-gray-100 pt-4">
+                      <p className="text-xs font-semibold text-navy uppercase tracking-wide">Professional References</p>
+                      <p className="text-xs text-gray-500">Reference 1 <span className="text-red-400">*</span></p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <Field label="Full Name" value={ref1Name} onChange={setRef1Name} error={errors.ref1Name} />
+                        <Field label="Phone" type="tel" value={ref1Phone} onChange={(v) => setRef1Phone(formatPhone(v))} error={errors.ref1Phone} inputMode="tel" />
+                        <Field label="Relationship" value={ref1Relationship} onChange={setRef1Relationship} error={errors.ref1Relationship} placeholder="e.g. Manager" />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">Reference 2 (optional)</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <Field label="Full Name" value={ref2Name} onChange={setRef2Name} />
+                        <Field label="Phone" type="tel" value={ref2Phone} onChange={(v) => setRef2Phone(formatPhone(v))} inputMode="tel" />
+                        <Field label="Relationship" value={ref2Relationship} onChange={setRef2Relationship} placeholder="e.g. Colleague" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             <button onClick={goNext} className="w-full bg-navy text-white py-3 rounded-xl font-medium text-sm flex items-center justify-center gap-2 hover:bg-navy-light transition-colors">
               Continue
