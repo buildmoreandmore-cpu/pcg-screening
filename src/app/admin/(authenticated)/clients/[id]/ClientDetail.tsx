@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import StatusBadge from '@/components/portal/StatusBadge'
 import ClientSettingsForm from '@/components/admin/ClientSettingsForm'
 import ClientPackagesManager from '@/components/admin/ClientPackagesManager'
-import { addClientUser, toggleClientUser, resendPortalInvite } from '@/app/admin/actions/clients'
+import { addClientUser, toggleClientUser, resendPortalInvite, resetClientUserPassword } from '@/app/admin/actions/clients'
 
 function timeAgo(date: string) {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
@@ -41,6 +41,18 @@ export default function ClientDetail({
   const [userRole, setUserRole] = useState('user')
   const [addingUser, setAddingUser] = useState(false)
   const [resendingId, setResendingId] = useState<string | null>(null)
+  const [resettingId, setResettingId] = useState<string | null>(null)
+
+  async function handleResetPassword(userId: string) {
+    setResettingId(userId)
+    const result = await resetClientUserPassword({ userId })
+    setResettingId(null)
+    if (result.error) {
+      alert(result.error)
+    } else {
+      alert(`Password reset email sent to ${result.sentTo}`)
+    }
+  }
 
   async function handleResendInvite(userId: string) {
     setResendingId(userId)
@@ -222,6 +234,13 @@ export default function ClientDetail({
                 <div className="flex items-center gap-3">
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${u.role === 'admin' ? 'bg-navy/10 text-navy' : 'bg-gray-100 text-gray-600'}`}>{u.role}</span>
                   <span className={`text-xs ${u.active ? 'text-green-600' : 'text-gray-400'}`}>{u.active ? 'Active' : 'Inactive'}</span>
+                  <button
+                    onClick={() => handleResetPassword(u.id)}
+                    disabled={resettingId === u.id}
+                    className="text-xs text-gray-400 hover:text-gold transition-colors disabled:opacity-50"
+                  >
+                    {resettingId === u.id ? 'Sending...' : 'Reset password'}
+                  </button>
                   <button
                     onClick={() => handleResendInvite(u.id)}
                     disabled={resendingId === u.id}

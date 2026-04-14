@@ -3,7 +3,7 @@
 import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/auth'
 import { Resend } from 'resend'
-import { buildTeamInviteEmail } from '@/lib/email-templates'
+import { buildTeamInviteEmail, buildPasswordResetEmail } from '@/lib/email-templates'
 
 export async function inviteTeamMember({
   name,
@@ -77,4 +77,59 @@ export async function deactivateTeamMember(memberId: string) {
   if (error) return { error: 'Failed to remove team member' }
 
   return {}
+}
+
+/**
+ * Employer admin resets a team member's password by sending a recovery email.
+ */
+export async function resetTeamMemberPassword(memberId: string) {
+  const clientUser = await requireAdmin()
+  const supabase = createAdminClient()
+
+  // Can't reset your own password this way — use settings
+  if (memberId === clientUser.id) {
+    return { error: 'Use your Settings page to change your own password' }
+  }
+
+  const { data: member, error: memberErr } = await supabase
+    .from('client_users')
+    .select('id, email, name, auth_user_id')
+    .eq('id', memberId)
+    .eq('client_id', clientUser.client_id)
+    .single()
+
+  if (memberErr || !member) return { error: 'Team member not found' }
+  if (!member.email) return { error: 'Member has no email address' }
+  if (!member.auth_user_id) return { error: 'Member has no account yet — resend their invite instead' }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pcgscreening.net'
+  const next = '/portal/reset-password'
+
+  const linkRes = await supabase.auth.admin.generateLink({
+    type: 'recovery',
+    email: member.email,
+    options: { redirectTo: `${siteUrl}${next}` },
+  })
+
+  if (linkRes.error || !linkRes.data?.properties?.hashed_token) {
+    return { error: `Failed to generate reset link: ${linkRes.error?.message || 'Unknown error'}` }
+  }
+
+  const hashedToken = linkRes.data.properties.hashed_token
+  const resetUrl = `${siteUrl}/portal/auth/confirm?token_hash=${encodeURIComponent(hashedToken)}&type=recovery&next=${encodeURIComponent(next)}`
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    await resend.emails.send({
+      from: process.env.FROM_EMAIL || 'PCG Screening <accounts@pcgscreening.com>',
+      to: member.email,
+      subject: 'Reset your PCG Screening password',
+      html: buildPasswordResetEmail({ name: member.name || 'there', resetUrl }),
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return { error: `Reset link generated but email failed: ${message}` }
+  }
+
+  return { ok: true as const, sentTo: member.email }
 }

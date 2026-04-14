@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { inviteTeamMember, deactivateTeamMember } from '@/app/portal/actions/team'
+import { inviteTeamMember, deactivateTeamMember, resetTeamMemberPassword } from '@/app/portal/actions/team'
 
 type Member = {
   id: string
@@ -24,6 +24,7 @@ export default function TeamManager({
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('user')
   const [loading, setLoading] = useState(false)
+  const [resettingId, setResettingId] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -50,6 +51,17 @@ export default function TeamManager({
 
     // Refresh page to show new member
     window.location.reload()
+  }
+
+  async function handleResetPassword(memberId: string) {
+    setResettingId(memberId)
+    const result = await resetTeamMemberPassword(memberId)
+    setResettingId(null)
+    if (result.error) {
+      alert(result.error)
+    } else {
+      alert(`Password reset email sent to ${result.sentTo}`)
+    }
   }
 
   async function handleDeactivate(memberId: string, memberName: string) {
@@ -156,12 +168,21 @@ export default function TeamManager({
                 {m.role}
               </span>
               {m.id !== currentUserId && (
-                <button
-                  onClick={() => handleDeactivate(m.id, m.name)}
-                  className="text-xs text-gray-400 hover:text-red-500 transition-colors"
-                >
-                  Remove
-                </button>
+                <>
+                  <button
+                    onClick={() => handleResetPassword(m.id)}
+                    disabled={resettingId === m.id}
+                    className="text-xs text-gray-400 hover:text-gold transition-colors disabled:opacity-50"
+                  >
+                    {resettingId === m.id ? 'Sending...' : 'Reset password'}
+                  </button>
+                  <button
+                    onClick={() => handleDeactivate(m.id, m.name)}
+                    className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    Remove
+                  </button>
+                </>
               )}
             </div>
           </div>
