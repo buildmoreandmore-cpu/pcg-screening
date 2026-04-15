@@ -15,10 +15,12 @@ export default function ResultsEntryForm({
   candidateId,
   components,
   initialResults,
+  onSaved,
 }: {
   candidateId: string
   components: Array<{ key: string; label: string }>
   initialResults: ScreeningResults
+  onSaved?: () => void
 }) {
   const [results, setResults] = useState<ScreeningResults>(() => {
     const r: ScreeningResults = {}
@@ -42,7 +44,10 @@ export default function ResultsEntryForm({
     setSaving(true)
     const res = await saveScreeningResults(candidateId, results)
     setSaving(false)
-    if (!res.error) setSaved(true)
+    if (!res.error) {
+      setSaved(true)
+      onSaved?.()
+    }
   }
 
   return (

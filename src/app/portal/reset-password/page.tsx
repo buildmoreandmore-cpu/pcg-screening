@@ -13,18 +13,33 @@ export default function ResetPasswordPage() {
   const [authedEmail, setAuthedEmail] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
 
-  // We arrive here from /portal/auth/confirm?type=recovery, which set
-  // session cookies via verifyOtp. If there's no session, the link expired.
+  // We arrive here from /portal/auth/confirm?type=recovery, which passes
+  // session tokens as URL hash fragments. Parse them and establish the session.
   useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data, error }) => {
+    async function init() {
+      const supabase = createClient()
+
+      // Pick up session tokens from URL hash (set by auth/confirm redirect)
+      const hash = window.location.hash.substring(1)
+      if (hash) {
+        const params = new URLSearchParams(hash)
+        const accessToken = params.get('access_token')
+        const refreshToken = params.get('refresh_token')
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+          window.history.replaceState(null, '', window.location.pathname)
+        }
+      }
+
+      const { data, error } = await supabase.auth.getUser()
       if (error || !data.user) {
         router.replace('/portal/login?error=link_expired')
         return
       }
       setAuthedEmail(data.user.email ?? null)
       setChecking(false)
-    })
+    }
+    init()
   }, [router])
 
   async function handleSubmit(e: React.FormEvent) {

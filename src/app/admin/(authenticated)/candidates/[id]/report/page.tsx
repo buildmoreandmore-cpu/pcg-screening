@@ -3,9 +3,7 @@ import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { SCREENING_COMPONENTS } from '@/lib/screening-components'
-import ResultsEntryForm from './ResultsEntryForm'
-import AttachmentUploader from './AttachmentUploader'
-import ReportActions from './ReportActions'
+import ReportWorkflow from './ReportWorkflow'
 
 export default async function ReportPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -59,26 +57,15 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
         </p>
       </div>
 
-      {/* Step 1: Enter Results */}
-      <ResultsEntryForm
+      <ReportWorkflow
         candidateId={id}
         components={componentLabels}
         initialResults={c.screening_results || {}}
-      />
-
-      {/* Step 2: Attachments */}
-      <AttachmentUploader
-        candidateId={id}
         initialAttachments={c.report_attachments || []}
-      />
-
-      {/* Step 3: Preview & Send */}
-      <ReportActions
-        candidateId={id}
         recipientEmail={recipientEmail}
         reportSentAt={c.report_sent_at}
         reportSentBy={c.report_sent_by}
-        hasResults={Object.keys(c.screening_results || {}).length > 0}
+        initialHasResults={Object.keys(c.screening_results || {}).length > 0}
       />
     </div>
   )

@@ -13,18 +13,32 @@ export default function SetupPasswordPage() {
   const [authedEmail, setAuthedEmail] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
 
-  // Confirm we have an active session — if a user lands here without going
-  // through the magic link, bounce them to the login page.
+  // Pick up session from URL hash fragments (set by auth/confirm redirect)
+  // then verify we have an active session.
   useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data, error }) => {
+    async function init() {
+      const supabase = createClient()
+
+      const hash = window.location.hash.substring(1)
+      if (hash) {
+        const params = new URLSearchParams(hash)
+        const accessToken = params.get('access_token')
+        const refreshToken = params.get('refresh_token')
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+          window.history.replaceState(null, '', window.location.pathname)
+        }
+      }
+
+      const { data, error } = await supabase.auth.getUser()
       if (error || !data.user) {
         router.replace('/portal/login?error=session_required')
         return
       }
       setAuthedEmail(data.user.email ?? null)
       setChecking(false)
-    })
+    }
+    init()
   }, [router])
 
   async function handleSubmit(e: React.FormEvent) {

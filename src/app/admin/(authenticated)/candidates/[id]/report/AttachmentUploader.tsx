@@ -19,6 +19,7 @@ export default function AttachmentUploader({
 }) {
   const [attachments, setAttachments] = useState<ReportAttachment[]>(initialAttachments)
   const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -26,6 +27,7 @@ export default function AttachmentUploader({
     if (!file) return
 
     setUploading(true)
+    setError('')
     const formData = new FormData()
     formData.append('file', file)
     formData.append('candidateId', candidateId)
@@ -33,7 +35,9 @@ export default function AttachmentUploader({
     const result = await uploadReportAttachment(formData)
     setUploading(false)
 
-    if (result.attachments) {
+    if (result.error) {
+      setError(result.error)
+    } else if (result.attachments) {
       setAttachments(result.attachments)
     }
 
@@ -86,6 +90,10 @@ export default function AttachmentUploader({
         </svg>
         <p className="text-sm text-gray-500">{uploading ? 'Uploading...' : 'Add attachment (PDF, DOCX)'}</p>
       </button>
+
+      {error && (
+        <p className="text-xs text-red-600 mt-2">{error}</p>
+      )}
 
       <input
         ref={fileRef}
