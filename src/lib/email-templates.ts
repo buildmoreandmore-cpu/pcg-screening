@@ -253,6 +253,49 @@ export function buildScreeningCompleteEmail({
   `)
 }
 
+export function buildStatusUpdateEmail({
+  candidateName,
+  trackingCode,
+  newStatus,
+  notes,
+  detailUrl,
+}: {
+  candidateName: string
+  trackingCode: string
+  newStatus: string
+  notes?: string
+  detailUrl: string
+}) {
+  const statusLabels: Record<string, string> = {
+    submitted: 'Submitted',
+    in_progress: 'In Progress',
+    drug_screen_ordered: 'Drug Screen Ordered',
+    drug_screen_collected: 'Drug Screen Collected',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    consent_signed: 'Consent Signed',
+  }
+
+  const label = statusLabels[newStatus] || newStatus.replace(/_/g, ' ')
+
+  return emailWrapper(`
+    <h1>Screening Update</h1>
+    <p>There's an update on the background screening for <strong>${candidateName}</strong>.</p>
+    <div class="tracking">
+      <p style="margin: 0; color: #8a8680; font-size: 12px;">Status</p>
+      <p class="tracking-code" style="margin: 4px 0 0; font-size: 16px;">${label}</p>
+    </div>
+    ${notes ? `<p><strong>Note from PCG:</strong> ${notes}</p>` : ''}
+    <div class="tracking">
+      <p style="margin: 0; color: #8a8680; font-size: 12px;">Tracking Code</p>
+      <p class="tracking-code" style="margin: 4px 0 0;">${trackingCode}</p>
+    </div>
+    <p style="text-align: center;">
+      <a href="${detailUrl}" class="btn">View Details</a>
+    </p>
+  `)
+}
+
 export function buildReportDeliveryEmail({
   candidateName,
   packageName,

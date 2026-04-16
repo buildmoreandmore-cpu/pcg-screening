@@ -13,8 +13,10 @@ const DEFAULTS: Record<string, Record<string, boolean>> = {
   },
   client: {
     order_received: true,
-    status_updates: false,
-    consent_signed: false,
+    status_updates: true,
+    consent_signed: true,
+    drug_screen_ordered: true,
+    drug_screen_collected: true,
     drug_test_received: false,
     report_completed: true,
   },

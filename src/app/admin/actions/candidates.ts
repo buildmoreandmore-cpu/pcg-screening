@@ -3,7 +3,7 @@
 import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
 import { Resend } from 'resend'
-import { buildScreeningCompleteEmail } from '@/lib/email-templates'
+import { buildScreeningCompleteEmail, buildStatusUpdateEmail } from '@/lib/email-templates'
 import { sendNotification } from '@/lib/notifications'
 import { dispatchAgentEvent } from '@/lib/agent-webhook'
 
@@ -112,45 +112,41 @@ export async function updateCandidateStatus({
   // Send notification emails (preference-aware)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
   const clientId = candidate.client_id
+  const notifyEmail = candidate.client?.notification_email || 'accounts@pcgscreening.com'
+  const portalUrl = `${siteUrl}/portal/candidates/${candidateId}`
+  const adminUrl = `${siteUrl}/admin/candidates/${candidateId}`
 
-  if (newStatus === 'completed') {
-    // Notify candidate
-    sendNotification({
-      clientId,
-      audience: 'candidate',
-      event: 'status_updates',
-      to: candidate.email,
-      subject: `Screening Complete — ${candidateName}`,
-      html: `<p>Hi ${candidate.first_name},</p><p>Your <strong>${candidate.package_name}</strong> screening has been completed. Results have been delivered to your employer.</p><p>Questions? Contact accounts@pcgscreening.com or 770-716-1278.</p>`,
-    })
+  // Always notify client on status changes (preference-checked inside sendNotification)
+  const statusEvent = newStatus === 'completed' ? 'report_completed'
+    : newStatus === 'drug_screen_ordered' ? 'drug_screen_ordered'
+    : newStatus === 'drug_screen_collected' ? 'drug_screen_collected'
+    : 'status_updates'
 
-    // Notify employer
-    const notifyEmail = candidate.client?.notification_email || 'accounts@pcgscreening.com'
-    sendNotification({
-      clientId,
-      audience: 'client',
-      event: 'report_completed',
-      to: notifyEmail,
-      subject: `Screening Complete — ${candidateName}`,
-      html: buildScreeningCompleteEmail({
-        candidateName,
-        packageName: candidate.package_name,
-        trackingCode: candidate.tracking_code,
-        detailUrl: `${siteUrl}/portal/candidates/${candidateId}`,
-      }),
-    })
+  sendNotification({
+    clientId,
+    audience: 'client',
+    event: statusEvent,
+    to: notifyEmail,
+    subject: newStatus === 'completed'
+      ? `Screening Complete — ${candidateName}`
+      : `Screening Update — ${candidateName}`,
+    html: newStatus === 'completed'
+      ? buildScreeningCompleteEmail({
+          candidateName,
+          packageName: candidate.package_name,
+          trackingCode: candidate.tracking_code,
+          detailUrl: portalUrl,
+        })
+      : buildStatusUpdateEmail({
+          candidateName,
+          trackingCode: candidate.tracking_code,
+          newStatus,
+          notes: notes || undefined,
+          detailUrl: portalUrl,
+        }),
+  })
 
-    // Notify PCG admin
-    sendNotification({
-      clientId,
-      audience: 'pcg_admin',
-      event: 'report_completed',
-      to: 'accounts@pcgscreening.com',
-      subject: `Report Complete — ${candidateName} (${candidate.client?.name})`,
-      html: `<p><strong>${candidateName}</strong>'s <em>${candidate.package_name}</em> screening for <strong>${candidate.client?.name}</strong> has been completed.</p><p><a href="${siteUrl}/admin/candidates/${candidateId}">View in dashboard</a></p>`,
-    })
-  }
-
+  // Notify candidate on key milestones
   if (newStatus === 'in_progress') {
     sendNotification({
       clientId,
@@ -159,6 +155,29 @@ export async function updateCandidateStatus({
       to: candidate.email,
       subject: `Your screening is underway`,
       html: `<p>Hi ${candidate.first_name},</p><p>Your <strong>${candidate.package_name}</strong> screening is now being processed. Most screenings complete within 1-3 business days.</p><p>Track your status: ${siteUrl}/track with code <strong>${candidate.tracking_code}</strong></p>`,
+    })
+  }
+
+  if (newStatus === 'completed') {
+    sendNotification({
+      clientId,
+      audience: 'candidate',
+      event: 'status_updates',
+      to: candidate.email,
+      subject: `Screening Complete — ${candidateName}`,
+      html: `<p>Hi ${candidate.first_name},</p><p>Your <strong>${candidate.package_name}</strong> screening has been completed. Results have been delivered to your employer.</p><p>Questions? Contact accounts@pcgscreening.com or 770-716-1278.</p>`,
+    })
+  }
+
+  // Notify PCG admin on completion
+  if (newStatus === 'completed') {
+    sendNotification({
+      clientId,
+      audience: 'pcg_admin',
+      event: 'report_completed',
+      to: 'accounts@pcgscreening.com',
+      subject: `Report Complete — ${candidateName} (${candidate.client?.name})`,
+      html: `<p><strong>${candidateName}</strong>'s <em>${candidate.package_name}</em> screening for <strong>${candidate.client?.name}</strong> has been completed.</p><p><a href="${adminUrl}">View in dashboard</a></p>`,
     })
   }
 
@@ -249,6 +268,24 @@ export async function updateInternalNotes({
   const { error } = await supabase
     .from('candidates')
     .update({ internal_notes: notes })
+    .eq('id', candidateId)
+
+  return { error: error?.message }
+}
+
+export async function updateClientNotes({
+  candidateId,
+  notes,
+}: {
+  candidateId: string
+  notes: string
+}) {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  const { error } = await supabase
+    .from('candidates')
+    .update({ client_notes: notes })
     .eq('id', candidateId)
 
   return { error: error?.message }

@@ -7,6 +7,7 @@ import CandidateStatusUpdate from './CandidateStatusUpdate'
 import JurisdictionManager from './JurisdictionManager'
 import ReportUpload from './ReportUpload'
 import InternalNotes from './InternalNotes'
+import ClientNotes from './ClientNotes'
 import ScreeningComponentsView from './ScreeningComponentsView'
 import DropboxSignButton from '@/components/admin/DropboxSignButton'
 import { isDropboxSignConfigured } from '@/lib/dropbox-sign'
@@ -157,6 +158,9 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
 
       {/* Search Jurisdictions */}
       <JurisdictionManager candidateId={c.id} jurisdictions={c.search_jurisdictions || []} candidateAddress={c.address} />
+
+      {/* Client Notes (visible to employer) */}
+      <ClientNotes candidateId={c.id} initialNotes={c.client_notes} />
 
       {/* Internal Notes */}
       <InternalNotes candidateId={c.id} initialNotes={c.internal_notes} />

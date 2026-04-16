@@ -5,7 +5,14 @@ import { requireAuth } from '@/lib/auth'
 import StatusBadge from '@/components/portal/StatusBadge'
 import CandidateActions from './CandidateActions'
 
-const steps = ['submitted', 'in_progress', 'completed'] as const
+const allSteps = ['submitted', 'in_progress', 'drug_screen_ordered', 'drug_screen_collected', 'completed'] as const
+const stepLabels: Record<string, string> = {
+  submitted: 'Submitted',
+  in_progress: 'In Progress',
+  drug_screen_ordered: 'Drug Screen Ordered',
+  drug_screen_collected: 'Sample Collected',
+  completed: 'Completed',
+}
 
 function formatDate(date: string | null) {
   if (!date) return null
@@ -29,13 +36,20 @@ export default async function CandidateDetailPage({
 
   const { data: candidate } = await supabase
     .from('candidates')
-    .select('*')
+    .select('*, client_notes')
     .eq('id', id)
     .eq('client_id', clientUser.client_id)
     .single()
 
   if (!candidate) notFound()
 
+  // Only show drug screen steps if the candidate has been through them
+  const hasDrugScreen = ['drug_screen_ordered', 'drug_screen_collected'].includes(candidate.status) ||
+    candidate.screening_components?.drug_screening?.enabled === true ||
+    candidate.screening_components?.drug_screening === true
+  const steps = hasDrugScreen
+    ? allSteps
+    : allSteps.filter(s => !s.startsWith('drug_screen'))
   const currentStepIndex = steps.indexOf(candidate.status as any)
   const timestamps: Record<string, string | null> = {
     submitted: candidate.created_at,
@@ -104,8 +118,8 @@ export default async function CandidateDetailPage({
                   )}
                 </div>
                 <div className="mt-2 text-center">
-                  <p className={`text-xs font-medium capitalize ${isComplete ? 'text-navy' : 'text-gray-400'}`}>
-                    {step.replace('_', ' ')}
+                  <p className={`text-xs font-medium ${isComplete ? 'text-navy' : 'text-gray-400'}`}>
+                    {stepLabels[step] || step.replace(/_/g, ' ')}
                   </p>
                   {ts && (
                     <p className="text-[10px] text-gray-400 mt-0.5">{formatDate(ts)}</p>
@@ -154,6 +168,19 @@ export default async function CandidateDetailPage({
           </div>
         </dl>
       </div>
+
+      {/* Notes from PCG */}
+      {candidate.client_notes && (
+        <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-gold">
+          <div className="flex items-center gap-2 mb-2">
+            <svg className="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+            <h2 className="text-sm font-medium text-gray-700">Note from PCG Screening</h2>
+          </div>
+          <p className="text-sm text-gray-600 whitespace-pre-wrap">{candidate.client_notes}</p>
+        </div>
+      )}
 
       {/* Payment & Consent */}
       <div className="grid grid-cols-2 gap-3">

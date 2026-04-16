@@ -1052,13 +1052,10 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
             </div>
 
             {inviteCode ? (
-              /* Employer-paid: hide price entirely. The candidate doesn't need
-                 to know the cost — the employer is being billed via the client's
-                 billing terms (immediate / net_30 / net_60 / net_90). */
+              /* Employer-paid: no pricing shown to the candidate. */
               <div className="bg-navy rounded-xl p-5 text-center">
-                <p className="text-white/70 text-xs uppercase tracking-wider">Billed to</p>
-                <p className="font-heading text-xl text-gold mt-1">{client.name}</p>
-                <p className="text-white/60 text-[11px] mt-1">No payment required from you.</p>
+                <p className="font-heading text-lg text-gold">No payment required</p>
+                <p className="text-white/60 text-[11px] mt-1">Your screening has been arranged by your employer.</p>
               </div>
             ) : (
               <>

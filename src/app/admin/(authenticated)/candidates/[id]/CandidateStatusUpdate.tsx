@@ -6,6 +6,8 @@ import { updateCandidateStatus } from '@/app/admin/actions/candidates'
 const statuses = [
   { value: 'submitted', label: 'Submitted' },
   { value: 'in_progress', label: 'In Progress' },
+  { value: 'drug_screen_ordered', label: 'Drug Screen Ordered' },
+  { value: 'drug_screen_collected', label: 'Drug Screen Collected' },
   { value: 'completed', label: 'Completed' },
   { value: 'cancelled', label: 'Cancelled' },
 ]
