@@ -197,12 +197,22 @@ export function buildCandidateSubmissionConfirmationEmail({
   companyName,
   trackingCode,
   trackUrl,
+  consentPdfUrl,
 }: {
   candidateName: string
   companyName: string
   trackingCode: string
   trackUrl: string
+  consentPdfUrl?: string | null
 }) {
+  const consentSection = consentPdfUrl
+    ? `<div style="background: #f8f7f4; border-radius: 8px; padding: 16px; margin: 16px 0; border-left: 3px solid #c9a44c;">
+        <p style="margin: 0 0 8px; font-size: 13px; color: #1f2f4a; font-weight: bold;">Your Signed Consent Record</p>
+        <p style="margin: 0 0 8px; font-size: 13px; color: #4a4743;">A copy of the FCRA disclosure and authorization you signed is available for your records.</p>
+        <a href="${consentPdfUrl}" style="display: inline-block; background: #ffffff; color: #1f2f4a; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; border: 1px solid #e5e4e0;">Download Consent PDF</a>
+      </div>`
+    : ''
+
   return emailWrapper(`
     <h1>Background Screening Confirmation</h1>
     <p>${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
@@ -212,6 +222,7 @@ export function buildCandidateSubmissionConfirmationEmail({
       <p style="margin: 0; color: #8a8680; font-size: 12px;">Your File Number</p>
       <p class="tracking-code" style="margin: 4px 0 0;">${trackingCode}</p>
     </div>
+    ${consentSection}
     <p>Thank you,</p>
     <p><strong>${companyName}</strong></p>
     <hr style="border: none; border-top: 1px solid #e5e4e0; margin: 20px 0;">

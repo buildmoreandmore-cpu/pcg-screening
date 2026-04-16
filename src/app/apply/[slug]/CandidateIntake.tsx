@@ -314,7 +314,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
       if (data.url) {
         window.location.href = data.url
       } else {
-        showToast('Payment could not be processed. Please try again.')
+        showToast(data.error || (inviteCode ? 'Submission failed. Please try again.' : 'Payment could not be processed. Please try again.'))
         setLoading(false)
       }
     } catch {
@@ -389,7 +389,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
     <div className="min-h-dvh bg-off-white">
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-navy text-white px-5 py-3 rounded-xl shadow-lg text-sm animate-[slideUp_0.3s_ease]">
+        <div className="fixed bottom-6 sm:bottom-20 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-50 bg-navy text-white px-5 py-3 rounded-xl shadow-lg text-sm text-center animate-[slideUp_0.3s_ease]">
           {toast}
         </div>
       )}
@@ -556,19 +556,19 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
             </div>
 
             {/* Form */}
-            <div className="bg-white rounded-xl shadow-sm p-5 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-5 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="First Name" value={firstName} onChange={setFirstName} error={errors.firstName} autoFocus />
                 <Field label="Last Name" value={lastName} onChange={setLastName} error={errors.lastName} />
               </div>
               <Field label="Maiden Name / Other Name Used" value={maidenName} onChange={setMaidenName} placeholder="If applicable" />
               <Field label="Email Address" type="email" value={email} onChange={setEmail} error={errors.email} />
               <Field label="Phone Number" type="tel" value={phone} onChange={(v) => setPhone(formatPhone(v))} error={errors.phone} inputMode="tel" />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Date of Birth" type="date" value={dob} onChange={setDob} error={errors.dob} />
                 <Field label="Social Security Number" value={ssn} onChange={(v) => setSsn(formatSsn(v))} error={errors.ssn} inputMode="numeric" maxLength={11} placeholder="XXX-XX-XXXX" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">Sex / Gender <span className="text-red-400">*</span></label>
                   <select value={sex} onChange={(e) => setSex(e.target.value)} className={`w-full px-3 py-2.5 rounded-lg border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent ${errors.sex ? 'border-red-300' : 'border-gray-200'}`}>
@@ -595,7 +595,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                   {errors.race && <p className="text-[11px] text-red-500 mt-0.5">{errors.race}</p>}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Driver's License / ID #" value={driversLicense} onChange={setDriversLicense} error={errors.driversLicense} />
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">Issuing State <span className="text-red-400">*</span></label>
@@ -606,7 +606,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                   {errors.dlState && <p className="text-[11px] text-red-500 mt-0.5">{errors.dlState}</p>}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">DL Class</label>
                   <select value={dlClass} onChange={(e) => setDlClass(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent">
@@ -627,8 +627,8 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                 <Field label="DL Expiration Date" type="date" value={dlExpiration} onChange={setDlExpiration} />
               </div>
               <Field label="Street Address" value={address} onChange={setAddress} error={errors.address} />
-              <div className="grid grid-cols-5 gap-2">
-                <div className="col-span-2"><Field label="City" value={city} onChange={setCity} error={errors.city} /></div>
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                <div className="sm:col-span-2"><Field label="City" value={city} onChange={setCity} error={errors.city} /></div>
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">State <span className="text-red-400">*</span></label>
                   <select value={state} onChange={(e) => setState(e.target.value)} className={`w-full px-2 py-2.5 rounded-lg border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent ${errors.state ? 'border-red-300' : 'border-gray-200'}`}>
@@ -636,7 +636,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                     {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
-                <div className="col-span-2"><Field label="Zip Code" value={zip} onChange={(v) => setZip(v.replace(/\D/g, '').slice(0, 5))} error={errors.zip} inputMode="numeric" maxLength={5} /></div>
+                <div className="sm:col-span-2"><Field label="Zip Code" value={zip} onChange={(v) => setZip(v.replace(/\D/g, '').slice(0, 5))} error={errors.zip} inputMode="numeric" maxLength={5} /></div>
               </div>
 
               {!inviteCode && (
@@ -678,7 +678,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
               const hasConditional = active.has('education') || active.has('employment') || active.has('professional_license') || active.has('international_search') || active.has('references')
               if (!hasConditional) return null
               return (
-                <div className="bg-white rounded-xl shadow-sm p-5 space-y-4">
+                <div className="bg-white rounded-xl shadow-sm p-4 sm:p-5 space-y-4">
                   <div>
                     <p className="text-sm font-medium text-navy">Additional Details Required</p>
                     <p className="text-xs text-gray-500 mt-0.5">Based on the screening package, we need a few more details.</p>
@@ -703,7 +703,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                         </select>
                         {errors.eduDegree && <p className="text-[11px] text-red-500 mt-0.5">{errors.eduDegree}</p>}
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <label className="block text-xs text-gray-500 mb-1">Did you graduate? <span className="text-red-400">*</span></label>
                           <div className="flex gap-4 mt-1.5">
@@ -728,15 +728,15 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                   {active.has('employment') && (
                     <div className="space-y-3 border-t border-gray-100 pt-4">
                       <p className="text-xs font-semibold text-navy uppercase tracking-wide">Employment Verification</p>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <Field label="Most Recent Employer" value={empEmployer} onChange={setEmpEmployer} error={errors.empEmployer} />
                         <Field label="Job Title" value={empTitle} onChange={setEmpTitle} error={errors.empTitle} />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <Field label="Employment Start Date" type="date" value={empFrom} onChange={setEmpFrom} />
                         <Field label="Employment End Date" type="date" value={empTo} onChange={setEmpTo} placeholder="Leave blank if current" />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <Field label="Supervisor Name" value={empSupervisor} onChange={setEmpSupervisor} placeholder="Optional" />
                         <Field label="Supervisor Phone" type="tel" value={empSupervisorPhone} onChange={(v) => setEmpSupervisorPhone(formatPhone(v))} placeholder="Optional" inputMode="tel" />
                       </div>
@@ -746,11 +746,11 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                   {active.has('professional_license') && (
                     <div className="space-y-3 border-t border-gray-100 pt-4">
                       <p className="text-xs font-semibold text-navy uppercase tracking-wide">Professional License</p>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <Field label="License Type" value={licType} onChange={setLicType} error={errors.licType} placeholder="e.g. RN, CPA, CDL" />
                         <Field label="License Number" value={licNumber} onChange={setLicNumber} error={errors.licNumber} />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <label className="block text-xs text-gray-500 mb-1">Issuing State</label>
                           <select value={licState} onChange={(e) => setLicState(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent">
@@ -774,13 +774,13 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
                     <div className="space-y-3 border-t border-gray-100 pt-4">
                       <p className="text-xs font-semibold text-navy uppercase tracking-wide">Professional References</p>
                       <p className="text-xs text-gray-500">Reference 1 <span className="text-red-400">*</span></p>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <Field label="Full Name" value={ref1Name} onChange={setRef1Name} error={errors.ref1Name} />
                         <Field label="Phone" type="tel" value={ref1Phone} onChange={(v) => setRef1Phone(formatPhone(v))} error={errors.ref1Phone} inputMode="tel" />
                         <Field label="Relationship" value={ref1Relationship} onChange={setRef1Relationship} error={errors.ref1Relationship} placeholder="e.g. Manager" />
                       </div>
                       <p className="text-xs text-gray-500 mt-2">Reference 2 (optional)</p>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <Field label="Full Name" value={ref2Name} onChange={setRef2Name} />
                         <Field label="Phone" type="tel" value={ref2Phone} onChange={(v) => setRef2Phone(formatPhone(v))} inputMode="tel" />
                         <Field label="Relationship" value={ref2Relationship} onChange={setRef2Relationship} placeholder="e.g. Colleague" />
@@ -861,7 +861,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
             </div>
 
             {/* FCRA Disclosure */}
-            <div className="bg-white rounded-xl shadow-sm p-5">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-5">
               <div className="bg-gray-50 rounded-lg p-4 max-h-48 overflow-y-auto text-xs text-gray-600 leading-relaxed">
                 {FCRA_DISCLOSURE_PARAGRAPHS.map((p, i) => (
                   <p key={i} className={i < FCRA_DISCLOSURE_PARAGRAPHS.length - 1 ? 'mb-3' : ''}>
@@ -883,7 +883,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
             </div>
 
             {/* Signature: Draw or Type */}
-            <div className="bg-white rounded-xl shadow-sm p-5">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-5">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-medium text-gray-700">Electronic Signature</p>
                 {signatureData && (
@@ -1032,7 +1032,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
             </div>
 
             {/* Review Card */}
-            <div className="bg-white rounded-xl shadow-sm p-5">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-5">
               <dl className="space-y-2">
                 {[
                   ['Name', `${firstName} ${lastName}`],
@@ -1061,7 +1061,7 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
               <>
                 <div className="bg-navy rounded-xl p-5 text-center">
                   <p className="text-white/70 text-xs uppercase tracking-wider">Total Due</p>
-                  <p className="font-heading text-3xl text-gold mt-1">${pkg?.price || 0}</p>
+                  <p className="font-heading text-2xl sm:text-3xl text-gold mt-1">${pkg?.price || 0}</p>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>

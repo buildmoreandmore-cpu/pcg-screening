@@ -79,7 +79,7 @@ export default function MarketingHome() {
 
       {/* Trust strip */}
       <section className="border-y border-gray-200 bg-white">
-        <div className="max-w-6xl mx-auto px-5 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div className="max-w-6xl mx-auto px-5 py-6 sm:py-8 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-center">
           {[
             { stat: '20+', label: 'Years in Business' },
             { stat: 'A+', label: 'BBB Rating' },
@@ -108,7 +108,7 @@ export default function MarketingHome() {
             <Link
               key={ind.slug}
               href={`/industries/${ind.slug}`}
-              className="group bg-white rounded-2xl shadow-sm hover:shadow-lg p-6 border border-gray-100 hover:border-gold/30 transition-all"
+              className="group bg-white rounded-2xl shadow-sm hover:shadow-lg p-4 sm:p-6 border border-gray-100 hover:border-gold/30 transition-all"
             >
               <div className="w-10 h-10 rounded-lg bg-gold-pale flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +133,7 @@ export default function MarketingHome() {
             <p className="text-xs uppercase tracking-widest text-gold font-medium mb-3">Why PCG</p>
             <h2 className="font-heading text-navy text-3xl md:text-4xl">Real People. Real Compliance.</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-5 md:gap-8">
             {[
               {
                 title: 'FCRA Compliant',
@@ -167,7 +167,7 @@ export default function MarketingHome() {
 
       {/* CTA */}
       <section className="max-w-6xl mx-auto px-5 py-20">
-        <div className="bg-navy rounded-3xl px-8 py-16 text-center text-white">
+        <div className="bg-navy rounded-2xl sm:rounded-3xl px-5 sm:px-8 py-10 sm:py-16 text-center text-white">
           <h2 className="font-heading text-3xl md:text-4xl mb-4">Ready to Run Your First Screen?</h2>
           <p className="text-white/80 max-w-xl mx-auto mb-8">
             Most employers are live and pulling reports the same day. No setup fees, no contracts.

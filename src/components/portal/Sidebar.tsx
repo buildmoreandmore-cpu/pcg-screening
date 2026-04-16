@@ -80,11 +80,11 @@ export default function Sidebar() {
     <aside className="hidden lg:flex flex-col w-56 bg-navy min-h-dvh fixed left-0 top-0">
       {/* Logo */}
       <div className="px-4 py-5 border-b border-white/10 flex justify-center">
-        <Link href="/" className="inline-block" aria-label="Back to home">
+        <Link href="/" className="inline-block bg-white/90 rounded-xl px-3 py-2" aria-label="Back to home">
           <img
             src="/Copy_of_PCG_Logo_with_Soft_Typography.png"
             alt="PCG Screening"
-            className="h-20 object-contain"
+            className="h-16 object-contain"
           />
         </Link>
       </div>

@@ -63,8 +63,8 @@ export default function AdminSidebar({ adminName, adminEmail }: { adminName: str
   const navContent = (
     <>
       <div className="px-4 py-5 border-b border-white/10 flex flex-col items-center">
-        <Link href="/" className="inline-block" aria-label="Back to home">
-          <img src="/Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG" className="h-20 object-contain" />
+        <Link href="/" className="inline-block bg-white/90 rounded-xl px-3 py-2" aria-label="Back to home">
+          <img src="/Copy_of_PCG_Logo_with_Soft_Typography.png" alt="PCG" className="h-16 object-contain" />
         </Link>
         <p className="text-[10px] text-gold uppercase tracking-widest mt-2 font-medium">Admin Dashboard</p>
       </div>
@@ -133,7 +133,7 @@ export default function AdminSidebar({ adminName, adminEmail }: { adminName: str
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50" onClick={() => setMobileOpen(false)}>
           <div className="absolute inset-0 bg-black/40" />
-          <aside className="absolute left-0 top-0 bottom-0 w-56 bg-navy flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <aside className="absolute left-0 top-0 bottom-0 w-64 max-w-[80vw] bg-navy flex flex-col" onClick={(e) => e.stopPropagation()}>
             {navContent}
           </aside>
         </div>

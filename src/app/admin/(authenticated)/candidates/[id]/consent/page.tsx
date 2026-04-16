@@ -19,7 +19,7 @@ export default async function ConsentRecordPage({
   const { data: candidate } = await supabase
     .from('candidates')
     .select(
-      'id, tracking_code, first_name, last_name, email, consent_status, consent_signed_at, consent_ip, consent_user_agent, consent_method, consent_signature_data_url, consent_disclosure_version, consent_document_url, dropbox_sign_request_id, clients(name)'
+      'id, tracking_code, first_name, last_name, email, consent_status, consent_signed_at, consent_ip, consent_user_agent, consent_method, consent_signature_data_url, consent_disclosure_version, consent_document_url, clients(name)'
     )
     .eq('id', id)
     .maybeSingle()
@@ -154,23 +154,11 @@ export default async function ConsentRecordPage({
         </>
       ) : (
         <section className="border border-amber-200 bg-amber-50 rounded-lg p-4 text-sm text-amber-900">
-          <p className="font-medium mb-1">No native consent record on file.</p>
+          <p className="font-medium mb-1">No consent record on file.</p>
           <p>
-            This candidate does not have a captured canvas signature. Check the Dropbox Sign request
-            on the candidate detail page if a formal e-signature was sent.
+            This candidate does not have a captured electronic signature. The consent may not have
+            been completed during the intake process.
           </p>
-          {candidate.consent_document_url && (
-            <p className="mt-2">
-              <a
-                href={candidate.consent_document_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-              >
-                View signed Dropbox Sign document →
-              </a>
-            </p>
-          )}
         </section>
       )}
 

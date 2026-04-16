@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase'
 import { FCRA_DISCLOSURE_VERSION } from '@/lib/fcra-disclosure'
 import { buildCandidateSubmissionConfirmationEmail } from '@/lib/email-templates'
+import { generateAndStoreConsentPdf } from '@/lib/consent-pdf'
 import { Resend } from 'resend'
 
 export const dynamic = 'force-dynamic'
@@ -18,11 +19,6 @@ function generateTrackingCode() {
 
 export async function POST(req: NextRequest) {
   try {
-    const secretKey = process.env.STRIPE_SECRET_KEY
-    if (!secretKey) {
-      return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
-    }
-
     const body = await req.json()
     const {
       clientSlug, inviteCode, firstName, lastName, maidenName, email, phone,
@@ -216,8 +212,15 @@ export async function POST(req: NextRequest) {
 
     const portalUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PORTAL_URL || 'https://www.pcgscreening.net').trim().replace(/\/+$/, '')
 
-    // Send confirmation email to candidate (best-effort, don't block the response)
-    if (signatureData && email) {
+    // Generate consent PDF and send confirmation email with link
+    if (signatureData && candidate && email) {
+      let consentPdfUrl: string | null = null
+      try {
+        consentPdfUrl = await generateAndStoreConsentPdf(candidate.id)
+      } catch (err) {
+        console.error('Failed to generate consent PDF:', err)
+      }
+
       const resendKey = process.env.RESEND_API_KEY
       if (resendKey) {
         const resend = new Resend(resendKey)
@@ -232,6 +235,7 @@ export async function POST(req: NextRequest) {
               companyName: client.name,
               trackingCode,
               trackUrl: `${portalUrl}/track?code=${trackingCode}`,
+              consentPdfUrl,
             }),
           })
         } catch (emailErr) {
@@ -255,6 +259,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Otherwise: self-pay. Create a Stripe Checkout Session.
+    const secretKey = process.env.STRIPE_SECRET_KEY
+    if (!secretKey) {
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
+    }
     const stripe = new Stripe(secretKey)
     const priceInCents = Math.round((packagePrice || 0) * 100)
 

@@ -101,11 +101,11 @@ export default function AdminCandidatesList({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="font-heading text-2xl text-navy">Candidates</h1>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">{totalCount} total</span>
-          <button onClick={exportCsv} className="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="font-heading text-xl sm:text-2xl text-navy">Candidates</h1>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs sm:text-sm text-gray-500">{totalCount} total</span>
+          <button onClick={exportCsv} className="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-700 px-2.5 sm:px-3 py-2 rounded-lg text-xs sm:text-sm hover:bg-gray-50 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             Export CSV
           </button>
@@ -119,7 +119,7 @@ export default function AdminCandidatesList({
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder="Search name, email, or tracking code..."
-          className="flex-1 min-w-[200px] px-3.5 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
+          className="flex-1 min-w-0 px-3.5 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
         />
         <select
           value={filters.client}

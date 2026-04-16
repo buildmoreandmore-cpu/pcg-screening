@@ -72,11 +72,11 @@ export default function GuestOrderForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Company / Buyer info */}
-      <div className="bg-white rounded-xl shadow-sm p-5 space-y-3">
+      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-5 space-y-3">
         <h2 className="text-sm font-medium text-navy">Your Information</h2>
         <p className="text-xs text-gray-500">You are paying for this screening. We&apos;ll send you the results.</p>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Company Name <span className="text-red-400">*</span></label>
             <input
@@ -98,7 +98,7 @@ export default function GuestOrderForm({
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Work Email <span className="text-red-400">*</span></label>
             <input
@@ -122,14 +122,14 @@ export default function GuestOrderForm({
       </div>
 
       {/* Candidate info */}
-      <div className="bg-white rounded-xl shadow-sm p-5 space-y-3">
+      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-5 space-y-3">
         <h2 className="text-sm font-medium text-navy">Candidate to Screen</h2>
         <p className="text-xs text-gray-500">
           After payment, we&apos;ll email this person a secure link to complete the FCRA consent form
           and provide their personal details (SSN, address, etc.).
         </p>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Candidate First Name <span className="text-red-400">*</span></label>
             <input

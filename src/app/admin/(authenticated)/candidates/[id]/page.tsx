@@ -9,8 +9,7 @@ import ReportUpload from './ReportUpload'
 import InternalNotes from './InternalNotes'
 import ClientNotes from './ClientNotes'
 import ScreeningComponentsView from './ScreeningComponentsView'
-import DropboxSignButton from '@/components/admin/DropboxSignButton'
-import { isDropboxSignConfigured } from '@/lib/dropbox-sign'
+import ConsentPdfButton from './ConsentPdfButton'
 
 function formatDate(date: string | null) {
   if (!date) return '—'
@@ -118,10 +117,10 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
                 <dt className="text-xs text-gray-500">Signed at</dt>
                 <dd className="text-sm text-gray-900">{formatDate(c.consent_signed_at)}</dd>
               </div>
-              {c.dropbox_sign_request_id && (
+              {c.consent_method && (
                 <div className="flex justify-between">
-                  <dt className="text-xs text-gray-500">Dropbox Sign ID</dt>
-                  <dd className="text-xs font-mono text-gray-500">{c.dropbox_sign_request_id}</dd>
+                  <dt className="text-xs text-gray-500">Method</dt>
+                  <dd className="text-sm text-gray-900 capitalize">{c.consent_method}</dd>
                 </div>
               )}
             </dl>
@@ -135,17 +134,13 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Download Consent Record
+                View Consent Record
               </Link>
-              {isDropboxSignConfigured() && (
-                <div className="pt-2">
-                  <DropboxSignButton
-                    candidateId={c.id}
-                    alreadySent={!!c.dropbox_sign_request_id}
-                    signedDocUrl={c.consent_document_url ?? null}
-                  />
-                </div>
-              )}
+              <ConsentPdfButton
+                candidateId={c.id}
+                consentDocUrl={c.consent_document_url ?? null}
+                hasSigned={c.consent_status === 'signed'}
+              />
             </div>
           </div>
         </div>

@@ -101,14 +101,14 @@ export default async function OrderPage({ params }: { params: Promise<{ slug: st
   if (!pkg) notFound()
 
   return (
-    <div className="max-w-5xl mx-auto px-5 py-12">
-      <div className="grid md:grid-cols-5 gap-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-5 py-8 sm:py-12">
+      <div className="grid md:grid-cols-5 gap-5 md:gap-8">
         {/* Order summary — sticky sidebar */}
         <div className="md:col-span-2 md:order-2">
-          <div className="sticky top-24 bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+          <div className="md:sticky md:top-24 bg-white rounded-2xl shadow-md p-4 sm:p-6 border border-gray-100">
             <p className="text-xs uppercase tracking-widest text-gold font-medium mb-2">Your Order</p>
             <h2 className="font-heading text-navy text-xl mb-1">{pkg.name}</h2>
-            <p className="text-3xl text-navy font-medium mb-5">
+            <p className="text-2xl sm:text-3xl text-navy font-medium mb-5">
               {pkg.priceLabel}<span className="text-sm text-gray-500 font-normal"> / candidate</span>
             </p>
             <ul className="space-y-2 mb-4">
