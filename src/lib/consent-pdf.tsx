@@ -141,8 +141,9 @@ function ConsentRecordDocument({ candidate: c, clientName }: ConsentPdfProps) {
 export async function generateAndStoreConsentPdf(candidateId: string): Promise<string | null> {
   const supabase = createAdminClient()
 
-  // Ensure the storage bucket exists (idempotent — ignores "already exists" errors)
+  // Ensure the storage bucket exists and is public (idempotent)
   await supabase.storage.createBucket('screening-reports', { public: true }).catch(() => {})
+  await supabase.storage.updateBucket('screening-reports', { public: true }).catch(() => {})
 
   const { data: c, error } = await supabase
     .from('candidates')
@@ -181,19 +182,27 @@ export async function generateAndStoreConsentPdf(candidateId: string): Promise<s
     return null
   }
 
-  const { data: urlData } = supabase.storage
+  // Use a signed URL (valid 1 year) — works regardless of bucket public/private setting
+  const { data: signedData, error: signError } = await supabase.storage
     .from('screening-reports')
-    .getPublicUrl(storagePath)
+    .createSignedUrl(storagePath, 60 * 60 * 24 * 365)
 
-  const publicUrl = urlData?.publicUrl || null
+  const url = signedData?.signedUrl || null
+
+  if (signError) {
+    console.error('[consent-pdf] Signed URL failed, falling back to public URL:', signError)
+  }
+
+  // Fallback to public URL if signing fails
+  const finalUrl = url || supabase.storage.from('screening-reports').getPublicUrl(storagePath).data?.publicUrl || null
 
   // Store URL on candidate record
-  if (publicUrl) {
+  if (finalUrl) {
     await supabase
       .from('candidates')
-      .update({ consent_document_url: publicUrl })
+      .update({ consent_document_url: finalUrl })
       .eq('id', candidateId)
   }
 
-  return publicUrl
+  return finalUrl
 }
