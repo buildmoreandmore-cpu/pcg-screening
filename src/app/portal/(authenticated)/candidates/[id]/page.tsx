@@ -36,7 +36,7 @@ export default async function CandidateDetailPage({
 
   const { data: candidate } = await supabase
     .from('candidates')
-    .select('*, client_notes')
+    .select('*, client_notes, consent_document_url, consent_signed_at, consent_method')
     .eq('id', id)
     .eq('client_id', clientUser.client_id)
     .single()
@@ -183,14 +183,39 @@ export default async function CandidateDetailPage({
       )}
 
       {/* Payment & Consent */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="bg-white rounded-xl shadow-sm p-4">
           <p className="text-xs text-gray-500 mb-1">Payment</p>
           <StatusBadge status={candidate.payment_status} />
         </div>
         <div className="bg-white rounded-xl shadow-sm p-4">
-          <p className="text-xs text-gray-500 mb-1">Consent</p>
-          <StatusBadge status={candidate.consent_status} />
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs text-gray-500">Consent</p>
+            {candidate.consent_signed_at && (
+              <p className="text-[10px] text-gray-400">
+                {formatDate(candidate.consent_signed_at)}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <StatusBadge status={candidate.consent_status} />
+            {candidate.consent_method && (
+              <span className="text-[10px] text-gray-400 capitalize">{candidate.consent_method}</span>
+            )}
+          </div>
+          {candidate.consent_document_url && (
+            <a
+              href={candidate.consent_document_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-1.5 text-xs text-gold hover:text-gold/80 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Download Consent PDF
+            </a>
+          )}
         </div>
       </div>
     </div>

@@ -141,6 +141,9 @@ function ConsentRecordDocument({ candidate: c, clientName }: ConsentPdfProps) {
 export async function generateAndStoreConsentPdf(candidateId: string): Promise<string | null> {
   const supabase = createAdminClient()
 
+  // Ensure the storage bucket exists (idempotent — ignores "already exists" errors)
+  await supabase.storage.createBucket('screening-reports', { public: true }).catch(() => {})
+
   const { data: c, error } = await supabase
     .from('candidates')
     .select(
