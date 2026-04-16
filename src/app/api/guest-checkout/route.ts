@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
         email: candidateEmail.trim().toLowerCase(),
         package_name: packageName,
         package_price: priceCents / 100,
-        status: 'pending',
+        status: 'submitted',
         payment_status: 'pending',
         source: 'guest_order',
         referral_source: `Guest order by ${companyName} (${buyerName}, ${buyerEmail}${buyerPhone ? ', ' + buyerPhone : ''})`,
