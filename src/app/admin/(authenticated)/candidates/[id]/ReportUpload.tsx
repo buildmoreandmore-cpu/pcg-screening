@@ -19,6 +19,7 @@ export default function ReportUpload({
   const [sentAt, setSentAt] = useState(reportSentAt)
   const [sentBy, setSentBy] = useState(reportSentBy)
   const [sending, setSending] = useState(false)
+  const [resending, setResending] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -46,6 +47,7 @@ export default function ReportUpload({
     if (!result.error) {
       setSentAt(new Date().toISOString())
       setSentBy('You')
+      setResending(false)
     }
   }
 
@@ -79,19 +81,30 @@ export default function ReportUpload({
 
           {/* Report Sent Status */}
           <div className="border-t border-gray-100 pt-3">
-            {sentAt ? (
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            {sentAt && !resending ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-900">Report sent to employer</p>
+                    <p className="text-xs text-gray-400">
+                      {sentBy} &middot; {new Date(sentAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setResending(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-500 hover:text-navy hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-900">Report sent to employer</p>
-                  <p className="text-xs text-gray-400">
-                    {sentBy} &middot; {new Date(sentAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                  </p>
-                </div>
+                  Resend
+                </button>
               </div>
             ) : (
               <button
