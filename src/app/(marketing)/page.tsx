@@ -46,17 +46,17 @@ export default function MarketingHome() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/get-started?type=screen"
+              href="/build-your-package"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-navy text-white font-medium hover:bg-navy-light transition-colors shadow-md"
             >
-              Run Your First Screen
+              Order a Screening
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
             </Link>
             <Link
-              href="/build-your-package"
+              href="/get-started?type=package"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-navy font-medium border border-navy/15 hover:border-navy/30 transition-colors"
             >
-              Build Your Package
+              Set Up Employer Account
             </Link>
             <Link
               href="/get-started?type=call"
@@ -174,10 +174,10 @@ export default function MarketingHome() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/get-started?type=screen"
+              href="/build-your-package"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gold text-navy font-medium hover:bg-gold-light transition-colors"
             >
-              Run Your First Screen
+              Order a Screening
             </Link>
             <Link
               href="/get-started?type=call"

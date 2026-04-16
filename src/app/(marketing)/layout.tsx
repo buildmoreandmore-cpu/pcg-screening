@@ -3,7 +3,7 @@ import '../portal/globals.css'
 
 const nav = [
   { label: 'Industries', href: '/#industries' },
-  { label: 'Build a Package', href: '/build-your-package' },
+  { label: 'Packages & Pricing', href: '/build-your-package' },
   { label: 'Add-Ons', href: '/add-ons' },
   { label: 'FAQ', href: '/faq' },
 ]
