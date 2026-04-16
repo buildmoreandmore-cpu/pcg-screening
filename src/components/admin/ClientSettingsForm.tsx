@@ -45,6 +45,8 @@ const NOTIFICATION_LABELS: Record<string, Record<string, string>> = {
     order_received: 'Order received',
     status_updates: 'Status updates',
     consent_signed: 'Consent signed',
+    drug_screen_ordered: 'Drug screen ordered',
+    drug_screen_collected: 'Drug screen sample collected',
     drug_test_received: 'Drug test results received',
     report_completed: 'Report completed',
   },

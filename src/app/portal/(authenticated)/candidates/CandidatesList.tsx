@@ -92,6 +92,8 @@ export default function CandidatesList({
           <option value="all">All Status</option>
           <option value="submitted">Submitted</option>
           <option value="in_progress">In Progress</option>
+          <option value="drug_screen_ordered">Drug Screen Ordered</option>
+          <option value="drug_screen_collected">Sample Collected</option>
           <option value="completed">Completed</option>
           <option value="cancelled">Cancelled</option>
         </select>
