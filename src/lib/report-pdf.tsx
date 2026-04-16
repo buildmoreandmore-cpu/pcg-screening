@@ -243,6 +243,96 @@ function ScreeningReportDocument(props: ReportProps) {
           <Text>PCG Screening Services • 770-716-1278 • accounts@pcgscreening.com • www.pcgscreening.net</Text>
         </View>
       </Page>
+
+      {/* FCRA Consumer Rights Summary — Page 1 */}
+      <Page size="LETTER" style={s.page}>
+        <View style={s.sectionTitle}><Text>A Summary of Your Rights Under the Fair Credit Reporting Act</Text></View>
+        <View style={s.divider} />
+        <Text style={s.paragraph}>
+          The federal Fair Credit Reporting Act (FCRA) promotes the accuracy, fairness, and privacy of information in the files of consumer reporting agencies. There are many types of consumer reporting agencies, including credit bureaus and specialty agencies (such as agencies that sell information about check writing histories, medical records, and rental history records). Here is a summary of your major rights under FCRA. For more information, including information about additional rights, go to www.consumerfinance.gov/learnmore or write to: Consumer Financial Protection Bureau, 1700 G Street N.W., Washington, DC 20552.
+        </Text>
+        <Text style={[s.paragraph, { fontWeight: 'bold', color: NAVY }]}>
+          You must be told if information in your file has been used against you.
+        </Text>
+        <Text style={s.paragraph}>
+          Anyone who uses a credit report or another type of consumer report to deny your application for credit, insurance, or employment — or to take another adverse action against you — must tell you, and must give you the name, address, and phone number of the agency that provided the information.
+        </Text>
+        <Text style={[s.paragraph, { fontWeight: 'bold', color: NAVY }]}>
+          You have the right to know what is in your file.
+        </Text>
+        <Text style={s.paragraph}>
+          You may request and obtain all the information about you in the files of a consumer reporting agency (your "file disclosure"). You will be required to provide proper identification, which may include your Social Security number. In many cases, the disclosure will be free. You are entitled to a free file disclosure if: a person has taken adverse action against you because of information in your credit report; you are the victim of identity theft and place a fraud alert in your file; your file contains inaccurate information as a result of fraud; you are on public assistance; or you are unemployed but expect to apply for employment within 60 days.
+        </Text>
+        <Text style={[s.paragraph, { fontWeight: 'bold', color: NAVY }]}>
+          You have the right to ask for a credit score.
+        </Text>
+        <Text style={s.paragraph}>
+          Credit scores are numerical summaries of your credit-worthiness based on information from credit bureaus. You may request a credit score from consumer reporting agencies that create scores or distribute scores used in residential real property loans, but you will have to pay a fee for it. In some mortgage transactions, you will receive credit score information for free from the mortgage lender.
+        </Text>
+        <Text style={[s.paragraph, { fontWeight: 'bold', color: NAVY }]}>
+          You have the right to dispute incomplete or inaccurate information.
+        </Text>
+        <Text style={s.paragraph}>
+          If you identify information in your file that is incomplete or inaccurate, and report it to the consumer reporting agency, the agency must investigate unless your dispute is frivolous. See www.consumerfinance.gov/learnmore for an explanation of dispute procedures.
+        </Text>
+        <Text style={[s.paragraph, { fontWeight: 'bold', color: NAVY }]}>
+          Consumer reporting agencies must correct or delete inaccurate, incomplete, or unverifiable information.
+        </Text>
+        <Text style={s.paragraph}>
+          Inaccurate, incomplete, or unverifiable information must be removed or corrected, usually within 30 days. However, a consumer reporting agency may continue to report information it has verified as accurate.
+        </Text>
+        <View style={s.footer}>
+          <Text>PCG Screening Services • 770-716-1278 • accounts@pcgscreening.com • www.pcgscreening.net</Text>
+        </View>
+      </Page>
+
+      {/* FCRA Consumer Rights Summary — Page 2 */}
+      <Page size="LETTER" style={s.page}>
+        <View style={s.sectionTitle}><Text>A Summary of Your Rights Under the Fair Credit Reporting Act (continued)</Text></View>
+        <View style={s.divider} />
+        <Text style={[s.paragraph, { fontWeight: 'bold', color: NAVY }]}>
+          Consumer reporting agencies may not report outdated negative information.
+        </Text>
+        <Text style={s.paragraph}>
+          In most cases, a consumer reporting agency may not report negative information that is more than seven years old, or bankruptcies that are more than 10 years old.
+        </Text>
+        <Text style={[s.paragraph, { fontWeight: 'bold', color: NAVY }]}>
+          Access to your file is limited.
+        </Text>
+        <Text style={s.paragraph}>
+          A consumer reporting agency may provide information about you only to people with a valid need — usually to consider an application with a creditor, insurer, employer, landlord, or other business. The FCRA specifies those with a valid need for access.
+        </Text>
+        <Text style={[s.paragraph, { fontWeight: 'bold', color: NAVY }]}>
+          You must give your consent for reports to be provided to employers.
+        </Text>
+        <Text style={s.paragraph}>
+          A consumer reporting agency may not give out information about you to your employer, or a potential employer, without your written consent given to the employer. Written consent generally is not required in the trucking industry. For more information, go to www.consumerfinance.gov/learnmore.
+        </Text>
+        <Text style={[s.paragraph, { fontWeight: 'bold', color: NAVY }]}>
+          You may limit "prescreened" offers of credit and insurance you get based on information in your credit report.
+        </Text>
+        <Text style={s.paragraph}>
+          Unsolicited "prescreened" offers for credit and insurance must include a toll-free phone number you can call if you choose to remove your name and address from the lists these offers are based on. You may opt out with the nationwide credit bureaus at 1-888-567-8688.
+        </Text>
+        <Text style={[s.paragraph, { fontWeight: 'bold', color: NAVY }]}>
+          The following FCRA right is especially relevant to identity theft victims.
+        </Text>
+        <Text style={s.paragraph}>
+          You have the right to place a "fraud alert" in your file. You have the right to a free credit report when a fraud alert is placed in your file. You have the right to block information resulting from identity theft. An identity thief's debts may also be blocked from your file. You also have the right to dispute inaccurate information in your file arising from identity theft, and consumer reporting agencies must generally complete their investigation within 30 days.
+        </Text>
+        <Text style={[s.paragraph, { fontWeight: 'bold', color: NAVY }]}>
+          States may enforce the FCRA, and many states have their own consumer reporting laws.
+        </Text>
+        <Text style={s.paragraph}>
+          You may have additional rights under state law. You may contact a state or local consumer protection agency or state attorney general to learn more. For information about your federal rights, contact the Consumer Financial Protection Bureau at www.consumerfinance.gov/learnmore or (855) 411-2372.
+        </Text>
+        <Text style={[s.paragraph, { fontStyle: 'italic', marginTop: 12, fontSize: 8, color: LIGHT_GRAY }]}>
+          This summary of rights is prescribed by the Consumer Financial Protection Bureau pursuant to Section 609 of the Fair Credit Reporting Act (15 U.S.C. § 1681g).
+        </Text>
+        <View style={s.footer}>
+          <Text>PCG Screening Services • 770-716-1278 • accounts@pcgscreening.com • www.pcgscreening.net</Text>
+        </View>
+      </Page>
     </Document>
   )
 }
