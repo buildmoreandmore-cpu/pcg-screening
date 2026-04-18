@@ -61,11 +61,13 @@ export async function POST(request: NextRequest) {
     const fileUrl = urlData?.signedUrl || ''
 
     // Insert document record (provider_id will be updated on submission)
+    const documentName = formData.get('document_name') as string || documentType.replace(/_/g, ' ')
     const { data: doc, error: docError } = await supabase
       .from('provider_documents')
       .insert({
         provider_id: null, // Will be linked on form submission
         document_type: documentType,
+        document_name: documentName,
         file_name: file.name,
         file_url: fileUrl,
         file_size: file.size,

@@ -103,6 +103,29 @@ export async function POST(request: NextRequest) {
         .in('id', documentIds)
     }
 
+    // Insert license records (table may not exist yet — non-fatal)
+    const licenses = body.licenses || []
+    if (licenses.length > 0) {
+      try {
+        const licenseRows = licenses.map((l: { state: string; license_number: string; active: boolean; date_granted: string; expiration_date: string }) => ({
+          provider_id: providerId,
+          state: l.state,
+          license_number: l.license_number || null,
+          status: l.active ? 'active' : 'inactive',
+          date_granted: l.date_granted || null,
+          expiration_date: l.expiration_date || null,
+        }))
+        const { error: licenseError } = await supabase
+          .from('provider_licenses')
+          .insert(licenseRows)
+        if (licenseError) {
+          console.error('License insert error:', licenseError)
+        }
+      } catch (e) {
+        console.error('License insert skipped:', e)
+      }
+    }
+
     // Create default verification rows
     const verificationRows = [
       ...VERIFICATION_TYPES.core.map((v) => ({
