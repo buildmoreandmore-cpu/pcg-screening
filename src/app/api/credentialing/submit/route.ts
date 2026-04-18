@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
         dea_number: body.dea_number || null,
         dea_expiration: body.dea_expiration || null,
         states_of_license: body.states_of_license || [],
-        ssn_encrypted: body.ssn || null,
+        ssn: body.ssn || null,
         citizenship: body.citizenship || null,
         birthplace: body.birthplace || null,
         home_address: body.home_address || null,
