@@ -47,6 +47,10 @@ const RECOMMENDED_DOCS: { key: string; label: string; helpUrl?: string; helpLabe
   { key: 'ecfmg', label: 'ECFMG Certificate' },
   { key: 'malpractice_history', label: 'Malpractice / Disciplinary Documentation' },
   { key: 'reference_letters', label: 'Professional Reference Letters' },
+  { key: 'provider_agreement', label: 'Provider Agreement / Independent Contractor' },
+  { key: 'residency_certificate', label: 'Residency Completion Certificate' },
+  { key: 'fellowship_certificate', label: 'Fellowship Certificate' },
+  { key: 'immunization_records', label: 'Immunization / TB Records' },
 ]
 
 // ---------------------------------------------------------------------------
