@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
     // Provider confirmation email
     try {
       await resend.emails.send({
-        from: 'PCG Screening <accounts@pcgscreening.com>',
+        from: `PCG Screening <${process.env.FROM_EMAIL || 'accounts@pcgscreening.com'}>`,
         to: body.email,
         subject: `MedCare Staffing — Credentialing Application Received`,
         html: buildProviderEmail(providerName, trackingCode),
@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
     if (adminEmail) {
       try {
         await resend.emails.send({
-          from: 'PCG Screening <noreply@pcgscreening.net>',
+          from: `PCG Screening <${process.env.FROM_EMAIL || 'accounts@pcgscreening.com'}>`,
           to: adminEmail,
           subject: `New Credentialing Submission — Dr. ${body.last_name}, ${body.specialty}`,
           html: buildAdminEmail(providerName, body, trackingCode, providerId, credentialingUrl, documentIds.length),
