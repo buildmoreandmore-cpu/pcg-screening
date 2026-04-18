@@ -3,28 +3,36 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Physician Credentialing | MedCare Staffing',
   description: 'Submit your credentialing application for locum tenens assignments with MedCare Staffing.',
+  icons: {
+    icon: '/credentialing/favicon.svg',
+  },
 }
 
 export default function CredentialingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#F8FBFF] flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-[#3a3a3a] sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* MedCare text logo - "MEDcare" bold blue with "STAFFING" in blue banner */}
-            <div>
-              <div className="text-2xl font-extrabold tracking-tight" style={{ color: '#2C5F8A' }}>
-                <span style={{ color: '#4A90D9' }}>MED</span>care
+            {/* MedCare Staffing logo */}
+            <div className="flex flex-col items-center">
+              <div className="text-2xl font-extrabold tracking-tight leading-none">
+                <span className="text-white">MED</span><span style={{ color: '#5BA4E6' }}>care</span>
               </div>
-              <div className="text-[10px] font-bold tracking-[0.2em] text-white bg-[#4A90D9] px-2 py-0.5 text-center rounded-sm -mt-0.5">
-                STAFFING
+              <div className="relative mt-0.5 w-full flex justify-center">
+                <div className="text-[9px] font-bold tracking-[0.25em] text-white px-3 py-[2px] text-center" style={{ background: '#5BA4E6', clipPath: 'polygon(4% 0%, 96% 0%, 100% 50%, 96% 100%, 4% 100%, 0% 50%)' }}>
+                  STAFFING
+                </div>
+              </div>
+              <div className="text-[7px] font-semibold tracking-[0.15em] text-gray-300 mt-0.5">
+                A VETERAN OWNED BUSINESS
               </div>
             </div>
-            <div className="hidden sm:block h-8 w-px bg-gray-200" />
-            <p className="hidden sm:block text-sm text-gray-600 font-medium">Physician Credentialing Application</p>
+            <div className="hidden sm:block h-10 w-px bg-white/20" />
+            <p className="hidden sm:block text-sm text-gray-300 font-medium">Physician Credentialing Application</p>
           </div>
-          <div className="flex items-center gap-1.5 text-green-600 text-xs font-medium">
+          <div className="flex items-center gap-1.5 text-green-400 text-xs font-medium">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
             Secure
           </div>
