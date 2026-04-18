@@ -615,7 +615,7 @@ export default function CredentialingIntakePage() {
                   clearError('ssn')
                 }}
                 className={errors.ssn ? INPUT_ERR : INPUT}
-                placeholder="\u2022\u2022\u2022-\u2022\u2022-\u2022\u2022\u2022\u2022"
+                placeholder="XXX-XX-XXXX"
                 autoComplete="off"
               />
               {errors.ssn && <p className="text-red-500 text-xs mt-1">{errors.ssn}</p>}
