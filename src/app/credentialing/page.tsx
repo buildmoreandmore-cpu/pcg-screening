@@ -37,8 +37,8 @@ const REQUIRED_DOCS: { key: string; label: string }[] = [
   { key: 'malpractice_insurance', label: 'Certificate of Malpractice Insurance / COI' },
 ]
 
-const RECOMMENDED_DOCS: { key: string; label: string }[] = [
-  { key: 'w9', label: 'W-9' },
+const RECOMMENDED_DOCS: { key: string; label: string; helpUrl?: string; helpLabel?: string }[] = [
+  { key: 'w9', label: 'W-9', helpUrl: 'https://www.irs.gov/pub/irs-pdf/fw9.pdf', helpLabel: 'Download blank W-9 from IRS' },
   { key: 'medical_school_diploma', label: 'Medical School Diploma' },
   { key: 'dea_registration', label: 'Federal DEA / Controlled Substance Registration' },
   { key: 'board_certification', label: 'Board Certification' },
@@ -1159,6 +1159,18 @@ export default function CredentialingIntakePage() {
                         )}
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-gray-800">{doc.label}</p>
+                          {doc.helpUrl && !uploaded && (
+                            <a
+                              href={doc.helpUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-[#4A90D9] hover:underline mt-0.5"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                              {doc.helpLabel}
+                            </a>
+                          )}
                           {uploaded && (
                             <p className="text-xs text-gray-500 truncate">
                               {uploaded.file_name} ({formatFileSize(uploaded.file_size)})
