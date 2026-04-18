@@ -33,6 +33,23 @@ const primaryNav = [
   },
 ]
 
+const credentialingUrl = process.env.NEXT_PUBLIC_CREDENTIALING_URL || ''
+
+const credentialingNav = credentialingUrl ? [
+  {
+    label: 'Credentialing',
+    href: `${credentialingUrl}/admin/dashboard`,
+    icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
+    external: true,
+  },
+  {
+    label: 'Providers',
+    href: `${credentialingUrl}/admin/providers`,
+    icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+    external: true,
+  },
+] : []
+
 const secondaryNav = [
   {
     label: 'Documents',
@@ -84,6 +101,26 @@ export default function AdminSidebar({ adminName, adminEmail }: { adminName: str
           </Link>
         ))}
       </nav>
+
+      {credentialingNav.length > 0 && (
+        <div className="px-3 py-3 border-t border-white/10 space-y-1">
+          <p className="px-3 text-[10px] text-gold uppercase tracking-widest font-medium mb-1">Credentialing</p>
+          {credentialingNav.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              {item.icon}
+              {item.label}
+              <svg className="w-3 h-3 ml-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            </a>
+          ))}
+        </div>
+      )}
 
       <div className="px-3 py-3 border-t border-white/10 space-y-1">
         {secondaryNav.map((item) => (

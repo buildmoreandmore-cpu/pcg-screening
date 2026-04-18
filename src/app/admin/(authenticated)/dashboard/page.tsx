@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { requireAdmin } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
 import StatusBadge from '@/components/portal/StatusBadge'
+import CredentialingCard from '@/components/admin/CredentialingCard'
 // ParkerPopup is rendered in the admin layout (available on all pages)
 
 function timeAgo(date: string) {
@@ -145,6 +147,11 @@ export default async function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Credentialing Bridge */}
+      <Suspense fallback={<div className="bg-white rounded-xl shadow-sm p-5 animate-pulse h-48" />}>
+        <CredentialingCard />
+      </Suspense>
 
       {/* Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3">
