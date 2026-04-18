@@ -148,11 +148,6 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      {/* Credentialing Bridge */}
-      <Suspense fallback={<div className="bg-white rounded-xl shadow-sm p-5 animate-pulse h-48" />}>
-        <CredentialingCard />
-      </Suspense>
-
       {/* Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3">
         <Link href="/admin/clients/new" className="inline-flex items-center justify-center gap-2 bg-navy text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-navy-light transition-colors">
@@ -166,6 +161,11 @@ export default async function AdminDashboard() {
           Upload Document
         </Link>
       </div>
+
+      {/* Credentialing Bridge */}
+      <Suspense fallback={<div className="bg-white rounded-xl shadow-sm p-5 animate-pulse h-48" />}>
+        <CredentialingCard />
+      </Suspense>
 
       {/* ParkerPopup moved to admin layout */}
     </div>
