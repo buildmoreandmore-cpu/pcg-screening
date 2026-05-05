@@ -10,6 +10,7 @@ import InternalNotes from './InternalNotes'
 import ClientNotes from './ClientNotes'
 import ScreeningComponentsView from './ScreeningComponentsView'
 import ConsentPdfButton from './ConsentPdfButton'
+import CandidatePII from './CandidatePII'
 
 function formatDate(date: string | null) {
   if (!date) return '—'
@@ -59,26 +60,24 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
 
       <div className="grid lg:grid-cols-2 gap-5">
         {/* Candidate Info */}
-        <div className="bg-white rounded-xl shadow-sm p-5">
-          <h2 className="text-sm font-medium text-gray-700 mb-3">Candidate Information</h2>
-          <dl className="space-y-2.5">
-            {[
-              ['Email', c.email],
-              ['Phone', c.phone || '—'],
-              ['DOB', c.dob ? new Date(c.dob).toLocaleDateString() : '—'],
-              ['SSN', c.ssn_last4 ? `••••${c.ssn_last4}` : '—'],
-              ['Address', c.address || '—'],
-              ['Source', c.source || 'portal'],
-              ['Heard about us', c.referral_source || '—'],
-              ['Submitted', formatDate(c.created_at)],
-            ].map(([label, value]) => (
-              <div key={label} className="flex justify-between">
-                <dt className="text-xs text-gray-500">{label}</dt>
-                <dd className="text-sm text-gray-900 text-right">{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+        <CandidatePII
+          candidateId={c.id}
+          email={c.email}
+          phone={c.phone}
+          dob={c.dob}
+          ssnLast4={c.ssn_last4}
+          maidenName={c.maiden_name}
+          sex={c.sex}
+          race={c.race}
+          driversLicenseNumber={c.drivers_license_number}
+          driversLicenseState={c.drivers_license_state}
+          driversLicenseClass={c.drivers_license_class}
+          driversLicenseExpiration={c.drivers_license_expiration}
+          address={c.address}
+          source={c.source}
+          referralSource={c.referral_source}
+          submittedAt={c.created_at}
+        />
 
         {/* Package & Payment */}
         <div className="space-y-5">
@@ -145,6 +144,16 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
           </div>
         </div>
       </div>
+
+      {/* Additional intake details (international, references, etc.) */}
+      {c.additional_details && Object.keys(c.additional_details).length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm p-5">
+          <h2 className="text-sm font-medium text-gray-700 mb-3">Additional Details</h2>
+          <pre className="text-xs text-gray-700 bg-gray-50 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap">
+            {JSON.stringify(c.additional_details, null, 2)}
+          </pre>
+        </div>
+      )}
 
       {/* Screening Components (à la carte) */}
       {c.screening_components && (
