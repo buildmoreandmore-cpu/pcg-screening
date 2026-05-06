@@ -14,13 +14,14 @@ type Package = {
   features: string[]
   components: Record<string, boolean>
   customNotes: string
+  drugPanel: string | null
 }
 
 const defaultPackages: Package[] = [
-  { name: 'Basic Background Check', price: '29', description: 'SSN trace + national criminal', features: ['SSN Verification', 'National Criminal'], components: { social_security_trace: true, criminal_history: true }, customNotes: '' },
-  { name: 'Standard Background Check', price: '49', description: 'Basic + county criminal + sex offender', features: [], components: { social_security_trace: true, criminal_history: true, sex_offender: true }, customNotes: '' },
-  { name: 'Premium Background Check', price: '79', description: 'Standard + employment + education verification', features: [], components: { social_security_trace: true, criminal_history: true, sex_offender: true, employment: true, education: true }, customNotes: '' },
-  { name: 'Drug Test Add-On', price: '45', description: '10-panel drug screening', features: [], components: {}, customNotes: '10-panel urine drug screening' },
+  { name: 'Basic Background Check', price: '29', description: 'SSN trace + national criminal', features: ['SSN Verification', 'National Criminal'], components: { social_security_trace: true, criminal_history: true }, customNotes: '', drugPanel: null },
+  { name: 'Standard Background Check', price: '49', description: 'Basic + county criminal + sex offender', features: [], components: { social_security_trace: true, criminal_history: true, sex_offender: true }, customNotes: '', drugPanel: null },
+  { name: 'Premium Background Check', price: '79', description: 'Standard + employment + education verification', features: [], components: { social_security_trace: true, criminal_history: true, sex_offender: true, employment: true, education: true }, customNotes: '', drugPanel: null },
+  { name: 'Drug Test Add-On', price: '45', description: 'Configurable drug screening (panel selected per package)', features: [], components: { drug_screen: true }, customNotes: '', drugPanel: '10_panel' },
 ]
 
 function slugify(text: string) {
@@ -70,7 +71,7 @@ export default function NewClientPage() {
   }
 
   function addPackage() {
-    setPackages([...packages, { name: '', price: '', description: '', features: [], components: {}, customNotes: '' }])
+    setPackages([...packages, { name: '', price: '', description: '', features: [], components: {}, customNotes: '', drugPanel: null }])
   }
 
   function applyComponentsDraft(index: number, draft: PackageDraft) {
@@ -82,6 +83,7 @@ export default function NewClientPage() {
       description: draft.description || updated[index].description,
       components: draft.components,
       customNotes: draft.customNotes,
+      drugPanel: draft.drugPanel,
     }
     setPackages(updated)
     setEditingComponentsIndex(null)
@@ -111,6 +113,7 @@ export default function NewClientPage() {
         features: p.features,
         components: p.components,
         customNotes: p.customNotes,
+        drugPanel: p.drugPanel,
       })),
       inviteUser,
       referralSource: referralSource || undefined,
@@ -352,8 +355,9 @@ export default function NewClientPage() {
                 description: packages[editingComponentsIndex].description,
                 components: packages[editingComponentsIndex].components,
                 customNotes: packages[editingComponentsIndex].customNotes,
+                drugPanel: packages[editingComponentsIndex].drugPanel,
               }
-            : { name: '', priceCents: 0, description: '', components: {}, customNotes: '' }
+            : { name: '', priceCents: 0, description: '', components: {}, customNotes: '', drugPanel: null }
         }
         onSave={(draft) => {
           if (editingComponentsIndex !== null) applyComponentsDraft(editingComponentsIndex, draft)

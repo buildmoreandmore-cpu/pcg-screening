@@ -2,7 +2,7 @@ import React from 'react'
 import { Document, Page, View, Text, Image, StyleSheet, Font } from '@react-pdf/renderer'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { SCREENING_COMPONENTS } from '@/lib/screening-components'
+import { SCREENING_COMPONENTS, expandActiveComponents, drugPanelLabel } from '@/lib/screening-components'
 import { FCRA_DISCLOSURE_PARAGRAPHS, FCRA_DISCLOSURE_VERSION } from '@/lib/fcra-disclosure'
 import type { ScreeningResults, ResultVerdict, ReportAttachment } from '@/lib/report-types'
 import { VERDICT_LABELS, VERDICT_COLORS } from '@/lib/report-types'
@@ -64,6 +64,7 @@ interface ReportProps {
   }
   clientName: string
   packageName: string
+  drugPanel: string | null
   screeningResults: ScreeningResults
   activeComponents: string[]
   jurisdictions: Array<{ type: string; name: string; state?: string }>
@@ -79,7 +80,7 @@ function getSiteUrl() {
 
 function ScreeningReportDocument(props: ReportProps) {
   const {
-    candidate: c, clientName, packageName, screeningResults,
+    candidate: c, clientName, packageName, drugPanel, screeningResults,
     activeComponents, jurisdictions, additionalDetails,
     attachmentNames, preparedBy, generatedAt,
   } = props
@@ -115,6 +116,7 @@ function ScreeningReportDocument(props: ReportProps) {
           ['Tracking Code', c.tracking_code],
           ['Client / Employer', clientName],
           ['Package', packageName],
+          ...(drugPanel ? [['Drug Panel', drugPanelLabel(drugPanel)] as [string, string]] : []),
           ['Report Date', generatedAt],
           ['Prepared By', preparedBy],
         ].map(([label, value]) => (
@@ -353,16 +355,8 @@ export async function generateReportPdf(candidateId: string): Promise<Buffer> {
   const jurisdictions = c.search_jurisdictions || []
   const additionalDetails = c.additional_details || {}
 
-  // Determine active components from screening_components or package components
-  const components = c.screening_components || {}
-  const activeComponents: string[] = []
-  for (const [key, val] of Object.entries(components)) {
-    if (typeof val === 'object' && val !== null && 'enabled' in val && (val as { enabled: boolean }).enabled) {
-      activeComponents.push(key)
-    } else if (val === true) {
-      activeComponents.push(key)
-    }
-  }
+  // Determine active components, expanding sanctions_lists into individual checks.
+  const activeComponents = expandActiveComponents(c.screening_components || {})
 
   // If no screening_components set, derive from results keys
   if (activeComponents.length === 0 && Object.keys(screeningResults).length > 0) {
@@ -380,6 +374,7 @@ export async function generateReportPdf(candidateId: string): Promise<Buffer> {
     candidate: c,
     clientName: c.client?.name || 'Unknown Client',
     packageName: c.package_name || 'Standard',
+    drugPanel: c.drug_panel || null,
     screeningResults,
     activeComponents,
     jurisdictions,

@@ -63,6 +63,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid screening link' }, { status: 400 })
     }
 
+    // Look up the client_packages row for this package so we can copy the
+    // configured components (and drug panel) onto the candidate. Without
+    // this step, the report workflow falls back to a default 3-component
+    // list and Gwen can't mark education/employment/etc. as completed even
+    // though the package included them.
+    const { data: pkgRow } = await supabase
+      .from('client_packages')
+      .select('components, drug_panel')
+      .eq('client_id', client.id)
+      .eq('name', packageName)
+      .eq('active', true)
+      .maybeSingle()
+
+    const packageComponents = (pkgRow?.components as Record<string, boolean> | null) || null
+    const packageDrugPanel = pkgRow?.drug_panel || null
+
+    // Build screening_components in the nested-enabled format the rest of
+    // the app expects. e.g. { criminal_history: { enabled: true } }
+    const screeningComponentsFromPackage: Record<string, unknown> | null = packageComponents
+      ? Object.fromEntries(
+          Object.entries(packageComponents)
+            .filter(([, v]) => v === true)
+            .map(([k]) => [k, { enabled: true }])
+        )
+      : null
+
     // Reconcile-or-insert. If the candidate arrived via an employer-sent
     // invite link, the row already exists (created by inviteCandidate()).
     // We update that row in place — same id, same tracking_code — so the
@@ -96,6 +122,20 @@ export async function POST(req: NextRequest) {
         .maybeSingle()
 
       if (existing && existing.payment_status !== 'paid') {
+        // Pull current screening_components so we don't overwrite a custom
+        // selection the employer set when generating the invite link.
+        const { data: existingFull } = await supabase
+          .from('candidates')
+          .select('screening_components, drug_panel')
+          .eq('id', existing.id)
+          .single()
+
+        const shouldSetComponents =
+          screeningComponentsFromPackage &&
+          (!existingFull?.screening_components ||
+            Object.keys(existingFull.screening_components).length === 0)
+        const shouldSetDrugPanel = packageDrugPanel && !existingFull?.drug_panel
+
         const { data: updated, error: updErr } = await supabase
           .from('candidates')
           .update({
@@ -120,6 +160,8 @@ export async function POST(req: NextRequest) {
             payment_status: 'pending',
             referral_source: referralSource || null,
             additional_details: additionalDetails || {},
+            ...(shouldSetComponents && { screening_components: screeningComponentsFromPackage }),
+            ...(shouldSetDrugPanel && { drug_panel: packageDrugPanel }),
             ...consentColumns,
           })
           .eq('id', existing.id)
@@ -179,6 +221,8 @@ export async function POST(req: NextRequest) {
           source: 'candidate_portal',
           referral_source: referralSource || null,
           additional_details: additionalDetails || {},
+          ...(screeningComponentsFromPackage && { screening_components: screeningComponentsFromPackage }),
+          ...(packageDrugPanel && { drug_panel: packageDrugPanel }),
           ...consentColumns,
         })
         .select('id, tracking_code')

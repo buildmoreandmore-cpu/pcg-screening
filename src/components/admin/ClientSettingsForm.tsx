@@ -89,15 +89,15 @@ export default function ClientSettingsForm({ client }: { client: any }) {
   // Billing type
   const [billingType, setBillingType] = useState(client.billing_type || 'net_30')
 
-  // Packages
-  const [packages, setPackages] = useState<Package[]>(
-    (client.packages || []).map((p: any) => ({
-      name: p.name || '',
-      price: p.price || 0,
-      description: p.description || '',
-      features: p.features || [],
-    }))
-  )
+  // Packages are now managed exclusively in the Packages tab via
+  // ClientPackagesManager. The legacy clients.packages JSONB is kept
+  // read-only here so updateClientSettings can echo it back unchanged.
+  const legacyPackages: Package[] = (client.packages || []).map((p: any) => ({
+    name: p.name || '',
+    price: p.price || 0,
+    description: p.description || '',
+    features: p.features || [],
+  }))
 
   // Notification preferences
   const [notifPrefs, setNotifPrefs] = useState(() => {
@@ -110,20 +110,6 @@ export default function ClientSettingsForm({ client }: { client: any }) {
   })
 
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
-
-  function updatePackage(index: number, field: keyof Package, value: any) {
-    const updated = [...packages]
-    updated[index] = { ...updated[index], [field]: value }
-    setPackages(updated)
-  }
-
-  function removePackage(index: number) {
-    setPackages(packages.filter((_, i) => i !== index))
-  }
-
-  function addPackage() {
-    setPackages([...packages, { name: '', price: 0, description: '', features: [] }])
-  }
 
   function toggleNotif(audience: string, event: string) {
     setNotifPrefs((prev: any) => ({
@@ -151,7 +137,7 @@ export default function ClientSettingsForm({ client }: { client: any }) {
       city,
       state,
       zip,
-      packages: packages.filter(p => p.name).map(p => ({
+      packages: legacyPackages.filter(p => p.name).map(p => ({
         ...p,
         price: Number(p.price),
       })),
@@ -260,33 +246,14 @@ export default function ClientSettingsForm({ client }: { client: any }) {
         </div>
       </div>
 
-      {/* Packages */}
-      <div className="bg-white rounded-xl shadow-sm p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-700">Screening Packages</h3>
-          <button type="button" onClick={addPackage} className="text-sm text-gold hover:text-gold-light transition-colors">+ Add Package</button>
-        </div>
-        <div className="space-y-3">
-          {packages.map((pkg, i) => (
-            <div key={i} className="border border-gray-100 rounded-lg p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex gap-2 flex-1">
-                  <input type="text" value={pkg.name} onChange={e => updatePackage(i, 'name', e.target.value)}
-                    placeholder="Package name" className="flex-1 px-2 py-1.5 rounded border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
-                  <div className="flex items-center">
-                    <span className="text-sm text-gray-400 mr-1">$</span>
-                    <input type="number" value={pkg.price} onChange={e => updatePackage(i, 'price', e.target.value)}
-                      placeholder="0" className="w-20 px-2 py-1.5 rounded border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
-                  </div>
-                </div>
-                <button type="button" onClick={() => removePackage(i)} className="text-gray-400 hover:text-red-500 ml-2 text-sm">Remove</button>
-              </div>
-              <input type="text" value={pkg.description} onChange={e => updatePackage(i, 'description', e.target.value)}
-                placeholder="Description" className="w-full px-2 py-1.5 rounded border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
-            </div>
-          ))}
-          {packages.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No packages configured</p>}
-        </div>
+      {/* Packages — managed in dedicated Packages tab */}
+      <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+        <h3 className="text-sm font-medium text-navy mb-1">Screening Packages</h3>
+        <p className="text-xs text-gray-600">
+          Packages are managed in the <span className="font-medium text-navy">Packages</span> tab above.
+          That is the single source of truth — including drug panel selection and which screening
+          components run for each package.
+        </p>
       </div>
 
       {/* Notification Preferences */}

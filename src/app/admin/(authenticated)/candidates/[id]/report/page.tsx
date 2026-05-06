@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { SCREENING_COMPONENTS } from '@/lib/screening-components'
+import { SCREENING_COMPONENTS, expandActiveComponents } from '@/lib/screening-components'
 import ReportWorkflow from './ReportWorkflow'
 
 export default async function ReportPage({ params }: { params: Promise<{ id: string }> }) {
@@ -18,16 +18,9 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
 
   if (!c) notFound()
 
-  // Determine active screening components
-  const components = c.screening_components || {}
-  const activeKeys: string[] = []
-  for (const [key, val] of Object.entries(components)) {
-    if (typeof val === 'object' && val !== null && 'enabled' in val && (val as { enabled: boolean }).enabled) {
-      activeKeys.push(key)
-    } else if (val === true) {
-      activeKeys.push(key)
-    }
-  }
+  // Determine active screening components, expanding the legacy
+  // sanctions_lists parent into individual OFAC/OIG/SAM/GSA checks.
+  const activeKeys = expandActiveComponents(c.screening_components || {})
 
   // If no components configured, show all results keys or default set
   const effectiveKeys = activeKeys.length > 0

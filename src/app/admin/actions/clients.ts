@@ -36,7 +36,7 @@ export async function createNewClient({
   state: string
   zip: string
   billingType?: string
-  packages: Array<{ name: string; price: number; description: string; features: string[]; components?: Record<string, boolean>; customNotes?: string }>
+  packages: Array<{ name: string; price: number; description: string; features: string[]; components?: Record<string, boolean>; customNotes?: string; drugPanel?: string | null }>
   inviteUser: boolean
   referralSource?: string
   referralSourceOther?: string
@@ -84,6 +84,7 @@ export async function createNewClient({
       description: p.description || null,
       components: p.components || {},
       custom_notes: p.customNotes || null,
+      drug_panel: p.drugPanel || null,
       sort_order: i,
     }))
     const { error: pkgErr } = await supabase.from('client_packages').insert(rows)

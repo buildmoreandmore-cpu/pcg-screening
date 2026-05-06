@@ -14,7 +14,7 @@ export default async function AdminClientDetailPage({ params }: { params: Promis
     supabase.from('clients').select('*').eq('id', id).single(),
     supabase.from('candidates').select('id, first_name, last_name, email, package_name, status, payment_status, tracking_code, created_at').eq('client_id', id).order('created_at', { ascending: false }),
     supabase.from('client_users').select('id, name, email, role, active, created_at').eq('client_id', id).order('created_at'),
-    supabase.from('client_packages').select('id, name, price_cents, description, components, custom_notes, sort_order, active').eq('client_id', id).eq('active', true).order('sort_order'),
+    supabase.from('client_packages').select('id, name, price_cents, description, components, custom_notes, drug_panel, sort_order, active').eq('client_id', id).eq('active', true).order('sort_order'),
   ])
 
   if (!clientRes.data) notFound()

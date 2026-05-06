@@ -35,6 +35,8 @@ export interface ScreeningSelections {
     enabled: boolean
     ofac: boolean
     healthcare_oig: boolean
+    sam: boolean
+    gsa: boolean
   }
   social_security_trace: {
     enabled: boolean
@@ -100,7 +102,7 @@ export const DEFAULT_SELECTIONS: ScreeningSelections = {
     felony_misdemeanor: false,
   },
   driver_history: { enabled: false, state: '', license_number: '' },
-  sanctions_lists: { enabled: false, ofac: false, healthcare_oig: false },
+  sanctions_lists: { enabled: false, ofac: false, healthcare_oig: false, sam: false, gsa: false },
   social_security_trace: { enabled: false },
   education: { enabled: false, school_name: '', year_graduated: '', location: '' },
   employment: { enabled: false, employer_contacts: '' },

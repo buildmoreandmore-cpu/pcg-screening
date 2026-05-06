@@ -8,7 +8,7 @@ import {
   updateClientPackage,
   deleteClientPackage,
 } from '@/app/admin/actions/packages'
-import { countComponents } from '@/lib/screening-components'
+import { countComponents, drugPanelLabel } from '@/lib/screening-components'
 
 type ClientPackage = {
   id: string
@@ -17,6 +17,7 @@ type ClientPackage = {
   description: string | null
   components: Record<string, boolean>
   custom_notes: string | null
+  drug_panel: string | null
   sort_order: number
   active: boolean
 }
@@ -27,6 +28,7 @@ const EMPTY_DRAFT: PackageDraft = {
   description: '',
   components: {},
   customNotes: '',
+  drugPanel: null,
 }
 
 export default function ClientPackagesManager({
@@ -70,6 +72,7 @@ export default function ClientPackagesManager({
         description: draft.description,
         components: draft.components,
         customNotes: draft.customNotes,
+        drugPanel: draft.drugPanel,
       })
       if (res.error) {
         setError(res.error)
@@ -83,6 +86,7 @@ export default function ClientPackagesManager({
         description: draft.description,
         components: draft.components,
         customNotes: draft.customNotes,
+        drugPanel: draft.drugPanel,
         sortOrder: packages.length,
       })
       if (res.error) {
@@ -151,6 +155,16 @@ export default function ClientPackagesManager({
                 {pkg.description && (
                   <p className="text-xs text-gray-500 mt-0.5">{pkg.description}</p>
                 )}
+                {pkg.drug_panel && (
+                  <p className="text-xs text-amber-700 mt-0.5">
+                    Drug panel: <span className="font-medium">{drugPanelLabel(pkg.drug_panel)}</span>
+                  </p>
+                )}
+                {pkg.components?.drug_screen && !pkg.drug_panel && (
+                  <p className="text-xs text-red-600 mt-0.5">
+                    Drug screen enabled but no panel selected — edit and pick one.
+                  </p>
+                )}
                 {pkg.custom_notes && (
                   <p className="text-xs text-gray-400 mt-1 italic">Notes: {pkg.custom_notes}</p>
                 )}
@@ -194,6 +208,7 @@ export default function ClientPackagesManager({
                 description: editing.description || '',
                 components: editing.components || {},
                 customNotes: editing.custom_notes || '',
+                drugPanel: editing.drug_panel || null,
               }
             : EMPTY_DRAFT
         }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { SCREENING_COMPONENTS } from '@/lib/screening-components'
+import { SCREENING_COMPONENTS, DRUG_PANEL_OPTIONS } from '@/lib/screening-components'
 
 export type PackageDraft = {
   name: string
@@ -9,6 +9,7 @@ export type PackageDraft = {
   description: string
   components: Record<string, boolean>
   customNotes: string
+  drugPanel: string | null
 }
 
 export default function PackageComponentsModal({
@@ -31,6 +32,7 @@ export default function PackageComponentsModal({
   const [description, setDescription] = useState(initial.description)
   const [components, setComponents] = useState<Record<string, boolean>>(initial.components || {})
   const [customNotes, setCustomNotes] = useState(initial.customNotes)
+  const [drugPanel, setDrugPanel] = useState<string | null>(initial.drugPanel || null)
   const [saving, setSaving] = useState(false)
 
   // Reset state when re-opened with a different package.
@@ -41,6 +43,7 @@ export default function PackageComponentsModal({
     setDescription(initial.description)
     setComponents(initial.components || {})
     setCustomNotes(initial.customNotes)
+    setDrugPanel(initial.drugPanel || null)
   }, [open, initial])
 
   if (!open) return null
@@ -57,6 +60,7 @@ export default function PackageComponentsModal({
       description: description.trim(),
       components,
       customNotes: customNotes.trim(),
+      drugPanel: components.drug_screen ? drugPanel : null,
     })
     setSaving(false)
   }
@@ -189,6 +193,30 @@ export default function PackageComponentsModal({
               })}
             </div>
           </div>
+
+          {/* Drug panel selector — only when drug_screen is enabled */}
+          {components.drug_screen && (
+            <div className="bg-amber-50/50 border border-amber-100 rounded-lg p-3">
+              <label className="block text-xs font-medium text-navy mb-1.5">
+                Drug Panel Type *
+              </label>
+              <select
+                value={drugPanel || ''}
+                onChange={(e) => setDrugPanel(e.target.value || null)}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
+              >
+                <option value="">Select panel —</option>
+                {DRUG_PANEL_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-[11px] text-gray-500 mt-1">
+                The exact panel must match what the lab is configured to run for this client.
+              </p>
+            </div>
+          )}
 
           {/* Custom notes */}
           <div>
