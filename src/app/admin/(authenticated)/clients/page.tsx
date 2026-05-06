@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
 import ClientDeleteButton from '@/components/admin/ClientDeleteButton'
-import { tierLabel } from '@/lib/subscriptions'
 
 export default async function AdminClientsPage() {
   await requireAdmin()
@@ -13,7 +12,6 @@ export default async function AdminClientsPage() {
     .from('clients')
     .select(`
       id, name, slug, contact_name, contact_email, contact_phone, packages, active, created_at,
-      subscription_tier, monthly_credit_limit, credits_used, allow_overage,
       candidates(id, status)
     `)
     .order('name')
@@ -82,7 +80,6 @@ export default async function AdminClientsPage() {
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Active</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Packages</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-4 py-3 w-12"></th>
               </tr>
@@ -104,24 +101,6 @@ export default async function AdminClientsPage() {
                   <td className="px-4 py-3 text-sm text-gray-900 font-medium">{c.activeCandidates}</td>
                   <td className="px-4 py-3 text-sm text-gray-500">{c.totalScreenings}</td>
                   <td className="px-4 py-3 text-sm text-gray-500">{c.packageCount}</td>
-                  <td className="px-4 py-3">
-                    {c.subscription_tier ? (
-                      <div>
-                        <p className="text-sm text-navy font-medium">{tierLabel(c.subscription_tier)}</p>
-                        {c.monthly_credit_limit ? (
-                          <p className={`text-[11px] ${
-                            (c.credits_used ?? 0) >= c.monthly_credit_limit
-                              ? c.allow_overage ? 'text-amber-700' : 'text-red-600'
-                              : 'text-gray-400'
-                          }`}>
-                            {c.credits_used ?? 0} / {c.monthly_credit_limit}
-                          </p>
-                        ) : null}
-                      </div>
-                    ) : (
-                      <span className="text-xs text-gray-400">Per-run</span>
-                    )}
-                  </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
                       c.active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'

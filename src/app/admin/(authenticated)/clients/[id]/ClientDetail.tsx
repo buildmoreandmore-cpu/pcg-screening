@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import StatusBadge from '@/components/portal/StatusBadge'
 import ClientSettingsForm from '@/components/admin/ClientSettingsForm'
 import ClientPackagesManager from '@/components/admin/ClientPackagesManager'
-import ClientSubscriptionSection from '@/components/admin/ClientSubscriptionSection'
 import { addClientUser, toggleClientUser, resendPortalInvite, resetClientUserPassword } from '@/app/admin/actions/clients'
 
 function timeAgo(date: string) {
@@ -262,18 +261,7 @@ export default function ClientDetail({
 
       {/* Settings Tab */}
       {tab === 'settings' && (
-        <div className="space-y-5">
-          <ClientSubscriptionSection
-            clientId={client.id}
-            initialTier={client.subscription_tier ?? null}
-            initialMonthlyLimit={client.monthly_credit_limit ?? null}
-            initialOveragePriceCents={client.overage_price_cents ?? null}
-            initialAllowOverage={client.allow_overage ?? false}
-            initialCreditsUsed={client.credits_used ?? 0}
-            initialPeriodStart={client.period_start ?? null}
-          />
-          <ClientSettingsForm client={client} />
-        </div>
+        <ClientSettingsForm client={client} />
       )}
     </div>
   )
