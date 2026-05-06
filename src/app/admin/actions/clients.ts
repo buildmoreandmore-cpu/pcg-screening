@@ -337,6 +337,53 @@ export async function updateClientSettings({
   return { error: error?.message }
 }
 
+export async function updateClientSubscription({
+  clientId,
+  tier,
+  monthlyLimit,
+  overagePriceCents,
+  allowOverage,
+}: {
+  clientId: string
+  tier: string | null
+  monthlyLimit: number | null
+  overagePriceCents: number | null
+  allowOverage: boolean
+}) {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  // When starting a brand new subscription, anchor period_start to today.
+  // Subsequent updates leave period_start alone so the cron resets cleanly.
+  const { data: existing } = await supabase
+    .from('clients')
+    .select('subscription_tier, period_start')
+    .eq('id', clientId)
+    .single()
+
+  const isStartingNewSubscription = tier && !existing?.subscription_tier
+
+  const { error } = await supabase
+    .from('clients')
+    .update({
+      subscription_tier: tier,
+      monthly_credit_limit: tier ? monthlyLimit : null,
+      overage_price_cents: tier ? overagePriceCents : null,
+      allow_overage: tier ? allowOverage : false,
+      ...(isStartingNewSubscription && {
+        period_start: new Date().toISOString().slice(0, 10),
+        credits_used: 0,
+      }),
+      // Clearing the tier resets counters too so a re-subscribe starts fresh.
+      ...(!tier && { credits_used: 0, period_start: null }),
+    })
+    .eq('id', clientId)
+
+  if (error) return { error: error.message }
+  revalidatePath(`/admin/clients/${clientId}`)
+  return {}
+}
+
 export async function deleteClient({ clientId }: { clientId: string }) {
   await requireAdmin()
   const supabase = createAdminClient()

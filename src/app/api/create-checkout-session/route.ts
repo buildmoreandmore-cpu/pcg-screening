@@ -4,6 +4,7 @@ import { getSupabase } from '@/lib/supabase'
 import { FCRA_DISCLOSURE_VERSION } from '@/lib/fcra-disclosure'
 import { buildCandidateSubmissionConfirmationEmail } from '@/lib/email-templates'
 import { generateAndStoreConsentPdf } from '@/lib/consent-pdf'
+import { evaluateCreditCheck, type ClientSubscription } from '@/lib/subscriptions'
 import { Resend } from 'resend'
 
 export const dynamic = 'force-dynamic'
@@ -54,13 +55,40 @@ export async function POST(req: NextRequest) {
     // Verify client exists and is active
     const { data: client } = await supabase
       .from('clients')
-      .select('id, name, slug')
+      .select(
+        'id, name, slug, subscription_tier, monthly_credit_limit, credits_used, period_start, overage_price_cents, allow_overage'
+      )
       .eq('slug', clientSlug)
       .eq('active', true)
       .single()
 
     if (!client) {
       return NextResponse.json({ error: 'Invalid screening link' }, { status: 400 })
+    }
+
+    // Subscription credit check. Only applies to employer-billed candidates
+    // (those who arrived via an invite link). Self-pay candidates pay at
+    // checkout regardless of the employer's subscription state — they don't
+    // consume the employer's allotment.
+    const subscription: ClientSubscription = {
+      subscription_tier: client.subscription_tier,
+      monthly_credit_limit: client.monthly_credit_limit,
+      credits_used: client.credits_used ?? 0,
+      period_start: client.period_start,
+      overage_price_cents: client.overage_price_cents,
+      allow_overage: client.allow_overage ?? false,
+    }
+    const isEmployerBilled = !!inviteCode
+    if (isEmployerBilled) {
+      const creditCheck = evaluateCreditCheck(subscription)
+      if (creditCheck.ok === false) {
+        return NextResponse.json(
+          {
+            error: `${client.name} has reached its monthly screening limit (${creditCheck.limit}). Contact your account manager to top up or wait for the next reset.`,
+          },
+          { status: 402 }
+        )
+      }
     }
 
     // Look up the client_packages row for this package so we can copy the
@@ -233,6 +261,21 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Failed to create record' }, { status: 500 })
       }
       candidate = inserted
+    }
+
+    // Decrement subscription credits for employer-billed candidates on a
+    // Fusion / Fusion Pro tier. Increment whether the candidate consumed
+    // an allotment slot OR was billed as overage — both still count as
+    // "this period's screenings".
+    if (
+      isEmployerBilled &&
+      subscription.subscription_tier &&
+      subscription.monthly_credit_limit
+    ) {
+      await supabase
+        .from('clients')
+        .update({ credits_used: (subscription.credits_used ?? 0) + 1 })
+        .eq('id', client.id)
     }
 
     // Also insert into submissions table for backwards compatibility
