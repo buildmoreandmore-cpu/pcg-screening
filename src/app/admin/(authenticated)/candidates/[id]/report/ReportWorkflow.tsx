@@ -26,6 +26,20 @@ export default function ReportWorkflow({
   initialHasResults: boolean
 }) {
   const [hasResults, setHasResults] = useState(initialHasResults)
+  const [results, setResults] = useState<ScreeningResults>(initialResults)
+
+  // A component is considered unfilled if it's still N/A — that's the
+  // default state when results haven't been entered. This prevents
+  // sending a report with a "Sanctions Lists: Clear" lump when really
+  // OFAC was checked but OIG/SAM/GSA weren't.
+  const unfilled = components
+    .filter((c) => {
+      const r = results[c.key]
+      if (!r) return true
+      if (r.result === 'not_applicable') return true
+      return false
+    })
+    .map((c) => c.label)
 
   return (
     <>
@@ -33,6 +47,7 @@ export default function ReportWorkflow({
         candidateId={candidateId}
         components={components}
         initialResults={initialResults}
+        onResultsChange={setResults}
         onSaved={() => setHasResults(true)}
       />
 
@@ -47,6 +62,8 @@ export default function ReportWorkflow({
         reportSentAt={reportSentAt}
         reportSentBy={reportSentBy}
         hasResults={hasResults}
+        totalComponents={components.length}
+        unfilledLabels={unfilled}
       />
     </>
   )

@@ -16,11 +16,13 @@ export default function ResultsEntryForm({
   components,
   initialResults,
   onSaved,
+  onResultsChange,
 }: {
   candidateId: string
   components: Array<{ key: string; label: string }>
   initialResults: ScreeningResults
   onSaved?: () => void
+  onResultsChange?: (results: ScreeningResults) => void
 }) {
   const [results, setResults] = useState<ScreeningResults>(() => {
     const r: ScreeningResults = {}
@@ -33,10 +35,11 @@ export default function ResultsEntryForm({
   const [saved, setSaved] = useState(false)
 
   function updateResult(key: string, field: 'result' | 'details', value: string) {
-    setResults(prev => ({
-      ...prev,
-      [key]: { ...prev[key], [field]: value },
-    }))
+    setResults(prev => {
+      const next = { ...prev, [key]: { ...prev[key], [field]: value } }
+      onResultsChange?.(next)
+      return next
+    })
     setSaved(false)
   }
 
@@ -57,12 +60,33 @@ export default function ResultsEntryForm({
           <h2 className="text-sm font-medium text-navy">Step 1: Screening Results</h2>
           <p className="text-xs text-gray-400 mt-0.5">Enter the result and details for each screening component.</p>
         </div>
-        {saved && (
-          <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-            Saved
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {(() => {
+            const filled = components.filter((c) => results[c.key]?.result && results[c.key].result !== 'not_applicable').length
+            const total = components.length
+            const complete = filled === total && total > 0
+            return (
+              <span
+                className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${
+                  complete ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
+                }`}
+              >
+                {complete ? (
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : null}
+                {filled} of {total} entered
+              </span>
+            )
+          })()}
+          {saved && (
+            <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              Saved
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4">

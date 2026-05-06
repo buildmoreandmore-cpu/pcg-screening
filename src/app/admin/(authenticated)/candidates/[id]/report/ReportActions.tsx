@@ -9,12 +9,16 @@ export default function ReportActions({
   reportSentAt,
   reportSentBy,
   hasResults,
+  totalComponents,
+  unfilledLabels,
 }: {
   candidateId: string
   recipientEmail: string
   reportSentAt: string | null
   reportSentBy: string | null
   hasResults: boolean
+  totalComponents: number
+  unfilledLabels: string[]
 }) {
   const [email, setEmail] = useState(initialEmail)
   const [sending, setSending] = useState(false)
@@ -23,10 +27,20 @@ export default function ReportActions({
   const [resending, setResending] = useState(false)
   const [error, setError] = useState('')
 
+  const hasUnfilled = unfilledLabels.length > 0
+  const filledCount = totalComponents - unfilledLabels.length
+
   async function handleSend() {
     if (!email) {
       setError('Recipient email is required')
       return
+    }
+    if (hasUnfilled) {
+      const confirmMsg =
+        `${unfilledLabels.length} component${unfilledLabels.length === 1 ? '' : 's'} ` +
+        `still marked N/A:\n\n• ${unfilledLabels.join('\n• ')}\n\n` +
+        `Send anyway?`
+      if (!confirm(confirmMsg)) return
     }
     setSending(true)
     setError('')
@@ -131,6 +145,24 @@ export default function ReportActions({
             </div>
             {!hasResults && (
               <p className="text-xs text-amber-600 mt-2">Save screening results before sending the report.</p>
+            )}
+            {hasResults && hasUnfilled && (
+              <div className="mt-3 rounded-lg bg-amber-50 border border-amber-100 px-3 py-2.5">
+                <p className="text-xs font-medium text-amber-800">
+                  {filledCount} of {totalComponents} components have results entered
+                </p>
+                <p className="text-[11px] text-amber-700 mt-0.5">
+                  Still N/A: {unfilledLabels.join(', ')}
+                </p>
+              </div>
+            )}
+            {hasResults && !hasUnfilled && totalComponents > 0 && (
+              <div className="mt-3 inline-flex items-center gap-1.5 text-xs text-green-700">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                All {totalComponents} components have results
+              </div>
             )}
             {error && (
               <p className="text-xs text-red-600 mt-2">{error}</p>

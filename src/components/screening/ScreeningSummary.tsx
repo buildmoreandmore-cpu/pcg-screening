@@ -27,6 +27,8 @@ function getSummaryChips(s: ScreeningSelections): string[] {
     const parts: string[] = []
     if (s.sanctions_lists.ofac) parts.push('OFAC')
     if (s.sanctions_lists.healthcare_oig) parts.push('OIG')
+    if (s.sanctions_lists.sam) parts.push('SAM')
+    if (s.sanctions_lists.gsa) parts.push('GSA')
     chips.push(parts.length ? `Sanctions (${parts.join(' + ')})` : 'Sanctions Lists')
   }
   if (s.social_security_trace.enabled) chips.push('SSN Trace')

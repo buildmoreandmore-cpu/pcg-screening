@@ -261,9 +261,21 @@ export default function ScreeningSelector({ mode: initialMode, initialSelections
                 disabled={isView}
               />
               <SubOption
-                label="Healthcare Sanction (OIG List)"
+                label="OIG / LEIE Healthcare Exclusion"
                 checked={selections.sanctions_lists.healthcare_oig}
                 onChange={v => updateSection('sanctions_lists', { healthcare_oig: v })}
+                disabled={isView}
+              />
+              <SubOption
+                label="SAM (System for Award Management)"
+                checked={selections.sanctions_lists.sam}
+                onChange={v => updateSection('sanctions_lists', { sam: v })}
+                disabled={isView}
+              />
+              <SubOption
+                label="GSA Excluded Parties"
+                checked={selections.sanctions_lists.gsa}
+                onChange={v => updateSection('sanctions_lists', { gsa: v })}
                 disabled={isView}
               />
             </div>
