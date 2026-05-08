@@ -89,6 +89,17 @@ export async function POST(req: NextRequest) {
         )
       : null
 
+    // Seed initial screening_results with each component in 'ordered' state
+    // so the workflow stepper is populated from day one. Gwen advances
+    // each component through pending → completed as work progresses.
+    const initialScreeningResults: Record<string, { result: string; details: string; component_status: string }> | null = packageComponents
+      ? Object.fromEntries(
+          Object.entries(packageComponents)
+            .filter(([, v]) => v === true)
+            .map(([k]) => [k, { result: 'not_applicable', details: '', component_status: 'ordered' }])
+        )
+      : null
+
     // Reconcile-or-insert. If the candidate arrived via an employer-sent
     // invite link, the row already exists (created by inviteCandidate()).
     // We update that row in place — same id, same tracking_code — so the
@@ -160,7 +171,10 @@ export async function POST(req: NextRequest) {
             payment_status: 'pending',
             referral_source: referralSource || null,
             additional_details: additionalDetails || {},
-            ...(shouldSetComponents && { screening_components: screeningComponentsFromPackage }),
+            ...(shouldSetComponents && {
+              screening_components: screeningComponentsFromPackage,
+              ...(initialScreeningResults && { screening_results: initialScreeningResults }),
+            }),
             ...(shouldSetDrugPanel && { drug_panel: packageDrugPanel }),
             ...consentColumns,
           })
@@ -221,7 +235,10 @@ export async function POST(req: NextRequest) {
           source: 'candidate_portal',
           referral_source: referralSource || null,
           additional_details: additionalDetails || {},
-          ...(screeningComponentsFromPackage && { screening_components: screeningComponentsFromPackage }),
+          ...(screeningComponentsFromPackage && {
+            screening_components: screeningComponentsFromPackage,
+            ...(initialScreeningResults && { screening_results: initialScreeningResults }),
+          }),
           ...(packageDrugPanel && { drug_panel: packageDrugPanel }),
           ...consentColumns,
         })

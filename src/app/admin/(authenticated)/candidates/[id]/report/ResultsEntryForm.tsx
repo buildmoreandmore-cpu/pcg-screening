@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { saveScreeningResults } from '@/app/admin/actions/report'
-import type { ScreeningResults, ResultVerdict } from '@/lib/report-types'
+import type { ScreeningResults, ResultVerdict, ComponentStatus } from '@/lib/report-types'
+import { COMPONENT_STATUS_LABELS } from '@/lib/report-types'
 
 const VERDICTS: { value: ResultVerdict; label: string; color: string }[] = [
   { value: 'clear', label: 'Clear', color: 'text-green-600' },
@@ -10,6 +11,52 @@ const VERDICTS: { value: ResultVerdict; label: string; color: string }[] = [
   { value: 'adverse', label: 'Adverse', color: 'text-red-600' },
   { value: 'not_applicable', label: 'N/A', color: 'text-gray-400' },
 ]
+
+const STAGES: ComponentStatus[] = ['ordered', 'pending', 'completed']
+
+function StageStepper({
+  current,
+  onChange,
+}: {
+  current: ComponentStatus
+  onChange: (next: ComponentStatus) => void
+}) {
+  const currentIndex = STAGES.indexOf(current)
+  return (
+    <div className="flex items-center gap-1">
+      {STAGES.map((stage, i) => {
+        const isActive = i === currentIndex
+        const isPast = i < currentIndex
+        return (
+          <button
+            key={stage}
+            type="button"
+            onClick={() => onChange(stage)}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+              isActive
+                ? stage === 'completed'
+                  ? 'bg-green-100 text-green-700'
+                  : stage === 'pending'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-gray-200 text-gray-700'
+                : isPast
+                  ? 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
+            }`}
+            aria-pressed={isActive}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              isActive
+                ? stage === 'completed' ? 'bg-green-600' : stage === 'pending' ? 'bg-blue-600' : 'bg-gray-500'
+                : isPast ? 'bg-gray-400' : 'bg-gray-300'
+            }`} />
+            {COMPONENT_STATUS_LABELS[stage]}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
 
 export default function ResultsEntryForm({
   candidateId,
@@ -27,7 +74,11 @@ export default function ResultsEntryForm({
   const [results, setResults] = useState<ScreeningResults>(() => {
     const r: ScreeningResults = {}
     for (const { key } of components) {
-      r[key] = initialResults[key] || { result: 'not_applicable', details: '' }
+      r[key] = initialResults[key] || {
+        result: 'not_applicable',
+        details: '',
+        component_status: 'ordered',
+      }
     }
     return r
   })
@@ -40,8 +91,7 @@ export default function ResultsEntryForm({
       const updated = { ...current, [field]: value }
 
       // Auto-stamp completion when the verdict transitions away from N/A.
-      // Don't overwrite an existing timestamp — that's the audit trail of
-      // when the component was actually completed.
+      // Don't overwrite an existing timestamp — that's the audit trail.
       if (field === 'result') {
         const wasNotApplicable = !current?.result || current.result === 'not_applicable'
         const becomingResolved = value !== 'not_applicable'
@@ -51,6 +101,37 @@ export default function ResultsEntryForm({
         if (value === 'not_applicable') {
           updated.completed_at = null
         }
+        // Setting any verdict implicitly advances the workflow stage to
+        // 'completed'. Clearing the verdict drops back to 'ordered' unless
+        // the admin already moved past it.
+        if (becomingResolved) {
+          updated.component_status = 'completed'
+        } else if (current?.component_status === 'completed') {
+          updated.component_status = 'pending'
+        }
+      }
+
+      const next = { ...prev, [key]: updated }
+      onResultsChange?.(next)
+      return next
+    })
+    setSaved(false)
+  }
+
+  function updateStage(key: string, stage: ComponentStatus) {
+    setResults(prev => {
+      const current = prev[key]
+      const updated = { ...current, component_status: stage }
+
+      // Stamp pending_at the first time we transition into 'pending'.
+      if (stage === 'pending' && !current?.pending_at) {
+        updated.pending_at = new Date().toISOString()
+      }
+      // If admin manually moves to 'completed' without a verdict yet, leave
+      // result alone — they'll set it via the dropdown next. If they move
+      // back from completed, clear the completion timestamp.
+      if (stage !== 'completed' && current?.completed_at && current.result !== 'not_applicable') {
+        // Keep the timestamp as historical audit data; just don't show as completed.
       }
 
       const next = { ...prev, [key]: updated }
@@ -70,33 +151,35 @@ export default function ResultsEntryForm({
     }
   }
 
+  // Per-stage counters for the header summary.
+  const stageCounts = STAGES.reduce<Record<ComponentStatus, number>>(
+    (acc, stage) => {
+      acc[stage] = components.filter(c => (results[c.key]?.component_status ?? 'ordered') === stage).length
+      return acc
+    },
+    { ordered: 0, pending: 0, completed: 0 }
+  )
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-5">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div>
           <h2 className="text-sm font-medium text-navy">Step 1: Screening Results</h2>
           <p className="text-xs text-gray-400 mt-0.5">Enter the result and details for each screening component.</p>
         </div>
-        <div className="flex items-center gap-2">
-          {(() => {
-            const filled = components.filter((c) => results[c.key]?.result && results[c.key].result !== 'not_applicable').length
-            const total = components.length
-            const complete = filled === total && total > 0
-            return (
-              <span
-                className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${
-                  complete ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
-                }`}
-              >
-                {complete ? (
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : null}
-                {filled} of {total} entered
-              </span>
-            )
-          })()}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 bg-gray-50 px-2 py-1 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+            {stageCounts.ordered} ordered
+          </span>
+          <span className="inline-flex items-center gap-1 text-[11px] text-blue-700 bg-blue-50 px-2 py-1 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+            {stageCounts.pending} pending
+          </span>
+          <span className="inline-flex items-center gap-1 text-[11px] text-green-700 bg-green-50 px-2 py-1 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-600" />
+            {stageCounts.completed} completed
+          </span>
           {saved && (
             <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
@@ -107,31 +190,41 @@ export default function ResultsEntryForm({
       </div>
 
       <div className="space-y-4">
-        {components.map(({ key, label }) => (
-          <div key={key} className="border border-gray-100 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-gray-800">{label}</p>
-              <select
-                value={results[key]?.result || 'not_applicable'}
-                onChange={(e) => updateResult(key, 'result', e.target.value)}
-                className={`text-sm px-3 py-1.5 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent ${
-                  VERDICTS.find(v => v.value === results[key]?.result)?.color || ''
-                }`}
-              >
-                {VERDICTS.map(v => (
-                  <option key={v.value} value={v.value}>{v.label}</option>
-                ))}
-              </select>
+        {components.map(({ key, label }) => {
+          const stage = results[key]?.component_status ?? 'ordered'
+          return (
+            <div key={key} className="border border-gray-100 rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <p className="text-sm font-medium text-gray-800">{label}</p>
+                <StageStepper
+                  current={stage}
+                  onChange={(next) => updateStage(key, next)}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-gray-500">Verdict</p>
+                <select
+                  value={results[key]?.result || 'not_applicable'}
+                  onChange={(e) => updateResult(key, 'result', e.target.value)}
+                  className={`text-sm px-3 py-1.5 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent ${
+                    VERDICTS.find(v => v.value === results[key]?.result)?.color || ''
+                  }`}
+                >
+                  {VERDICTS.map(v => (
+                    <option key={v.value} value={v.value}>{v.label}</option>
+                  ))}
+                </select>
+              </div>
+              <textarea
+                value={results[key]?.details || ''}
+                onChange={(e) => updateResult(key, 'details', e.target.value)}
+                placeholder="Details, notes, or findings..."
+                rows={2}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent resize-none"
+              />
             </div>
-            <textarea
-              value={results[key]?.details || ''}
-              onChange={(e) => updateResult(key, 'details', e.target.value)}
-              placeholder="Details, notes, or findings..."
-              rows={2}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent resize-none"
-            />
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <button

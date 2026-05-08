@@ -4,8 +4,8 @@ import { renderToBuffer } from '@react-pdf/renderer'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { SCREENING_COMPONENTS, expandActiveComponents, drugPanelLabel } from '@/lib/screening-components'
 import { FCRA_DISCLOSURE_PARAGRAPHS, FCRA_DISCLOSURE_VERSION } from '@/lib/fcra-disclosure'
-import type { ScreeningResults, ResultVerdict, ReportAttachment } from '@/lib/report-types'
-import { VERDICT_LABELS, VERDICT_COLORS } from '@/lib/report-types'
+import type { ScreeningResults, ResultVerdict, ReportAttachment, ComponentStatus } from '@/lib/report-types'
+import { VERDICT_LABELS, VERDICT_COLORS, COMPONENT_STATUS_COLORS } from '@/lib/report-types'
 
 Font.register({
   family: 'Helvetica',
@@ -172,16 +172,22 @@ function ScreeningReportDocument(props: ReportProps) {
 
   const results = activeComponents.map(key => {
     const stored = screeningResults[key]
+    // Infer status from legacy data: a recorded verdict means 'completed'.
+    const inferredStatus: ComponentStatus = stored?.component_status
+      ?? (stored && stored.result && stored.result !== 'not_applicable' ? 'completed' : 'ordered')
     return {
       key,
       label: SCREENING_COMPONENTS.find(sc => sc.key === key)?.label || key,
       result: stored?.result ?? ('not_applicable' as ResultVerdict),
       details: stored?.details ?? '',
       completed_at: stored?.completed_at ?? null,
+      component_status: inferredStatus,
     }
   })
 
-  const completedCount = results.filter(r => r.result !== 'not_applicable').length
+  const completedCount = results.filter(r => r.component_status === 'completed').length
+  const pendingCount = results.filter(r => r.component_status === 'pending').length
+  const orderedCount = results.filter(r => r.component_status === 'ordered').length
   const recordsFoundCount = results.filter(r => r.result === 'record_found').length
   const adverseCount = results.filter(r => r.result === 'adverse').length
 
@@ -197,6 +203,12 @@ function ScreeningReportDocument(props: ReportProps) {
   } else if (completedCount === results.length && results.length > 0) {
     overallLabel = 'Clear'
     overallColor = VERDICT_COLORS.clear
+  } else if (pendingCount > 0) {
+    overallLabel = 'Pending'
+    overallColor = COMPONENT_STATUS_COLORS.pending
+  } else if (orderedCount === results.length && results.length > 0) {
+    overallLabel = 'Ordered'
+    overallColor = COMPONENT_STATUS_COLORS.ordered
   }
 
   return (
@@ -270,11 +282,27 @@ function ScreeningReportDocument(props: ReportProps) {
             ? 'See breakdown below'
             : (r.details || '—')
 
+          // Stage-aware status: when completed, show the verdict (Clear /
+          // Record Found / Adverse). When still in progress, show the
+          // workflow stage (Ordered / Pending).
+          let statusText: string
+          let statusColor: string
+          if (r.component_status === 'completed') {
+            statusText = VERDICT_LABELS[r.result]
+            statusColor = VERDICT_COLORS[r.result]
+          } else if (r.component_status === 'pending') {
+            statusText = 'Pending'
+            statusColor = COMPONENT_STATUS_COLORS.pending
+          } else {
+            statusText = 'Ordered'
+            statusColor = COMPONENT_STATUS_COLORS.ordered
+          }
+
           return (
             <View key={r.key} style={s.row} wrap={false}>
               <Text style={s.resultCol1}>{r.label}</Text>
               <Text style={s.resultCol2}>{formatShortDate(r.completed_at)}</Text>
-              <Text style={[s.resultCol3, { color: VERDICT_COLORS[r.result] }]}>{VERDICT_LABELS[r.result]}</Text>
+              <Text style={[s.resultCol3, { color: statusColor }]}>{statusText}</Text>
               <Text style={s.resultCol4}>{inlineNote}</Text>
             </View>
           )
