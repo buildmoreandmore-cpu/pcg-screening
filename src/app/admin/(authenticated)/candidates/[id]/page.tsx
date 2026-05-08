@@ -11,6 +11,7 @@ import ClientNotes from './ClientNotes'
 import ScreeningComponentsView from './ScreeningComponentsView'
 import ConsentPdfButton from './ConsentPdfButton'
 import CandidatePII from './CandidatePII'
+import { normalizeScreeningComponents } from '@/lib/screening-components'
 
 function formatDate(date: string | null) {
   if (!date) return '—'
@@ -157,7 +158,7 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
 
       {/* Screening Components (à la carte) */}
       {c.screening_components && (
-        <ScreeningComponentsView candidateId={c.id} components={c.screening_components} />
+        <ScreeningComponentsView candidateId={c.id} components={normalizeScreeningComponents(c.screening_components) as any} />
       )}
 
       {/* Search Jurisdictions */}

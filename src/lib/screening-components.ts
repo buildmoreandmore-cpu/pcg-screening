@@ -97,3 +97,89 @@ export function countComponents(components: Record<string, boolean> | null | und
   if (!components) return 0
   return Object.values(components).filter(Boolean).length
 }
+
+/**
+ * Normalize any shape of `candidates.screening_components` JSONB into the
+ * full nested ScreeningSelections shape that ScreeningSelector and
+ * ScreeningSummary expect. Handles three input shapes:
+ *
+ *   1. Legacy nested: { criminal_history: { enabled: true, ... }, ... }
+ *   2. New flat:      { criminal_history: true, ofac: true, ... }
+ *   3. Post-migration mixed: { criminal_history: { enabled: true },
+ *                              ofac: { enabled: true },
+ *                              oig_leie: { enabled: true } }
+ *
+ * Output always has every top-level key. Flat ofac/oig_leie/sam/gsa keys
+ * are folded back into sanctions_lists.{ofac, healthcare_oig, sam, gsa}.
+ */
+export function normalizeScreeningComponents(
+  raw: Record<string, unknown> | null | undefined
+): Record<string, any> {
+  // Default skeleton — every top-level key present, all disabled.
+  const out: Record<string, any> = {
+    criminal_history: { enabled: false, statewide: false, statewide_states: [], county: false, county_jurisdictions: [], national_with_sex_offender: false, federal: false },
+    sex_offender: { enabled: false, states: [] },
+    international_search: { enabled: false, international_criminal: false, cities: '', countries: '', federal: false, felony_misdemeanor: false },
+    driver_history: { enabled: false, state: '', license_number: '' },
+    sanctions_lists: { enabled: false, ofac: false, healthcare_oig: false, sam: false, gsa: false },
+    social_security_trace: { enabled: false },
+    education: { enabled: false, school_name: '', year_graduated: '', location: '' },
+    employment: { enabled: false, employer_contacts: '' },
+    professional_license: { enabled: false, state: '', license_type: '' },
+    references: { enabled: false, contacts: '' },
+    civil_checks: { enabled: false, bankruptcy: false, county_civil_record: false, statewide_eviction: [], civil_record_county_state: '' },
+    credit_reports: { enabled: false },
+    e_verify: { enabled: false },
+    drug_screen: { enabled: false },
+  }
+
+  if (!raw) return out
+
+  const isEnabled = (val: unknown): boolean =>
+    val === true ||
+    (typeof val === 'object' && val !== null && 'enabled' in val && (val as { enabled: boolean }).enabled === true)
+
+  for (const [key, val] of Object.entries(raw)) {
+    // Flat-key sanctions sub-checks fold back into sanctions_lists.
+    if (key === 'ofac' && isEnabled(val)) {
+      out.sanctions_lists.enabled = true
+      out.sanctions_lists.ofac = true
+      continue
+    }
+    if (key === 'oig_leie' && isEnabled(val)) {
+      out.sanctions_lists.enabled = true
+      out.sanctions_lists.healthcare_oig = true
+      continue
+    }
+    if (key === 'sam' && isEnabled(val)) {
+      out.sanctions_lists.enabled = true
+      out.sanctions_lists.sam = true
+      continue
+    }
+    if (key === 'gsa' && isEnabled(val)) {
+      out.sanctions_lists.enabled = true
+      out.sanctions_lists.gsa = true
+      continue
+    }
+
+    // Skip keys we don't model in ScreeningSelections.
+    if (!(key in out)) continue
+
+    // Boolean flat shape: { criminal_history: true }
+    if (val === true) {
+      out[key] = { ...out[key], enabled: true }
+      continue
+    }
+    if (val === false) {
+      out[key] = { ...out[key], enabled: false }
+      continue
+    }
+
+    // Nested object shape: merge over the default skeleton.
+    if (typeof val === 'object' && val !== null) {
+      out[key] = { ...out[key], ...(val as Record<string, unknown>) }
+    }
+  }
+
+  return out
+}
