@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAgentAuth } from '@/lib/agent-auth'
 import { dispatchAgentEvent } from '@/lib/agent-webhook'
+import { expandActiveComponents } from '@/lib/screening-components'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,6 +59,7 @@ export async function GET(
     report_sent_by: c.report_sent_by,
     search_jurisdictions: c.search_jurisdictions,
     components: c.screening_components,
+    active_components: expandActiveComponents(c.screening_components || {}),
     internal_notes: c.internal_notes,
     status_notes: c.status_notes,
     created_at: c.created_at,
@@ -177,6 +179,7 @@ export async function PATCH(
     report_sent_at: c.report_sent_at,
     report_sent_by: c.report_sent_by,
     components: c.screening_components,
+    active_components: expandActiveComponents(c.screening_components || {}),
     search_jurisdictions: c.search_jurisdictions,
     internal_notes: c.internal_notes,
     status_notes: c.status_notes,

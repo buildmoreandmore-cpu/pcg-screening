@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAgentAuth } from '@/lib/agent-auth'
+import { expandActiveComponents } from '@/lib/screening-components'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,6 +53,7 @@ export async function GET(req: NextRequest) {
     report_sent_at: c.report_sent_at,
     search_jurisdictions: c.search_jurisdictions,
     components: c.screening_components,
+    active_components: expandActiveComponents(c.screening_components || {}),
     created_at: c.created_at,
     updated_at: c.updated_at,
   }))

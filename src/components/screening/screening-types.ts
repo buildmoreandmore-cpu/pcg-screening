@@ -73,6 +73,10 @@ export interface ScreeningSelections {
   e_verify: {
     enabled: boolean
   }
+  drug_screen: {
+    enabled: boolean
+    panel?: string
+  }
 }
 
 export interface ScreeningSelectorProps {
@@ -117,4 +121,5 @@ export const DEFAULT_SELECTIONS: ScreeningSelections = {
   },
   credit_reports: { enabled: false },
   e_verify: { enabled: false },
+  drug_screen: { enabled: false, panel: '' },
 }

@@ -21,6 +21,7 @@ const TABS = [
   { key: 'civil_checks', label: 'Civil', icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3' },
   { key: 'credit_reports', label: 'Credit', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
   { key: 'e_verify', label: 'E-Verify', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+  { key: 'drug_screen', label: 'Drug Screen', icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z' },
 ] as const
 
 type TabKey = typeof TABS[number]['key']
@@ -416,6 +417,22 @@ export default function ScreeningSelector({ mode: initialMode, initialSelections
 
           {activeTab === 'e_verify' && (
             <p className="text-xs text-gray-500">Include E-Verify as part of this request.</p>
+          )}
+
+          {activeTab === 'drug_screen' && (
+            <div>
+              <p className="text-xs text-gray-500 mb-2">
+                Drug screen will be ordered for this candidate. The exact panel
+                (4-panel, 9-panel, with or without THC) is set on the package config.
+              </p>
+              {isEdit && (
+                <p className="text-[11px] text-amber-700">
+                  Note: drug panel variants (4-panel NO THC, 9-panel, etc.) are configured
+                  per-package by an admin. Toggling this on without a package-level panel
+                  set will require manual entry by Gwen.
+                </p>
+              )}
+            </div>
           )}
         </div>
       </div>

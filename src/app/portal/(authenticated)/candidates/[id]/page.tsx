@@ -45,8 +45,8 @@ export default async function CandidateDetailPage({
 
   // Only show drug screen steps if the candidate has been through them
   const hasDrugScreen = ['drug_screen_ordered', 'drug_screen_collected'].includes(candidate.status) ||
-    candidate.screening_components?.drug_screening?.enabled === true ||
-    candidate.screening_components?.drug_screening === true
+    candidate.screening_components?.drug_screen?.enabled === true ||
+    candidate.screening_components?.drug_screen === true
   const steps = hasDrugScreen
     ? allSteps
     : allSteps.filter(s => !s.startsWith('drug_screen'))
