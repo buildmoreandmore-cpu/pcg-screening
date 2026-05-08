@@ -3,6 +3,8 @@ export type ResultVerdict = 'clear' | 'record_found' | 'adverse' | 'not_applicab
 export interface ComponentResult {
   result: ResultVerdict
   details: string
+  /** ISO timestamp when this component's verdict was first set to a non-N/A value. */
+  completed_at?: string | null
 }
 
 export type ScreeningResults = Record<string, ComponentResult>

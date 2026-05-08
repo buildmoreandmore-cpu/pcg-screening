@@ -33,9 +33,10 @@ const s = StyleSheet.create({
   headerRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: NAVY, paddingBottom: 4, marginBottom: 2 },
   colLabel: { width: '30%', fontSize: 9, color: LIGHT_GRAY },
   colValue: { width: '70%', fontSize: 10, color: NAVY },
-  resultCol1: { width: '30%', fontSize: 10 },
-  resultCol2: { width: '20%', fontSize: 10 },
-  resultCol3: { width: '50%', fontSize: 9, color: GRAY },
+  resultCol1: { width: '32%', fontSize: 10 },
+  resultCol2: { width: '20%', fontSize: 9, color: GRAY },
+  resultCol3: { width: '18%', fontSize: 10 },
+  resultCol4: { width: '30%', fontSize: 9, color: GRAY },
   headerText: { fontSize: 9, fontWeight: 'bold', color: NAVY },
   summaryBox: { flexDirection: 'row', justifyContent: 'space-around', backgroundColor: BG_GRAY, borderRadius: 6, padding: 12, marginVertical: 12 },
   summaryItem: { alignItems: 'center' },
@@ -72,6 +73,89 @@ interface ReportProps {
   attachmentNames: string[]
   preparedBy: string
   generatedAt: string
+  submittedAt: string | null
+  completedAt: string | null
+}
+
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return '—'
+  return d.toLocaleString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit',
+  })
+}
+
+function formatShortDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+/**
+ * Parse vendor "NAME VARIATIONS / UNIQUE JURISDICTIONS" dump format into
+ * structured aliases + jurisdictions for cleaner PDF rendering. Falls back
+ * to the raw text in `summary` when nothing parseable is found.
+ *
+ * Recognised input shape:
+ *   NAME VARIATIONS: 6  UNIQUE JURISDICTIONS: 2  #
+ *
+ *   KOCH KELLY
+ *   KOCH KELLY JEAN
+ *   ...
+ *
+ *   ID    KOOTENAI
+ *   MI    SAGINAW
+ */
+function parseCriminalHistoryDetails(raw: string): {
+  aliasCount: number | null
+  jurisdictionCount: number | null
+  aliases: string[]
+  jurisdictions: string[]
+  summary: string
+} {
+  if (!raw || !raw.trim()) {
+    return { aliasCount: null, jurisdictionCount: null, aliases: [], jurisdictions: [], summary: '' }
+  }
+
+  const aliasMatch = raw.match(/NAME VARIATIONS:\s*(\d+)/i)
+  const jurMatch = raw.match(/UNIQUE JURISDICTIONS:\s*(\d+)/i)
+
+  if (!aliasMatch && !jurMatch) {
+    return { aliasCount: null, jurisdictionCount: null, aliases: [], jurisdictions: [], summary: raw.trim() }
+  }
+
+  // Strip the header line, then split remaining lines into aliases vs jurisdictions.
+  // Aliases are word-only lines (no leading state code). Jurisdictions are lines
+  // starting with a 2-char state code followed by whitespace and the county.
+  const headerStripped = raw
+    .replace(/NAME VARIATIONS:\s*\d+/i, '')
+    .replace(/UNIQUE JURISDICTIONS:\s*\d+/i, '')
+    .replace(/^\s*#\s*$/m, '')
+    .trim()
+
+  const lines = headerStripped.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean)
+  const aliases: string[] = []
+  const jurisdictions: string[] = []
+  for (const line of lines) {
+    // 2-letter uppercase state code at the start, followed by whitespace and a name.
+    const m = line.match(/^([A-Z]{2})\s{2,}(.+)$/)
+    if (m) {
+      jurisdictions.push(`${m[1]} — ${m[2].trim()}`)
+    } else {
+      aliases.push(line)
+    }
+  }
+
+  return {
+    aliasCount: aliasMatch ? parseInt(aliasMatch[1], 10) : aliases.length,
+    jurisdictionCount: jurMatch ? parseInt(jurMatch[1], 10) : jurisdictions.length,
+    aliases,
+    jurisdictions,
+    summary: '',
+  }
 }
 
 function getSiteUrl() {
@@ -83,18 +167,36 @@ function ScreeningReportDocument(props: ReportProps) {
     candidate: c, clientName, packageName, drugPanel, screeningResults,
     activeComponents, jurisdictions, additionalDetails,
     attachmentNames, preparedBy, generatedAt,
+    submittedAt, completedAt,
   } = props
 
-  const results = activeComponents.map(key => ({
-    key,
-    label: SCREENING_COMPONENTS.find(sc => sc.key === key)?.label || key,
-    ...(screeningResults[key] || { result: 'not_applicable' as ResultVerdict, details: '' }),
-  }))
+  const results = activeComponents.map(key => {
+    const stored = screeningResults[key]
+    return {
+      key,
+      label: SCREENING_COMPONENTS.find(sc => sc.key === key)?.label || key,
+      result: stored?.result ?? ('not_applicable' as ResultVerdict),
+      details: stored?.details ?? '',
+      completed_at: stored?.completed_at ?? null,
+    }
+  })
 
-  const counts = {
-    clear: results.filter(r => r.result === 'clear').length,
-    record_found: results.filter(r => r.result === 'record_found').length,
-    adverse: results.filter(r => r.result === 'adverse').length,
+  const completedCount = results.filter(r => r.result !== 'not_applicable').length
+  const recordsFoundCount = results.filter(r => r.result === 'record_found').length
+  const adverseCount = results.filter(r => r.result === 'adverse').length
+
+  // Overall status: Adverse > Records Found > Clear (when all are Clear) > In Progress
+  let overallLabel = 'In Progress'
+  let overallColor: string = LIGHT_GRAY
+  if (adverseCount > 0) {
+    overallLabel = 'Adverse'
+    overallColor = VERDICT_COLORS.adverse
+  } else if (recordsFoundCount > 0) {
+    overallLabel = 'Review'
+    overallColor = VERDICT_COLORS.record_found
+  } else if (completedCount === results.length && results.length > 0) {
+    overallLabel = 'Clear'
+    overallColor = VERDICT_COLORS.clear
   }
 
   return (
@@ -117,6 +219,8 @@ function ScreeningReportDocument(props: ReportProps) {
           ['Client / Employer', clientName],
           ['Package', packageName],
           ...(drugPanel ? [['Drug Panel', drugPanelLabel(drugPanel)] as [string, string]] : []),
+          ['Submitted', formatDateTime(submittedAt)],
+          ['Completed', formatDateTime(completedAt)],
           ['Report Date', generatedAt],
           ['Prepared By', preparedBy],
         ].map(([label, value]) => (
@@ -126,19 +230,27 @@ function ScreeningReportDocument(props: ReportProps) {
           </View>
         ))}
 
-        {/* Summary */}
+        {/* Summary — 4 KPI tiles aligned with Elevait's audit-readable format */}
         <View style={s.summaryBox}>
           <View style={s.summaryItem}>
-            <Text style={[s.summaryCount, { color: VERDICT_COLORS.clear }]}>{counts.clear}</Text>
-            <Text style={s.summaryLabel}>Clear</Text>
+            <Text style={[s.summaryCount, { color: NAVY }]}>
+              {completedCount}/{results.length}
+            </Text>
+            <Text style={s.summaryLabel}>Components Completed</Text>
           </View>
           <View style={s.summaryItem}>
-            <Text style={[s.summaryCount, { color: VERDICT_COLORS.record_found }]}>{counts.record_found}</Text>
-            <Text style={s.summaryLabel}>Record Found</Text>
+            <Text style={[s.summaryCount, { color: VERDICT_COLORS.record_found }]}>{recordsFoundCount}</Text>
+            <Text style={s.summaryLabel}>Records Found</Text>
           </View>
           <View style={s.summaryItem}>
-            <Text style={[s.summaryCount, { color: VERDICT_COLORS.adverse }]}>{counts.adverse}</Text>
-            <Text style={s.summaryLabel}>Adverse</Text>
+            <Text style={[s.summaryCount, { color: VERDICT_COLORS.adverse }]}>{adverseCount}</Text>
+            <Text style={s.summaryLabel}>Adverse Findings</Text>
+          </View>
+          <View style={s.summaryItem}>
+            <Text style={[{ fontSize: 14, fontWeight: 'bold', color: overallColor }]}>
+              {overallLabel}
+            </Text>
+            <Text style={s.summaryLabel}>Overall Status</Text>
           </View>
         </View>
 
@@ -146,16 +258,75 @@ function ScreeningReportDocument(props: ReportProps) {
         <View style={s.sectionTitle}><Text>Screening Results</Text></View>
         <View style={s.headerRow}>
           <Text style={[s.resultCol1, s.headerText]}>Component</Text>
-          <Text style={[s.resultCol2, s.headerText]}>Result</Text>
-          <Text style={[s.resultCol3, s.headerText]}>Details</Text>
+          <Text style={[s.resultCol2, s.headerText]}>Date Completed</Text>
+          <Text style={[s.resultCol3, s.headerText]}>Status</Text>
+          <Text style={[s.resultCol4, s.headerText]}>Notes</Text>
         </View>
-        {results.map(r => (
-          <View key={r.key} style={s.row} wrap={false}>
-            <Text style={s.resultCol1}>{r.label}</Text>
-            <Text style={[s.resultCol2, { color: VERDICT_COLORS[r.result] }]}>{VERDICT_LABELS[r.result]}</Text>
-            <Text style={s.resultCol3}>{r.details || '—'}</Text>
-          </View>
-        ))}
+        {results.map(r => {
+          const isCriminal = r.key === 'criminal_history' && r.details
+          const parsedCriminal = isCriminal ? parseCriminalHistoryDetails(r.details) : null
+          const hasStructuredCriminal = !!parsedCriminal && (parsedCriminal.aliases.length > 0 || parsedCriminal.jurisdictions.length > 0)
+          const inlineNote = hasStructuredCriminal
+            ? 'See breakdown below'
+            : (r.details || '—')
+
+          return (
+            <View key={r.key} style={s.row} wrap={false}>
+              <Text style={s.resultCol1}>{r.label}</Text>
+              <Text style={s.resultCol2}>{formatShortDate(r.completed_at)}</Text>
+              <Text style={[s.resultCol3, { color: VERDICT_COLORS[r.result] }]}>{VERDICT_LABELS[r.result]}</Text>
+              <Text style={s.resultCol4}>{inlineNote}</Text>
+            </View>
+          )
+        })}
+
+        {/* Criminal History — structured breakdown when vendor returned the
+            standard NAME VARIATIONS / UNIQUE JURISDICTIONS dump format. */}
+        {(() => {
+          const ch = results.find(r => r.key === 'criminal_history')
+          if (!ch || !ch.details) return null
+          const parsed = parseCriminalHistoryDetails(ch.details)
+          if (parsed.aliases.length === 0 && parsed.jurisdictions.length === 0) return null
+
+          return (
+            <>
+              <View style={s.sectionTitle}><Text>Criminal History — Detail</Text></View>
+              <View style={s.row}>
+                <Text style={s.colLabel}>Aliases Searched</Text>
+                <Text style={s.colValue}>
+                  {parsed.aliasCount ?? parsed.aliases.length}
+                </Text>
+              </View>
+              {parsed.aliases.length > 0 && (
+                <View style={{ paddingLeft: 8, marginTop: 2, marginBottom: 6 }}>
+                  {parsed.aliases.map((alias, i) => (
+                    <Text key={i} style={[s.paragraph, { marginBottom: 1 }]}>• {alias}</Text>
+                  ))}
+                </View>
+              )}
+              <View style={s.row}>
+                <Text style={s.colLabel}>Jurisdictions Searched</Text>
+                <Text style={s.colValue}>
+                  {parsed.jurisdictionCount ?? parsed.jurisdictions.length}
+                </Text>
+              </View>
+              {parsed.jurisdictions.length > 0 && (
+                <View style={{ paddingLeft: 8, marginTop: 2, marginBottom: 6 }}>
+                  {parsed.jurisdictions.map((j, i) => (
+                    <Text key={i} style={[s.paragraph, { marginBottom: 1 }]}>• {j}</Text>
+                  ))}
+                </View>
+              )}
+              <View style={s.row}>
+                <Text style={s.colLabel}>Result Summary</Text>
+                <Text style={[s.colValue, { color: VERDICT_COLORS[ch.result] }]}>
+                  {VERDICT_LABELS[ch.result]}
+                  {ch.result === 'clear' && ' — no records returned across the searched aliases and jurisdictions.'}
+                </Text>
+              </View>
+            </>
+          )
+        })()}
 
         {/* Jurisdictions */}
         {jurisdictions.length > 0 && (
@@ -384,6 +555,8 @@ export async function generateReportPdf(candidateId: string): Promise<Buffer> {
     generatedAt: new Date().toLocaleDateString('en-US', {
       month: 'long', day: 'numeric', year: 'numeric',
     }),
+    submittedAt: c.created_at || null,
+    completedAt: c.screening_completed_at || null,
   }
 
   const buffer = await renderToBuffer(<ScreeningReportDocument {...props} />)

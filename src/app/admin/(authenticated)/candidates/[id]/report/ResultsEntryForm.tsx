@@ -36,7 +36,24 @@ export default function ResultsEntryForm({
 
   function updateResult(key: string, field: 'result' | 'details', value: string) {
     setResults(prev => {
-      const next = { ...prev, [key]: { ...prev[key], [field]: value } }
+      const current = prev[key]
+      const updated = { ...current, [field]: value }
+
+      // Auto-stamp completion when the verdict transitions away from N/A.
+      // Don't overwrite an existing timestamp — that's the audit trail of
+      // when the component was actually completed.
+      if (field === 'result') {
+        const wasNotApplicable = !current?.result || current.result === 'not_applicable'
+        const becomingResolved = value !== 'not_applicable'
+        if (wasNotApplicable && becomingResolved && !current?.completed_at) {
+          updated.completed_at = new Date().toISOString()
+        }
+        if (value === 'not_applicable') {
+          updated.completed_at = null
+        }
+      }
+
+      const next = { ...prev, [key]: updated }
       onResultsChange?.(next)
       return next
     })
