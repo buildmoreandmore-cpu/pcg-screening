@@ -4,6 +4,8 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { requireAuth } from '@/lib/auth'
 import StatusBadge from '@/components/portal/StatusBadge'
 import CandidateActions from './CandidateActions'
+import CandidateDocumentsPortal from './CandidateDocumentsPortal'
+import ComponentTrackerPortal from './ComponentTrackerPortal'
 
 const allSteps = ['submitted', 'in_progress', 'drug_screen_ordered', 'drug_screen_collected', 'completed'] as const
 const stepLabels: Record<string, string> = {
@@ -153,6 +155,24 @@ export default async function CandidateDetailPage({
           status: candidate.status,
         }}
         packages={(clientUser.client.packages as any[]) || []}
+      />
+
+      {/* Per-component tracking — gives Elevait the same component-level
+          visibility we expose on the admin Results page, read-only. */}
+      <ComponentTrackerPortal
+        screeningComponents={candidate.screening_components ?? null}
+        screeningResults={candidate.screening_results ?? null}
+        drugPanel={candidate.drug_panel ?? null}
+      />
+
+      {/* Documents card — report PDF + attachments + consent record */}
+      <CandidateDocumentsPortal
+        candidateId={candidate.id}
+        consentDocUrl={candidate.consent_document_url ?? null}
+        reportSentAt={candidate.report_sent_at ?? null}
+        reportAttachments={candidate.report_attachments ?? []}
+        hasSignedConsent={candidate.consent_status === 'signed'}
+        isCompleted={candidate.status === 'completed'}
       />
 
       <div className="bg-white rounded-xl shadow-sm p-5">
