@@ -2,7 +2,15 @@ import React from 'react'
 import { Document, Page, View, Text, Image, StyleSheet, Font } from '@react-pdf/renderer'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { SCREENING_COMPONENTS, expandActiveComponents, drugPanelLabel } from '@/lib/screening-components'
+import {
+  SCREENING_COMPONENTS,
+  expandActiveComponents,
+  drugPanelLabel,
+  getStageLabel,
+  getStageColor,
+  getTurnaroundForComponent,
+  CRIMINAL_JURISDICTION_LEVELS,
+} from '@/lib/screening-components'
 import { FCRA_DISCLOSURE_PARAGRAPHS, FCRA_DISCLOSURE_VERSION } from '@/lib/fcra-disclosure'
 import type { ScreeningResults, ResultVerdict, ReportAttachment, ComponentStatus } from '@/lib/report-types'
 import { VERDICT_LABELS, VERDICT_COLORS, COMPONENT_STATUS_COLORS } from '@/lib/report-types'
@@ -182,12 +190,15 @@ function ScreeningReportDocument(props: ReportProps) {
       details: stored?.details ?? '',
       completed_at: stored?.completed_at ?? null,
       component_status: inferredStatus,
+      jurisdiction_status: stored?.jurisdiction_status ?? null,
     }
   })
 
   const completedCount = results.filter(r => r.component_status === 'completed').length
-  const pendingCount = results.filter(r => r.component_status === 'pending').length
   const orderedCount = results.filter(r => r.component_status === 'ordered').length
+  // Anything not 'ordered' and not 'completed' counts as in-flight (pending,
+  // searching, twn_in_process, sample_collected, lab_processing, etc.)
+  const pendingCount = results.length - completedCount - orderedCount
   const recordsFoundCount = results.filter(r => r.result === 'record_found').length
   const adverseCount = results.filter(r => r.result === 'adverse').length
 
@@ -283,19 +294,16 @@ function ScreeningReportDocument(props: ReportProps) {
             : (r.details || '—')
 
           // Stage-aware status: when completed, show the verdict (Clear /
-          // Record Found / Adverse). When still in progress, show the
-          // workflow stage (Ordered / Pending).
+          // Record Found / Adverse). Otherwise show the component-specific
+          // workflow stage (Ordered, Searching, Sample Collected, TWN, etc.).
           let statusText: string
           let statusColor: string
           if (r.component_status === 'completed') {
             statusText = VERDICT_LABELS[r.result]
             statusColor = VERDICT_COLORS[r.result]
-          } else if (r.component_status === 'pending') {
-            statusText = 'Pending'
-            statusColor = COMPONENT_STATUS_COLORS.pending
           } else {
-            statusText = 'Ordered'
-            statusColor = COMPONENT_STATUS_COLORS.ordered
+            statusText = getStageLabel(r.component_status)
+            statusColor = getStageColor(r.component_status)
           }
 
           return (
@@ -352,6 +360,20 @@ function ScreeningReportDocument(props: ReportProps) {
                   {ch.result === 'clear' && ' — no records returned across the searched aliases and jurisdictions.'}
                 </Text>
               </View>
+              {/* Per-level jurisdiction tracker (state / county / federal) */}
+              {ch.jurisdiction_status && Object.keys(ch.jurisdiction_status).length > 0 && (
+                <>
+                  <View style={s.row}>
+                    <Text style={s.colLabel}>Jurisdiction Levels</Text>
+                    <Text style={s.colValue}>
+                      {CRIMINAL_JURISDICTION_LEVELS
+                        .filter((lvl) => ch.jurisdiction_status?.[lvl])
+                        .map((lvl) => `${lvl.charAt(0).toUpperCase() + lvl.slice(1)}: ${ch.jurisdiction_status?.[lvl]}`)
+                        .join(' · ')}
+                    </Text>
+                  </View>
+                </>
+              )}
             </>
           )
         })()}

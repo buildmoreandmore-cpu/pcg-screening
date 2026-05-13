@@ -11,6 +11,7 @@ import ClientNotes from './ClientNotes'
 import ScreeningComponentsView from './ScreeningComponentsView'
 import ConsentPdfButton from './ConsentPdfButton'
 import CandidatePII from './CandidatePII'
+import CandidateDocuments from './CandidateDocuments'
 import { normalizeScreeningComponents } from '@/lib/screening-components'
 
 function formatDate(date: string | null) {
@@ -155,6 +156,16 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
           </pre>
         </div>
       )}
+
+      {/* Documents — direct download access for completed reports and attachments */}
+      <CandidateDocuments
+        candidateId={c.id}
+        consentDocUrl={c.consent_document_url ?? null}
+        reportUrl={c.report_url ?? null}
+        reportSentAt={c.report_sent_at ?? null}
+        reportAttachments={c.report_attachments ?? []}
+        hasSignedConsent={c.consent_status === 'signed'}
+      />
 
       {/* Screening Components (à la carte) */}
       {c.screening_components && (
