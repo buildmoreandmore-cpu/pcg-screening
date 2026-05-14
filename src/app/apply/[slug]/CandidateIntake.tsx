@@ -140,7 +140,13 @@ export default function CandidateIntake({ client }: { client: ClientData }) {
         if (data.firstName) setFirstName(data.firstName)
         if (data.lastName) setLastName(data.lastName)
         if (data.email) setEmail(data.email)
-        if (data.packageName && packages.find((p) => p.name === data.packageName)) {
+        // Set the invite's package name even when it isn't in the client's
+        // legacy `clients.packages` JSONB list (e.g. "Custom Screening" or
+        // any package admins created in the new `client_packages` table).
+        // Without this, the package step would skip but the consent submit
+        // would POST an empty packageName and the server would reject with
+        // "Missing required fields".
+        if (data.packageName) {
           setSelectedPackage(data.packageName)
         }
         setInvitePrefilled(true)
